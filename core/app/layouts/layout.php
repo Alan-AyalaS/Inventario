@@ -97,11 +97,29 @@
 <div class="sidebar-brand d-none d-md-flex">
 <div class="sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
 
-<h4><a href="./" style="color: white;">INVENTIO<b>LITE</b></a></h4>
+<h4><a href="./" style="color: white;"><?php
+require_once 'core/app/model/ConfigurationData.php';
+$configs = ConfigurationData::getAll();
+$providers_enabled = false;
+$clients_enabled = false;
+$system_title = "INVENTIO LITE"; // Valor por defecto
+foreach($configs as $conf) {
+    if($conf->short == "active_providers" && $conf->val == 1) {
+        $providers_enabled = true;
+    }
+    if($conf->short == "active_clients" && $conf->val == 1) {
+        $clients_enabled = true;
+    }
+    if($conf->short == "title") {
+        $system_title = $conf->val;
+    }
+}
+?>
+<?php echo $system_title; ?></a></h4>
 
 </div>
 <div class="sidebar-brand-narrow" width="46" height="46" alt="CoreUI Logo">
-<h4><a href="./" style="color: white;">I<b>L</b></a></h4>
+<h4><a href="./" style="color: white;"><?php echo substr($system_title, 0, 1); ?><b><?php echo substr($system_title, -1); ?></b></a></h4>
 
 </div>
 </div>
@@ -141,8 +159,26 @@
           <ul class="nav-group-items">
             <li class="nav-item"><a class="nav-link" href="./?view=products"><span class="nav-icon"></span> PRODUCTOS</a></li>
             <li class="nav-item"><a class="nav-link" href="./?view=categories"><span class="nav-icon"></span> CATEGORIAS  </a></li>
+            <?php
+            require_once 'core/app/model/ConfigurationData.php';
+            $configs = ConfigurationData::getAll();
+            $providers_enabled = false;
+            $clients_enabled = false;
+            foreach($configs as $conf) {
+                if($conf->short == "active_providers" && $conf->val == 1) {
+                    $providers_enabled = true;
+                }
+                if($conf->short == "active_clients" && $conf->val == 1) {
+                    $clients_enabled = true;
+                }
+            }
+            ?>
+            <?php if($clients_enabled): ?>
             <li class="nav-item"><a class="nav-link" href="./?view=clients"><span class="nav-icon"></span> CLIENTES  </a></li>
+            <?php endif; ?>
+            <?php if($providers_enabled): ?>
             <li class="nav-item"><a class="nav-link" href="./?view=providers"><span class="nav-icon"></span> PROVEEDORES  </a></li>
+            <?php endif; ?>
           </ul>
         </li>
         <li class="nav-group"><a class="nav-link nav-group-toggle" href="#">

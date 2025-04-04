@@ -23,11 +23,13 @@
 <div class="">
 	<a href="index.php?view=newproduct" class="btn btn-secondary">Agregar Producto</a>
 <div class="btn-group pull-right">
-  <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">
+  <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow: none !important;">
     <i class="fa fa-download"></i> Descargar <span class="caret"></span>
   </button>
-  <ul class="dropdown-menu" role="menu">
-    <li><a href="report/products-word.php">Word 2007 (.docx)</a></li>
+  <ul class="dropdown-menu dropdown-menu-end" style="background-color: #28a745; border: none;">
+    <li><a class="dropdown-item text-white" href="index.php?view=download-products" style="background-color: transparent !important; transition: color 0.3s ease;">Word 2007 (.docx)</a></li>
+    <li><a class="dropdown-item text-white" href="index.php?view=download-products-excel" style="background-color: transparent !important; transition: color 0.3s ease;">Excel (.xlsx)</a></li>
+    <li><a class="dropdown-item text-white" href="index.php?view=download-products-pdf" style="background-color: transparent !important; transition: color 0.3s ease;">PDF (.pdf)</a></li>
   </ul>
 </div>
 </div>
@@ -315,3 +317,10 @@ document.getElementById('quantity').addEventListener('keypress', function(e) {
     }
 });
 </script>
+
+<style>
+.dropdown-item:hover {
+  color:rgb(24, 56, 31) !important;
+  background-color: white !important;
+}
+</style>

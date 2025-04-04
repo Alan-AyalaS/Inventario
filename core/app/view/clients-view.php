@@ -4,6 +4,20 @@
 		<h1>Directorio de Clientes</h1>
 	<div class="">
 	<a href="index.php?view=newclient" class="btn btn-secondary"><i class='fa fa-smile-o'></i> Nuevo Cliente</a>
+<?php
+require_once 'core/app/model/ConfigurationData.php';
+$configs = ConfigurationData::getAll();
+$word_enabled = false;
+$excel_enabled = false;
+$pdf_enabled = false;
+
+foreach($configs as $conf) {
+    if($conf->short == "enable_word_reports" && $conf->val == 1) $word_enabled = true;
+    if($conf->short == "enable_excel_reports" && $conf->val == 1) $excel_enabled = true;
+    if($conf->short == "enable_pdf_reports" && $conf->val == 1) $pdf_enabled = true;
+}
+?>
+
 <div class="btn-group pull-right">
   <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow: none !important;">
     <i class="fa fa-download"></i> Descargar <span class="caret"></span>

@@ -2,18 +2,17 @@
 // Evitar que se cargue el layout principal
 define('NO_LAYOUT', true);
 
-require_once 'core/app/model/PersonData.php';
-require_once 'core/app/model/ConfigurationData.php';
+// Limpiar cualquier salida anterior
+ob_clean();
 
-// Obtener la configuración del sistema
-$configs = ConfigurationData::getAll();
-$system_name = "Inventario Jersey"; // Valor por defecto
-foreach($configs as $conf) {
-    if($conf->short == "system_name") {
-        $system_name = $conf->val;
-        break;
-    }
-}
+require_once 'core/app/model/PersonData.php';
+require_once 'vendor/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 // Obtener todos los clientes
 $clients = PersonData::getClients();
@@ -21,57 +20,76 @@ $clients = PersonData::getClients();
 // Obtener fecha y hora actual
 $current_datetime = date("d-m-Y_H-i-s");
 
-// Configurar headers para descarga de archivo Excel
-header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-header("Content-Disposition: attachment; filename=directorio_clientes_{$current_datetime}.xlsx");
-header("Pragma: no-cache");
-header("Expires: 0");
+// Crear una nueva hoja de cálculo
+$spreadsheet = new Spreadsheet();
+$sheet = $spreadsheet->getActiveSheet();
 
-// Crear el contenido del Excel
-$excel = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<?mso-application progid=\"Excel.Sheet\"?>
-<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"
- xmlns:o=\"urn:schemas-microsoft-com:office:office\"
- xmlns:x=\"urn:schemas-microsoft-com:office:excel\"
- xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\"
- xmlns:html=\"http://www.w3.org/TR/REC-html40\">
- <Styles>
-  <Style ss:ID=\"Default\" ss:Name=\"Normal\">
-   <Alignment ss:Vertical=\"Bottom\"/>
-   <Borders/>
-   <Font ss:FontName=\"Calibri\" x:Family=\"Swiss\" ss:Size=\"11\" ss:Color=\"#000000\"/>
-   <Interior/>
-   <NumberFormat/>
-   <Protection/>
-  </Style>
-  <Style ss:ID=\"s62\">
-   <Font ss:FontName=\"Calibri\" x:Family=\"Swiss\" ss:Size=\"11\" ss:Color=\"#000000\"
-    ss:Bold=\"1\"/>
-  </Style>
- </Styles>
- <Worksheet ss:Name=\"Directorio de Clientes\">
-  <Table>
-   <Row>
-    <Cell ss:StyleID=\"s62\"><Data ss:Type=\"String\">Nombre</Data></Cell>
-    <Cell ss:StyleID=\"s62\"><Data ss:Type=\"String\">Dirección</Data></Cell>
-    <Cell ss:StyleID=\"s62\"><Data ss:Type=\"String\">Email</Data></Cell>
-    <Cell ss:StyleID=\"s62\"><Data ss:Type=\"String\">Teléfono</Data></Cell>
-   </Row>";
+// Establecer los encabezados
+$sheet->setCellValue('A1', 'Nombre');
+$sheet->setCellValue('B1', 'Dirección');
+$sheet->setCellValue('C1', 'Email');
+$sheet->setCellValue('D1', 'Teléfono');
 
+// Estilo para los encabezados
+$headerStyle = [
+    'font' => [
+        'bold' => true,
+    ],
+    'alignment' => [
+        'horizontal' => Alignment::HORIZONTAL_CENTER,
+    ],
+    'borders' => [
+        'allBorders' => [
+            'borderStyle' => Border::BORDER_THIN,
+        ],
+    ],
+    'fill' => [
+        'fillType' => Fill::FILL_SOLID,
+        'startColor' => [
+            'rgb' => 'F2F2F2',
+        ],
+    ],
+];
+
+$sheet->getStyle('A1:D1')->applyFromArray($headerStyle);
+
+// Llenar los datos
+$row = 2;
 foreach($clients as $client) {
-    $excel .= "
-   <Row>
-    <Cell><Data ss:Type=\"String\">" . htmlspecialchars($client->name . " " . $client->lastname) . "</Data></Cell>
-    <Cell><Data ss:Type=\"String\">" . htmlspecialchars($client->address1) . "</Data></Cell>
-    <Cell><Data ss:Type=\"String\">" . htmlspecialchars($client->email1) . "</Data></Cell>
-    <Cell><Data ss:Type=\"String\">" . htmlspecialchars($client->phone1) . "</Data></Cell>
-   </Row>";
+    $sheet->setCellValue('A' . $row, trim($client->name . " " . $client->lastname));
+    $sheet->setCellValue('B' . $row, trim($client->address1));
+    $sheet->setCellValue('C' . $row, trim($client->email1));
+    $sheet->setCellValue('D' . $row, trim($client->phone1));
+    $row++;
 }
 
-$excel .= "
-  </Table>
- </Worksheet>
-</Workbook>";
+// Estilo para las celdas de datos
+$dataStyle = [
+    'borders' => [
+        'allBorders' => [
+            'borderStyle' => Border::BORDER_THIN,
+        ],
+    ],
+    'alignment' => [
+        'horizontal' => Alignment::HORIZONTAL_LEFT,
+    ],
+];
 
-echo $excel;
+$lastRow = $row - 1;
+$sheet->getStyle('A2:D' . $lastRow)->applyFromArray($dataStyle);
+
+// Ajustar el ancho de las columnas
+$sheet->getColumnDimension('A')->setWidth(30);
+$sheet->getColumnDimension('B')->setWidth(40);
+$sheet->getColumnDimension('C')->setWidth(30);
+$sheet->getColumnDimension('D')->setWidth(20);
+
+// Configurar headers para descarga
+header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+header('Content-Disposition: attachment;filename="directorio_clientes_' . $current_datetime . '.xlsx"');
+header('Cache-Control: max-age=0');
+
+// Crear el archivo Excel
+$writer = new Xlsx($spreadsheet);
+$writer->save('php://output');
 exit; 

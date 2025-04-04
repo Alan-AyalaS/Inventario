@@ -54,30 +54,9 @@ if($_POST["q"]!="" && $_POST["q"]!="0"){
  // Establecer el ID del último producto agregado en la sesión
  $_SESSION['last_product_id'] = $prod[1];
  
- $result = $op->add();
+ $op->add();
  
- // Mensajes de depuración solo en consola para el último producto
- echo "<script>";
- echo "console.log('Depuración de registro de producto:');";
- echo "console.log('ID del producto: " . $prod[1] . "');";
- echo "console.log('Cantidad a registrar: " . $_POST["q"] . "');";
- echo "console.log('Tipo de operación: " . $op->operation_type_id . "');";
- echo "console.log('Resultado de la operación: " . json_encode($result) . "');";
- 
- // Verificar si la operación se registró
- $operations = OperationData::getAllByProductId($prod[1]);
- echo "console.log('Operaciones encontradas: " . count($operations) . "');";
- foreach($operations as $op){
-     echo "console.log('Operación ID: " . $op->id . ", Cantidad: " . $op->q . ", Tipo: " . $op->operation_type_id . "');";
- }
- echo "</script>";
- 
- // Redirección automática después de 2 segundos
- echo "<script>
- 	setTimeout(function() {
- 		window.location.href = 'index.php?view=products';
- 	}, 2000);
- </script>";
+ print "<script>window.location='index.php?view=products';</script>";
  exit;
 }
 

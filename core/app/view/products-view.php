@@ -128,7 +128,6 @@ if($px<=$npaginas):
 		<th>Precio de Entrada</th>
 		<th>Precio de Salida</th>
 		<th>Unidad</th>
-		<th>Presentacion</th>
 		<th>Disponible</th>
 		<th>Minima en Inventario</th>
 		<th></th>
@@ -143,7 +142,6 @@ if($px<=$npaginas):
 		<td><?php echo $product->price_in; ?></td>
 		<td><?php echo $product->price_out; ?></td>
 		<td><?php echo $product->unit; ?></td>
-		<td><?php echo $product->presentation; ?></td>
 		<td>
 			<?php 
 			$available = OperationData::getQYesF($product->id);

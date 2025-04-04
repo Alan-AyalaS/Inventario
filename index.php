@@ -24,21 +24,4 @@ Core::$root="";
 $lb = new Lb();
 $lb->start();
 
-// Obtener configuración de proveedores
-$configs = ConfigurationData::getAll();
-$providers_enabled = false;
-foreach($configs as $conf) {
-    if($conf->short == "active_providers" && $conf->val == 1) {
-        $providers_enabled = true;
-        break;
-    }
-}
-
-// Modificar el menú de catálogos
-$lb->addMenu("Catálogos", array(
-    "Categorías" => "index.php?view=categories",
-    "Productos" => "index.php?view=products",
-    "Proveedores" => "index.php?view=providers"
-), $providers_enabled);
-
 ?>

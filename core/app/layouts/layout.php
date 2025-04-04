@@ -103,6 +103,12 @@ $configs = ConfigurationData::getAll();
 $providers_enabled = false;
 $clients_enabled = false;
 $system_title = "INVENTIO LITE"; // Valor por defecto
+$sells_enabled = true;
+$sell_enabled = true;
+$box_enabled = true;
+$reports_enabled = true;
+$purchases_enabled = false;
+
 foreach($configs as $conf) {
     if($conf->short == "active_providers" && $conf->val == 1) {
         $providers_enabled = true;
@@ -112,6 +118,21 @@ foreach($configs as $conf) {
     }
     if($conf->short == "title") {
         $system_title = $conf->val;
+    }
+    if($conf->short == "active_sells" && $conf->val == 0) {
+        $sells_enabled = false;
+    }
+    if($conf->short == "active_sell" && $conf->val == 0) {
+        $sell_enabled = false;
+    }
+    if($conf->short == "active_box" && $conf->val == 0) {
+        $box_enabled = false;
+    }
+    if($conf->short == "active_reports" && $conf->val == 0) {
+        $reports_enabled = false;
+    }
+    if($conf->short == "active_purchases" && $conf->val == 1) {
+        $purchases_enabled = true;
     }
 }
 ?>
@@ -137,21 +158,27 @@ foreach($configs as $conf) {
             <svg class="nav-icon">
               <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-home"></use>
             </svg> INICIO</a></li>
+        <?php if($sell_enabled): ?>
         <li class="nav-item"><a class="nav-link" href="./?view=sell">
             <svg class="nav-icon">
               <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-money"></use>
             </svg> VENDER</a>
         </li>
+        <?php endif; ?>
+        <?php if($sells_enabled): ?>
         <li class="nav-item"><a class="nav-link" href="./?view=sells">
             <svg class="nav-icon">
               <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-cart"></use>
             </svg> VENTAS</a>
         </li>
+        <?php endif; ?>
+        <?php if($box_enabled): ?>
         <li class="nav-item"><a class="nav-link" href="./?view=box">
             <svg class="nav-icon">
               <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-3d"></use>
             </svg> CAJA</a>
         </li>
+        <?php endif; ?>
         <li class="nav-group"><a class="nav-link nav-group-toggle" href="#">
             <svg class="nav-icon">
               <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-folder-open"></use>
@@ -187,10 +214,13 @@ foreach($configs as $conf) {
             </svg> INVENTARIO</a>
           <ul class="nav-group-items">
             <li class="nav-item"><a class="nav-link" href="./?view=inventary"><span class="nav-icon"></span> INVENTARIO</a></li>
+            <?php if($purchases_enabled): ?>
             <li class="nav-item"><a class="nav-link" href="./?view=re"><span class="nav-icon"></span> HACER COMPRA  </a></li>
             <li class="nav-item"><a class="nav-link" href="./?view=res"><span class="nav-icon"></span> COMPRAS  </a></li>
+            <?php endif; ?>
           </ul>
         </li>
+        <?php if($reports_enabled): ?>
         <li class="nav-group"><a class="nav-link nav-group-toggle" href="#">
             <svg class="nav-icon">
               <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-chart"></use>
@@ -200,6 +230,7 @@ foreach($configs as $conf) {
             <li class="nav-item"><a class="nav-link" href="./?view=sellreports"><span class="nav-icon"></span> REPORTE DE VENTAS  </a></li>
           </ul>
         </li>
+        <?php endif; ?>
 <!--
         <li class="nav-title">Components</li>
 -->

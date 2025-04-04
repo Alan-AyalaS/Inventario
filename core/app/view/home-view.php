@@ -9,7 +9,20 @@ foreach($products as $product){
 
 	}
 }
-	?>
+
+require_once 'core/app/model/ConfigurationData.php';
+$configs = ConfigurationData::getAll();
+$providers_enabled = false;
+$clients_enabled = false;
+foreach($configs as $conf) {
+    if($conf->short == "active_providers" && $conf->val == 1) {
+        $providers_enabled = true;
+    }
+    if($conf->short == "active_clients" && $conf->val == 1) {
+        $clients_enabled = true;
+    }
+}
+?>
 <div class="row">
 	<div class="col-md-12">
 		<h1>Bienvenido a Inventio Lite</h1>
@@ -37,17 +50,18 @@ foreach($products as $product){
                         </div>
                       </div>
                       <!-- /.col-->
+                      <?php if($clients_enabled): ?>
                       <div class="col-6 col-lg-3">
                         <div class="card">
                           <div class="card-body p-3 d-flex align-items-center">
                             <div class="bg-info text-white p-3 me-3">
                               <svg class="icon icon-xl">
-                                <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-user"></use>
+                                <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-people"></use>
                               </svg>
                             </div>
                             <div>
                               <div class="fs-6 fw-semibold text-info"><?php echo count(PersonData::getClients());?></div>
-                              <div class="text-medium-emphasis text-uppercase fw-semibold small">CLIENTES</div>
+                              <div class="text-medium-emphasis text-uppercase fw-semibold small">IR A CLIENTES</div>
                             </div>
                           </div>
                           <div class="card-footer px-3 py-2"><a class="btn-block text-medium-emphasis d-flex justify-content-between align-items-center" href="./?view=clients"><span class="small fw-semibold">IR A CLIENTES</span>
@@ -56,7 +70,8 @@ foreach($products as $product){
                               </svg></a></div>
                         </div>
                       </div>
-                      <!-- /.col-->
+                      <?php endif; ?>
+                      <?php if($providers_enabled): ?>
                       <div class="col-6 col-lg-3">
                         <div class="card">
                           <div class="card-body p-3 d-flex align-items-center">
@@ -76,6 +91,7 @@ foreach($products as $product){
                               </svg></a></div>
                         </div>
                       </div>
+                      <?php endif; ?>
                       <div class="col-6 col-lg-3">
                         <div class="card">
                           <div class="card-body p-3 d-flex align-items-center">
@@ -86,7 +102,7 @@ foreach($products as $product){
                             </div>
                             <div>
                               <div class="fs-6 fw-semibold text-danger"><?php echo count(CategoryData::getAll());?></div>
-                              <div class="text-medium-emphasis text-uppercase fw-semibold small">Widget title</div>
+                              <div class="text-medium-emphasis text-uppercase fw-semibold small">CATEGORIAS</div>
                             </div>
                           </div>
                           <div class="card-footer px-3 py-2"><a class="btn-block text-medium-emphasis d-flex justify-content-between align-items-center" href="./?view=categories"><span class="small fw-semibold">IR A CATEGORIAS</span>

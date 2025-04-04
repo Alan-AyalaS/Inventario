@@ -108,6 +108,7 @@ create table operation(
 	q float,
 	operation_type_id int,
 	sell_id int,
+	is_oficial boolean default 1,
 	created_at datetime,
 	foreign key (product_id) references product(id),
 	foreign key (operation_type_id) references operation_type(id),

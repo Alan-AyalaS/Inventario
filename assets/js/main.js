@@ -17,6 +17,98 @@ Chart.defaults.defaultFontColor = '#646470';
 const random = (min, max) => // eslint-disable-next-line no-mixed-operators
 Math.floor(Math.random() * (max - min + 1) + min); // eslint-disable-next-line no-unused-vars
 
+// Gráficos
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar y crear cardChart1
+    const cardChart1Element = document.getElementById('card-chart1');
+    if (cardChart1Element) {
+        const cardChart1 = new Chart(cardChart1Element, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                datasets: [{
+                    label: 'My First Dataset',
+                    data: [65, 59, 80, 81, 56, 55, 40],
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            }
+        });
+    }
+
+    // Verificar y crear cardChart2
+    const cardChart2Element = document.getElementById('card-chart2');
+    if (cardChart2Element) {
+        const cardChart2 = new Chart(cardChart2Element, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                datasets: [{
+                    label: 'My First Dataset',
+                    data: [65, 59, 80, 81, 56, 55, 40],
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            }
+        });
+    }
+
+    // Verificar y crear cardChart3
+    const cardChart3Element = document.getElementById('card-chart3');
+    if (cardChart3Element) {
+        const cardChart3 = new Chart(cardChart3Element, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                datasets: [{
+                    label: 'My First Dataset',
+                    data: [65, 59, 80, 81, 56, 55, 40],
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            }
+        });
+    }
+
+    // Verificar y crear cardChart4
+    const cardChart4Element = document.getElementById('card-chart4');
+    if (cardChart4Element) {
+        const cardChart4 = new Chart(cardChart4Element, {
+            type: 'bar',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                datasets: [{
+                    label: 'My First Dataset',
+                    data: [65, 59, 80, 81, 56, 55, 40, 65, 59, 80, 81, 56],
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            }
+        });
+    }
+
+    // Verificar y crear mainChart
+    const mainChartElement = document.getElementById('main-chart');
+    if (mainChartElement) {
+        const mainChart = new Chart(mainChartElement, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                datasets: [{
+                    label: 'My First Dataset',
+                    data: [65, 59, 80, 81, 56, 55, 40],
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            }
+        });
+    }
+});
 
 const cardChart1 = new Chart(document.getElementById('card-chart1'), {
   type: 'line',

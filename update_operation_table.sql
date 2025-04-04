@@ -1,0 +1,1 @@
+ALTER TABLE operation ADD COLUMN is_oficial boolean default 1; 

@@ -8,12 +8,14 @@ class OperationData {
 		$this->q = "";
 		$this->cut_id = "";
 		$this->operation_type_id = "";
+		$this->is_oficial = 1;
+		$this->sell_id = "NULL";
 		$this->created_at = "NOW()";
 	}
 
 	public function add(){
-		$sql = "insert into ".self::$tablename." (product_id,q,operation_type_id,sell_id,created_at) ";
-		$sql .= "value (\"$this->product_id\",\"$this->q\",$this->operation_type_id,$this->sell_id,$this->created_at)";
+		$sql = "insert into ".self::$tablename." (product_id,q,operation_type_id,sell_id,is_oficial,created_at) ";
+		$sql .= "value (\"$this->product_id\",\"$this->q\",$this->operation_type_id,$this->sell_id,$this->is_oficial,NOW())";
 		return Executor::doit($sql);
 	}
 
@@ -74,16 +76,53 @@ class OperationData {
 
 
 
+	public static function getAllByProductId($product_id){
+		$sql = "select * from ".self::$tablename." where product_id=$product_id and is_oficial=1 order by created_at desc";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new OperationData());
+	}
+
 	public static function getQYesF($product_id){
 		$q=0;
 		$operations = self::getAllByProductId($product_id);
 		$input_id = OperationTypeData::getByName("entrada")->id;
 		$output_id = OperationTypeData::getByName("salida")->id;
-		foreach($operations as $operation){
-				if($operation->operation_type_id==$input_id){ $q+=$operation->q; }
-				else if($operation->operation_type_id==$output_id){  $q+=(-$operation->q); }
+		
+		// Solo mostrar depuración para el último producto agregado
+		if(isset($_SESSION['last_product_id']) && $_SESSION['last_product_id'] == $product_id){
+			echo "<script>";
+			echo "console.log('Depuración de getQYesF:');";
+			echo "console.log('ID del producto: " . $product_id . "');";
+			echo "console.log('ID de entrada: " . $input_id . "');";
+			echo "console.log('ID de salida: " . $output_id . "');";
+			echo "console.log('Número de operaciones encontradas: " . count($operations) . "');";
 		}
-		// print_r($data);
+		
+		foreach($operations as $operation){
+			if(isset($_SESSION['last_product_id']) && $_SESSION['last_product_id'] == $product_id){
+				echo "console.log('Operación ID: " . $operation->id . ", Cantidad: " . $operation->q . ", Tipo: " . $operation->operation_type_id . "');";
+			}
+			
+			if($operation->operation_type_id==$input_id){ 
+				$q+=$operation->q;
+				if(isset($_SESSION['last_product_id']) && $_SESSION['last_product_id'] == $product_id){
+					echo "console.log('Sumando entrada: " . $operation->q . "');";
+				}
+			}
+			else if($operation->operation_type_id==$output_id){  
+				$q+=(-$operation->q);
+				if(isset($_SESSION['last_product_id']) && $_SESSION['last_product_id'] == $product_id){
+					echo "console.log('Restando salida: " . $operation->q . "');";
+				}
+			}
+		}
+		
+		if(isset($_SESSION['last_product_id']) && $_SESSION['last_product_id'] == $product_id){
+			echo "console.log('Total calculado: " . $q . "');";
+			echo "</script>";
+			unset($_SESSION['last_product_id']);
+		}
+		
 		return $q;
 	}
 
@@ -94,13 +133,6 @@ class OperationData {
 		$query = Executor::doit($sql);
 		return Model::many($query[0],new OperationData());
 	}
-
-	public static function getAllByProductId($product_id){
-		$sql = "select * from ".self::$tablename." where product_id=$product_id  order by created_at desc";
-		$query = Executor::doit($sql);
-		return Model::many($query[0],new OperationData());
-	}
-
 
 	public static function getAllByProductIdCutIdOficial($product_id,$cut_id){
 		$sql = "select * from ".self::$tablename." where product_id=$product_id and cut_id=$cut_id order by created_at desc";

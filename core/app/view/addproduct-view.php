@@ -42,14 +42,43 @@ if(count($_POST)>0){
 
 
 
-if($_POST["q"]!="" || $_POST["q"]!="0"){
+if($_POST["q"]!="" && $_POST["q"]!="0"){
  $op = new OperationData();
- $op->product_id = $prod[0];
- $op->operation_type_id=OperationTypeData::getByName("entrada")->id;
- $op->q= $_POST["q"];
- $op->sell_id="NULL";
- $op->is_oficial=1;
- $op->add();
+ $op->product_id = $prod[1];
+ $op->operation_type_id = OperationTypeData::getByName("entrada")->id;
+ $op->q = floatval($_POST["q"]);
+ $op->sell_id = "NULL";
+ $op->is_oficial = 1;
+ $op->created_at = "NOW()";
+ 
+ // Establecer el ID del último producto agregado en la sesión
+ $_SESSION['last_product_id'] = $prod[1];
+ 
+ $result = $op->add();
+ 
+ // Mensajes de depuración solo en consola para el último producto
+ echo "<script>";
+ echo "console.log('Depuración de registro de producto:');";
+ echo "console.log('ID del producto: " . $prod[1] . "');";
+ echo "console.log('Cantidad a registrar: " . $_POST["q"] . "');";
+ echo "console.log('Tipo de operación: " . $op->operation_type_id . "');";
+ echo "console.log('Resultado de la operación: " . json_encode($result) . "');";
+ 
+ // Verificar si la operación se registró
+ $operations = OperationData::getAllByProductId($prod[1]);
+ echo "console.log('Operaciones encontradas: " . count($operations) . "');";
+ foreach($operations as $op){
+     echo "console.log('Operación ID: " . $op->id . ", Cantidad: " . $op->q . ", Tipo: " . $op->operation_type_id . "');";
+ }
+ echo "</script>";
+ 
+ // Redirección automática después de 2 segundos
+ echo "<script>
+ 	setTimeout(function() {
+ 		window.location.href = 'index.php?view=products';
+ 	}, 2000);
+ </script>";
+ exit;
 }
 
 print "<script>window.location='index.php?view=products';</script>";

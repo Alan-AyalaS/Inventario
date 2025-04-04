@@ -15,8 +15,17 @@ class OperationData {
 
 	public function add(){
 		$sql = "insert into ".self::$tablename." (product_id,q,operation_type_id,sell_id,is_oficial,created_at) ";
-		$sql .= "value (\"$this->product_id\",\"$this->q\",$this->operation_type_id,$this->sell_id,$this->is_oficial,NOW())";
-		return Executor::doit($sql);
+		$sql .= "value (?,?,?,?,?,NOW())";
+		
+		$params = [
+			$this->product_id,
+			$this->q,
+			$this->operation_type_id,
+			$this->sell_id,
+			$this->is_oficial
+		];
+		
+		return Executor::doit($sql, $params);
 	}
 
 	public static function delById($id){
@@ -136,6 +145,7 @@ class OperationData {
 
 	public static function getAllByProductIdCutIdOficial($product_id,$cut_id){
 		$sql = "select * from ".self::$tablename." where product_id=$product_id and cut_id=$cut_id order by created_at desc";
+		$query = Executor::doit($sql);
 		return Model::many($query[0],new OperationData());
 	}
 
@@ -149,8 +159,8 @@ class OperationData {
 
 	public static function getAllByProductIdCutIdYesF($product_id,$cut_id){
 		$sql = "select * from ".self::$tablename." where product_id=$product_id and cut_id=$cut_id order by created_at desc";
+		$query = Executor::doit($sql);
 		return Model::many($query[0],new OperationData());
-		return $array;
 	}
 
 ////////////////////////////////////////////////////////////////////
@@ -209,7 +219,6 @@ class OperationData {
 ////////////////////////////////////////////////////////////////////
 	public static function getInputQ($product_id,$cut_id){
 		$q=0;
-		return Model::many($query[0],new OperationData());
 		$operations = self::getInputByProductId($product_id);
 		$input_id = OperationTypeData::getByName("entrada")->id;
 		$output_id = OperationTypeData::getByName("salida")->id;
@@ -217,7 +226,6 @@ class OperationData {
 			if($operation->operation_type_id==$input_id){ $q+=$operation->q; }
 			else if($operation->operation_type_id==$output_id){  $q+=(-$operation->q); }
 		}
-		// print_r($data);
 		return $q;
 	}
 

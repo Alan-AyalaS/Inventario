@@ -36,9 +36,10 @@ if(count($_POST)>0){
 	}
 
 	setcookie("prdupd","true");
-	print "<script>window.location='index.php?view=editproduct&id=$_POST[product_id]';</script>";
-
-
+	
+	// Redirigir directamente a la lista de productos
+	header("Location: index.php?view=products");
+	exit;
 }
 
 

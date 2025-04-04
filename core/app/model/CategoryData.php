@@ -1,22 +1,18 @@
 <?php
 class CategoryData {
 	public static $tablename = "category";
-
-
+	public $id;
+	public $name;
+	public $created_at;
 
 	public function CategoryData(){
 		$this->name = "";
-		$this->lastname = "";
-		$this->email = "";
-		$this->image = "";
-		$this->password = "";
 		$this->created_at = "NOW()";
 	}
 
 	public function add(){
-		$sql = "insert into category (name,created_at) ";
-		$sql .= "value (\"$this->name\",$this->created_at)";
-		Executor::doit($sql);
+		$sql = "insert into ".self::$tablename." (name, created_at) values ('$this->name', NOW())";
+		return Executor::doit($sql);
 	}
 
 	public static function delById($id){

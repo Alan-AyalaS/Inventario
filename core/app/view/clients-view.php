@@ -5,11 +5,13 @@
 	<div class="">
 	<a href="index.php?view=newclient" class="btn btn-secondary"><i class='fa fa-smile-o'></i> Nuevo Cliente</a>
 <div class="btn-group pull-right">
-  <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+  <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow: none !important;">
     <i class="fa fa-download"></i> Descargar <span class="caret"></span>
   </button>
-  <ul class="dropdown-menu" role="menu">
-    <li><a href="report/clients-word.php">Word 2007 (.docx)</a></li>
+  <ul class="dropdown-menu dropdown-menu-end" style="background-color: #28a745; border: none;">
+    <li><a class="dropdown-item text-white" href="index.php?view=download-clients" style="background-color: transparent !important; transition: color 0.3s ease;">Word 2007 (.docx)</a></li>
+    <li><a class="dropdown-item text-white" href="index.php?view=download-clients-excel" style="background-color: transparent !important; transition: color 0.3s ease;">Excel (.xlsx)</a></li>
+    <li><a class="dropdown-item text-white" href="index.php?view=download-clients-pdf" style="background-color: transparent !important; transition: color 0.3s ease;">PDF (.pdf)</a></li>
   </ul>
 </div>
 </div>	
@@ -67,3 +69,14 @@ echo "</table>";
 
 	</div>
 </div>
+
+<!-- Scripts de Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+.dropdown-item:hover {
+  color:rgb(24, 56, 31) !important;
+  background-color: white !important;
+}
+</style>

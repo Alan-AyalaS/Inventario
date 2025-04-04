@@ -29,7 +29,7 @@ class ConfigurationData {
 
 // partiendo de que ya tenemos creado un objecto ConfigurationData previamente utilizamos el contexto
 	public function update(){
-		$sql = "update ".self::$tablename." set val=\"$this->val\" where id=$this->id";
+		$sql = "update ".self::$tablename." set val='".$this->val."' where id=".$this->id;
 		Executor::doit($sql);
 	}
 
@@ -78,7 +78,7 @@ class ConfigurationData {
 		while($r = $query[0]->fetch_array()){
 			$array[$cnt] = new ConfigurationData();
 			$array[$cnt]->id = $r['id'];
-			$array[$cnt]->short = $r['name'];
+			$array[$cnt]->short = $r['short'];
 			$array[$cnt]->name = $r['name'];
 			$array[$cnt]->kind = $r['kind'];
 			$array[$cnt]->val = $r['val'];

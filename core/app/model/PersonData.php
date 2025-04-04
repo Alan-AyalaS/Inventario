@@ -14,13 +14,13 @@ class PersonData {
 
 	public function add_client(){
 		$sql = "insert into person (name,lastname,address1,email1,phone1,kind,created_at) ";
-		$sql .= "value (\"$this->name\",\"$this->lastname\",\"$this->address1\",\"$this->email1\",\"$this->phone1\",1,$this->created_at)";
+		$sql .= "value (\"$this->name\",\"$this->lastname\",\"$this->address1\",\"$this->email1\",\"$this->phone1\",1,NOW())";
 		Executor::doit($sql);
 	}
 
 	public function add_provider(){
 		$sql = "insert into person (name,lastname,address1,email1,phone1,kind,created_at) ";
-		$sql .= "value (\"$this->name\",\"$this->lastname\",\"$this->address1\",\"$this->email1\",\"$this->phone1\",2,$this->created_at)";
+		$sql .= "value (\"$this->name\",\"$this->lastname\",\"$this->address1\",\"$this->email1\",\"$this->phone1\",2,NOW())";
 		Executor::doit($sql);
 	}
 

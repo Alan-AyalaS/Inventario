@@ -138,7 +138,7 @@ if($px<=$npaginas):
 	?>
 	<tr class="<?php if($q<=$product->inventary_min/2){ echo "danger";}else if($q<=$product->inventary_min){ echo "warning";}?>">
 		<td><?php echo $product->id; ?></td>
-		<td><?php echo $product->name; ?></td>
+		<td><a href="index.php?view=producthistory&id=<?php echo $product->id; ?>" style="text-decoration: none; color: inherit;"><?php echo $product->name; ?></a></td>
 		<td><?php echo $product->price_in; ?></td>
 		<td><?php echo $product->price_out; ?></td>
 		<td><?php echo $product->unit; ?></td>

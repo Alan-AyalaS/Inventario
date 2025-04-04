@@ -78,7 +78,25 @@ if($px<=$npaginas):
 		<td><?php echo $product->name; ?></td>
 		<td>
 			
-			<?php echo $q; ?>
+			<?php 
+			$available = OperationData::getQYesF($product->id);
+			$min_q = $product->inventary_min;
+			// Calcular qué tan cerca está del mínimo (100% = en el mínimo, 0% = muy por encima)
+			$percentage = ($min_q / $available) * 100;
+			
+			// Determinar el color según el porcentaje
+			$color = '#28a745'; // Verde por defecto
+			if($percentage >= 80) {
+				$color = '#dc3545'; // Rojo si está muy cerca del mínimo (80% o más)
+			} else if($percentage >= 60) {
+				$color = '#fd7e14'; // Naranja si está cerca del mínimo (60-80%)
+			} else if($percentage >= 40) {
+				$color = '#ffc107'; // Amarillo si está moderadamente cerca (40-60%)
+			}
+			
+			// Aplicar el estilo con el color calculado
+			echo "<span style='background-color: $color; color: white; padding: 5px 10px; border-radius: 5px;'>$available</span>";
+			?>
 
 		</td>
 		<td style="width:93px;">

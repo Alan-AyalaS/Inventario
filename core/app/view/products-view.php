@@ -67,37 +67,54 @@ if($px<=$npaginas):
 <br><table class="table table-bordered table-hover">
 	<thead>
 		<th>Codigo</th>
-		<th>Imagen</th>
 		<th>Nombre</th>
-		<th>Precio Entrada</th>
-		<th>Precio Salida</th>
-		<th>Categoria</th>
-		<th>Minima</th>
-		<th>Activo</th>
+		<th>Precio de Entrada</th>
+		<th>Precio de Salida</th>
+		<th>Unidad</th>
+		<th>Presentacion</th>
+		<th>Disponible</th>
+		<th>Minima en Inventario</th>
 		<th></th>
 	</thead>
-	<?php foreach($curr_products as $product):?>
-	<tr>
-		<td><?php echo $product->barcode; ?></td>
-		<td>
-			<?php if($product->image!=""):?>
-				<img src="storage/products/<?php echo $product->image;?>" style="width:64px;">
-			<?php endif;?>
-		</td>
+	<?php 
+	foreach($curr_products as $product):
+		$q=OperationData::getQYesF($product->id);
+	?>
+	<tr class="<?php if($q<=$product->inventary_min/2){ echo "danger";}else if($q<=$product->inventary_min){ echo "warning";}?>">
+		<td><?php echo $product->id; ?></td>
 		<td><?php echo $product->name; ?></td>
-		<td>$ <?php echo number_format($product->price_in,2,'.',','); ?></td>
-		<td>$ <?php echo number_format($product->price_out,2,'.',','); ?></td>
-		<td><?php if($product->category_id!=null){echo $product->getCategory()->name;}else{ echo "<center>----</center>"; }  ?></td>
+		<td><?php echo $product->price_in; ?></td>
+		<td><?php echo $product->price_out; ?></td>
+		<td><?php echo $product->unit; ?></td>
+		<td><?php echo $product->presentation; ?></td>
+		<td>
+			<?php 
+			$available = OperationData::getQYesF($product->id);
+			$min_q = $product->inventary_min;
+			// Calcular qué tan cerca está del mínimo (100% = en el mínimo, 0% = muy por encima)
+			$percentage = ($min_q / $available) * 100;
+			
+			// Determinar el color según el porcentaje
+			$color = '#28a745'; // Verde por defecto
+			if($percentage >= 80) {
+				$color = '#dc3545'; // Rojo si está muy cerca del mínimo (80% o más)
+			} else if($percentage >= 60) {
+				$color = '#fd7e14'; // Naranja si está cerca del mínimo (60-80%)
+			} else if($percentage >= 40) {
+				$color = '#ffc107'; // Amarillo si está moderadamente cerca (40-60%)
+			}
+			
+			// Aplicar el estilo con el color calculado
+			echo "<span style='background-color: $color; color: white; padding: 5px 10px; border-radius: 5px;'>$available</span>";
+			?>
+		</td>
 		<td><?php echo $product->inventary_min; ?></td>
-		<td><?php if($product->is_active): ?><i class="fa fa-check"></i><?php endif;?></td>
-		
-
-		<td style="width:120px;">
+		<td style="width:93px;">
 		<a href="index.php?view=editproduct&id=<?php echo $product->id; ?>" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></a>
 		<a href="index.php?view=delproduct&id=<?php echo $product->id; ?>" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
 		</td>
 	</tr>
-	<?php endforeach;?>
+	<?php endforeach; ?>
 </table>
 <div class="btn-group pull-right">
 <?php

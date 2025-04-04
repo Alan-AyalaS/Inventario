@@ -12,9 +12,9 @@ $excel_enabled = false;
 $pdf_enabled = false;
 
 foreach($configs as $conf) {
-    if($conf->short == "enable_word_reports" && $conf->val == 1) $word_enabled = true;
-    if($conf->short == "enable_excel_reports" && $conf->val == 1) $excel_enabled = true;
-    if($conf->short == "enable_pdf_reports" && $conf->val == 1) $pdf_enabled = true;
+    if($conf->short == "active_reports_word" && $conf->val == 1) $word_enabled = true;
+    if($conf->short == "active_reports_excel" && $conf->val == 1) $excel_enabled = true;
+    if($conf->short == "active_reports_pdf" && $conf->val == 1) $pdf_enabled = true;
 }
 ?>
 <div class="btn-group pull-right">
@@ -22,9 +22,15 @@ foreach($configs as $conf) {
     <i class="fa fa-download"></i> Descargar <span class="caret"></span>
   </button>
   <ul class="dropdown-menu dropdown-menu-end" style="background-color: #28a745; border: none;">
+    <?php if($word_enabled): ?>
     <li><a class="dropdown-item text-white" href="index.php?view=download-providers" style="background-color: transparent !important; transition: color 0.3s ease;">Word 2007 (.docx)</a></li>
+    <?php endif; ?>
+    <?php if($excel_enabled): ?>
     <li><a class="dropdown-item text-white" href="index.php?view=download-providers-excel" style="background-color: transparent !important; transition: color 0.3s ease;">Excel (.xlsx)</a></li>
+    <?php endif; ?>
+    <?php if($pdf_enabled): ?>
     <li><a class="dropdown-item text-white" href="index.php?view=download-providers-pdf" style="background-color: transparent !important; transition: color 0.3s ease;">PDF (.pdf)</a></li>
+    <?php endif; ?>
   </ul>
 </div>
 </div>

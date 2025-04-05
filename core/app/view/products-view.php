@@ -20,6 +20,31 @@
 				setTimeout(closeAlert, 5000);
 			</script>
 			<?php setcookie("prdupd","",time()-18600); endif; ?>
+		<?php if(isset($_COOKIE["prddel"])):?>
+			<div class="alert alert-danger alert-dismissible fade show" role="alert" id="deleteAlert">
+				<strong>¡Eliminado!</strong> El producto "<?php echo $_COOKIE["prddel"]; ?>" ha sido eliminado correctamente.
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="closeDeleteAlert()"></button>
+			</div>
+			<script>
+				function closeDeleteAlert() {
+					document.getElementById('deleteAlert').style.transition = 'opacity 0.5s';
+					document.getElementById('deleteAlert').style.opacity = '0';
+					setTimeout(function() {
+						document.getElementById('deleteAlert').style.display = 'none';
+					}, 500);
+				}
+				
+				// Cierre automático después de 5 segundos
+				setTimeout(closeDeleteAlert, 5000);
+				
+				// Eliminar la cookie inmediatamente para evitar que la alerta aparezca nuevamente
+				document.cookie = "prddel=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/";
+			</script>
+			<?php 
+			// Eliminar la cookie desde PHP también para mayor seguridad
+			setcookie("prddel", "", time()-3600, "/");
+			?>
+		<?php endif; ?>
 <div class="">
 	<a href="index.php?view=newproduct" class="btn btn-secondary">Agregar Producto</a>
 <div class="btn-group pull-right">
@@ -89,6 +114,26 @@
         <span id="alertMessage"></span>
       </div>
       <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmación para eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="deleteModalLabel">Confirmar eliminación</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">¿Está seguro que desea eliminar el producto <strong id="productNameToDelete"></strong>?</p>
+        <p class="text-danger mt-3 mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Esta acción no se puede deshacer. Se eliminarán también todas las operaciones de inventario asociadas a este producto.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <a href="#" id="confirmDeleteBtn" class="btn btn-danger">Eliminar producto</a>
+      </div>
     </div>
   </div>
 </div>
@@ -168,16 +213,22 @@ if($px<=$npaginas):
 			$available = OperationData::getQYesF($product->id);
 			$min_q = $product->inventary_min;
 			// Calcular qué tan cerca está del mínimo (100% = en el mínimo, 0% = muy por encima)
-			$percentage = ($min_q / $available) * 100;
-			
-			// Determinar el color según el porcentaje
 			$color = '#28a745'; // Verde por defecto
-			if($percentage >= 80) {
-				$color = '#dc3545'; // Rojo si está muy cerca del mínimo (80% o más)
-			} else if($percentage >= 60) {
-				$color = '#fd7e14'; // Naranja si está cerca del mínimo (60-80%)
-			} else if($percentage >= 40) {
-				$color = '#ffc107'; // Amarillo si está moderadamente cerca (40-60%)
+			
+			if ($available <= 0) {
+				// Si no hay inventario disponible, mostrar en rojo
+				$color = '#dc3545';
+			} else {
+				$percentage = ($min_q / $available) * 100;
+				
+				// Determinar el color según el porcentaje
+				if($percentage >= 80) {
+					$color = '#dc3545'; // Rojo si está muy cerca del mínimo (80% o más)
+				} else if($percentage >= 60) {
+					$color = '#fd7e14'; // Naranja si está cerca del mínimo (60-80%)
+				} else if($percentage >= 40) {
+					$color = '#ffc107'; // Amarillo si está moderadamente cerca (40-60%)
+				}
 			}
 			
 			// Aplicar el estilo con el color calculado
@@ -195,9 +246,9 @@ if($px<=$npaginas):
 			<a href="index.php?view=editproduct&id=<?php echo $product->id; ?>" class="btn btn-sm btn-warning">
 				<i class="bi bi-pencil"></i>
 			</a>
-			<a href="index.php?view=delproduct&id=<?php echo $product->id; ?>" class="btn btn-sm btn-danger">
+			<button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal(<?php echo $product->id; ?>, '<?php echo addslashes($product->name); ?>')">
 				<i class="bi bi-trash"></i>
-			</a>
+			</button>
 		</td>
 	</tr>
 	<?php endforeach; ?>
@@ -335,6 +386,13 @@ document.getElementById('quantity').addEventListener('keypress', function(e) {
         submitAdjustment();
     }
 });
+
+function showDeleteModal(productId, productName) {
+    document.getElementById('productNameToDelete').textContent = productName;
+    document.getElementById('confirmDeleteBtn').href = 'index.php?view=delproduct&id=' + productId;
+    var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
 </script>
 
 <style>

@@ -24,4 +24,14 @@ Core::$root="";
 $lb = new Lb();
 $lb->start();
 
+$iniciador = new Core();
+
+// Añadir el controlador de eliminación múltiple
+if(isset($_GET["view"]) && $_GET["view"]=="deleteproducts"){
+    require_once("core/app/controller/DeleteProductsController.php");
+    $controller = new DeleteProductsController();
+    $controller->index();
+    exit;
+}
+
 ?>

@@ -97,38 +97,17 @@ class OperationData {
 		$input_id = OperationTypeData::getByName("entrada")->id;
 		$output_id = OperationTypeData::getByName("salida")->id;
 		
-		// Solo mostrar depuración para el último producto agregado
-		if(isset($_SESSION['last_product_id']) && $_SESSION['last_product_id'] == $product_id){
-			echo "<script>";
-			echo "console.log('Depuración de getQYesF:');";
-			echo "console.log('ID del producto: " . $product_id . "');";
-			echo "console.log('ID de entrada: " . $input_id . "');";
-			echo "console.log('ID de salida: " . $output_id . "');";
-			echo "console.log('Número de operaciones encontradas: " . count($operations) . "');";
-		}
-		
 		foreach($operations as $operation){
-			if(isset($_SESSION['last_product_id']) && $_SESSION['last_product_id'] == $product_id){
-				echo "console.log('Operación ID: " . $operation->id . ", Cantidad: " . $operation->q . ", Tipo: " . $operation->operation_type_id . "');";
-			}
-			
 			if($operation->operation_type_id==$input_id){ 
 				$q+=$operation->q;
-				if(isset($_SESSION['last_product_id']) && $_SESSION['last_product_id'] == $product_id){
-					echo "console.log('Sumando entrada: " . $operation->q . "');";
-				}
 			}
 			else if($operation->operation_type_id==$output_id){  
 				$q+=(-$operation->q);
-				if(isset($_SESSION['last_product_id']) && $_SESSION['last_product_id'] == $product_id){
-					echo "console.log('Restando salida: " . $operation->q . "');";
-				}
 			}
 		}
 		
-		if(isset($_SESSION['last_product_id']) && $_SESSION['last_product_id'] == $product_id){
-			echo "console.log('Total calculado: " . $q . "');";
-			echo "</script>";
+		// Limpiar variable de sesión si existe
+		if(isset($_SESSION['last_product_id'])) {
 			unset($_SESSION['last_product_id']);
 		}
 		

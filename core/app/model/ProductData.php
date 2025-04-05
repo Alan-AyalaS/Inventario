@@ -31,8 +31,15 @@ class ProductData {
 		Executor::doit($sql);
 	}
 	public function del(){
+		// Primero eliminar todas las operaciones asociadas
+		$operations = OperationData::getAllByProductId($this->id);
+		foreach ($operations as $op) {
+			$op->del();
+		}
+		
+		// Luego eliminar el producto
 		$sql = "delete from ".self::$tablename." where id=$this->id";
-		Executor::doit($sql);
+		return Executor::doit($sql);
 	}
 
 // partiendo de que ya tenemos creado un objecto ProductData previamente utilizamos el contexto
@@ -91,6 +98,194 @@ class ProductData {
 
 	public static function getAllByCategoryId($category_id){
 		$sql = "select * from ".self::$tablename." where category_id=$category_id order by created_at desc";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+
+	/**
+	 * Obtiene los productos creados en el último mes
+	 */
+	public static function getLastMonth(){
+		$sql = "select * from ".self::$tablename." where created_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+	
+	/**
+	 * Obtiene los productos de una categoría creados en el último mes
+	 */
+	public static function getLastMonthByCategory($category_id){
+		$sql = "select * from ".self::$tablename." where created_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH) AND category_id=$category_id";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+	
+	/**
+	 * Obtiene los productos creados en la última semana
+	 */
+	public static function getLastWeek(){
+		$sql = "select * from ".self::$tablename." where created_at >= DATE_SUB(NOW(), INTERVAL 1 WEEK)";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+	
+	/**
+	 * Obtiene los productos de una categoría creados en la última semana
+	 */
+	public static function getLastWeekByCategory($category_id){
+		$sql = "select * from ".self::$tablename." where created_at >= DATE_SUB(NOW(), INTERVAL 1 WEEK) AND category_id=$category_id";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+	
+	/**
+	 * Obtiene los productos creados esta semana (desde el lunes)
+	 */
+	public static function getThisWeek(){
+		$sql = "select * from ".self::$tablename." where YEARWEEK(created_at, 1) = YEARWEEK(CURDATE(), 1)";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+	
+	/**
+	 * Obtiene los productos de una categoría creados esta semana (desde el lunes)
+	 */
+	public static function getThisWeekByCategory($category_id){
+		$sql = "select * from ".self::$tablename." where YEARWEEK(created_at, 1) = YEARWEEK(CURDATE(), 1) AND category_id=$category_id";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+	
+	/**
+	 * Obtiene los productos creados la semana pasada
+	 */
+	public static function getPreviousWeek(){
+		$sql = "select * from ".self::$tablename." where YEARWEEK(created_at, 1) = YEARWEEK(CURDATE() - INTERVAL 1 WEEK, 1)";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+	
+	/**
+	 * Obtiene los productos de una categoría creados la semana pasada
+	 */
+	public static function getPreviousWeekByCategory($category_id){
+		$sql = "select * from ".self::$tablename." where YEARWEEK(created_at, 1) = YEARWEEK(CURDATE() - INTERVAL 1 WEEK, 1) AND category_id=$category_id";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+	
+	/**
+	 * Obtiene los productos creados hoy
+	 */
+	public static function getToday(){
+		// Construir consulta más explícita para depuración
+		$sql = "select * from ".self::$tablename." where DATE(created_at) = CURDATE()";
+		//echo "<!-- Consulta SQL getToday: ".$sql." -->";
+		$query = Executor::doit($sql);
+		$result = Model::many($query[0],new ProductData());
+		//echo "<!-- Resultados recuperados: ".count($result)." -->";
+		return $result;
+	}
+	
+	/**
+	 * Obtiene los productos de una categoría creados hoy
+	 */
+	public static function getTodayByCategory($category_id){
+		// Construir consulta más explícita para depuración
+		$sql = "select * from ".self::$tablename." where DATE(created_at) = CURDATE() AND category_id=$category_id";
+		//echo "<!-- Consulta SQL getTodayByCategory: ".$sql." -->";
+		$query = Executor::doit($sql);
+		$result = Model::many($query[0],new ProductData());
+		//echo "<!-- Resultados recuperados por categoría: ".count($result)." -->";
+		return $result;
+	}
+	
+	/**
+	 * Obtiene los productos creados ayer
+	 */
+	public static function getYesterday(){
+		$sql = "select * from ".self::$tablename." where DATE(created_at) = DATE_SUB(CURDATE(), INTERVAL 1 DAY)";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+	
+	/**
+	 * Obtiene los productos de una categoría creados ayer
+	 */
+	public static function getYesterdayByCategory($category_id){
+		$sql = "select * from ".self::$tablename." where DATE(created_at) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) AND category_id=$category_id";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+
+	/**
+	 * Obtiene los productos creados este mes
+	 */
+	public static function getThisMonth(){
+		$sql = "select * from ".self::$tablename." where YEAR(created_at) = YEAR(CURRENT_DATE()) AND MONTH(created_at) = MONTH(CURRENT_DATE())";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+
+	/**
+	 * Obtiene los productos de una categoría creados este mes
+	 */
+	public static function getThisMonthByCategory($category_id){
+		$sql = "select * from ".self::$tablename." where YEAR(created_at) = YEAR(CURRENT_DATE()) AND MONTH(created_at) = MONTH(CURRENT_DATE()) AND category_id=$category_id";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+
+	/**
+	 * Obtiene los productos creados en los últimos 3 meses
+	 */
+	public static function getLast3Months(){
+		$sql = "select * from ".self::$tablename." where created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 3 MONTH)";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+
+	/**
+	 * Obtiene los productos de una categoría creados en los últimos 3 meses
+	 */
+	public static function getLast3MonthsByCategory($category_id){
+		$sql = "select * from ".self::$tablename." where created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 3 MONTH) AND category_id=$category_id";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+
+	/**
+	 * Obtiene los productos creados en los últimos 6 meses
+	 */
+	public static function getLast6Months(){
+		$sql = "select * from ".self::$tablename." where created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 6 MONTH)";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+
+	/**
+	 * Obtiene los productos de una categoría creados en los últimos 6 meses
+	 */
+	public static function getLast6MonthsByCategory($category_id){
+		$sql = "select * from ".self::$tablename." where created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 6 MONTH) AND category_id=$category_id";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+
+	/**
+	 * Obtiene los productos creados este año
+	 */
+	public static function getThisYear(){
+		$sql = "select * from ".self::$tablename." where YEAR(created_at) = YEAR(CURRENT_DATE())";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+
+	/**
+	 * Obtiene los productos de una categoría creados este año
+	 */
+	public static function getThisYearByCategory($category_id){
+		$sql = "select * from ".self::$tablename." where YEAR(created_at) = YEAR(CURRENT_DATE()) AND category_id=$category_id";
 		$query = Executor::doit($sql);
 		return Model::many($query[0],new ProductData());
 	}

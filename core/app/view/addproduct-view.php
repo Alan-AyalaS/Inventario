@@ -47,20 +47,20 @@ if($_POST["q"]!="" && $_POST["q"]!="0"){
  $op->product_id = $prod[1];
  $op->operation_type_id = OperationTypeData::getByName("entrada")->id;
  $op->q = floatval($_POST["q"]);
- $op->sell_id = "NULL";
  $op->is_oficial = 1;
- $op->created_at = "NOW()";
  
- // Establecer el ID del último producto agregado en la sesión
- $_SESSION['last_product_id'] = $prod[1];
+ // Usar SQL directo para asegurar que la operación se realiza correctamente
+ $db = Database::getCon();
+ $sql = "INSERT INTO operation (product_id, q, operation_type_id, is_oficial, created_at) 
+         VALUES ({$op->product_id}, {$op->q}, {$op->operation_type_id}, 1, NOW())";
  
- $op->add();
+ $db->query($sql);
  
- print "<script>window.location='index.php?view=products';</script>";
+ print "<script>window.location='index.php?view=inventary';</script>";
  exit;
 }
 
-print "<script>window.location='index.php?view=products';</script>";
+print "<script>window.location='index.php?view=inventary';</script>";
 
 
 }

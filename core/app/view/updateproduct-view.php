@@ -37,8 +37,8 @@ if(count($_POST)>0){
 
 	setcookie("prdupd","true");
 	
-	// Redirigir directamente a la lista de productos
-	header("Location: index.php?view=products");
+	// Redirigir a la vista de inventario
+	header("Location: index.php?view=inventary");
 	exit;
 }
 

@@ -1,6 +1,16 @@
 <?php
 class OperationData {
 	public static $tablename = "operation";
+	
+	public $id;
+	public $name;
+	public $product_id;
+	public $q;
+	public $cut_id;
+	public $operation_type_id;
+	public $is_oficial;
+	public $sell_id;
+	public $created_at;
 
 	public function OperationData(){
 		$this->name = "";
@@ -21,7 +31,7 @@ class OperationData {
 			$this->product_id,
 			$this->q,
 			$this->operation_type_id,
-			$this->sell_id,
+			$this->sell_id === "NULL" ? null : $this->sell_id,
 			$this->is_oficial
 		];
 		

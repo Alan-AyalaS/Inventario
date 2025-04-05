@@ -45,46 +45,13 @@
 			setcookie("prddel", "", time()-3600, "/");
 			?>
 		<?php endif; ?>
-<div class="">
-	<a href="index.php?view=newproduct" class="btn btn-secondary">Agregar Producto</a>
-<div class="btn-group pull-right">
-  <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow: none !important;">
-    <i class="fa fa-download"></i> Descargar <span class="caret"></span>
-  </button>
-  <ul class="dropdown-menu dropdown-menu-end" style="background-color: #28a745; border: none;">
-    <?php
-    require_once 'core/app/model/ConfigurationData.php';
-    $configs = ConfigurationData::getAll();
-    $word_enabled = false;
-    $excel_enabled = false;
-    $pdf_enabled = false;
-
-    foreach($configs as $conf) {
-        if($conf->short == "active_reports_word" && $conf->val == 1) $word_enabled = true;
-        if($conf->short == "active_reports_excel" && $conf->val == 1) $excel_enabled = true;
-        if($conf->short == "active_reports_pdf" && $conf->val == 1) $pdf_enabled = true;
-    }
-    ?>
-    <?php if($word_enabled): ?>
-    <li><a class="dropdown-item text-white" href="index.php?view=download-products" style="background-color: transparent !important; transition: color 0.3s ease;">Word 2007 (.docx)</a></li>
-    <?php endif; ?>
-    <?php if($excel_enabled): ?>
-    <li><a class="dropdown-item text-white" href="index.php?view=download-products-excel" style="background-color: transparent !important; transition: color 0.3s ease;">Excel (.xlsx)</a></li>
-    <?php endif; ?>
-    <?php if($pdf_enabled): ?>
-    <li><a class="dropdown-item text-white" href="index.php?view=download-products-pdf" style="background-color: transparent !important; transition: color 0.3s ease;">PDF (.pdf)</a></li>
-    <?php endif; ?>
-  </ul>
-</div>
-</div>
-<br>
 
 <!-- Modal para ajustar inventario -->
-<div class="modal fade" id="adjustInventoryModal" tabindex="-1" aria-labelledby="adjustInventoryModalLabel" aria-hidden="true">
+<div class="modal fade" id="adjustModal" tabindex="-1" aria-labelledby="adjustModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="adjustInventoryModalLabel">Ajustar Inventario</h5>
+        <h5 class="modal-title" id="adjustModalLabel">Ajustar Inventario</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -118,7 +85,7 @@
   </div>
 </div>
 
-<!-- Modal de confirmación para eliminación -->
+<!-- Modal para eliminar un producto -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -142,7 +109,7 @@
 	<div class="card-header">
 		PRODUCTOS
 	</div>
-		<div class="card-body">
+	<div class="card-body">
 
 <?php
 $page=1;
@@ -189,6 +156,7 @@ if($px<=$npaginas):
 <div class="clearfix"></div>
 <br><table class="table table-bordered table-hover">
 	<thead>
+		<th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
 		<th>Codigo</th>
 		<th>Nombre</th>
 		<th>Precio de Entrada</th>
@@ -203,6 +171,7 @@ if($px<=$npaginas):
 		$q=OperationData::getQYesF($product->id);
 	?>
 	<tr class="<?php if($q<=$product->inventary_min/2){ echo "danger";}else if($q<=$product->inventary_min){ echo "warning";}?>">
+		<td><input type="checkbox" class="product-checkbox" value="<?php echo $product->id; ?>"></td>
 		<td><?php echo $product->id; ?></td>
 		<td><a href="index.php?view=producthistory&id=<?php echo $product->id; ?>" style="text-decoration: none; color: inherit;"><?php echo $product->name; ?></a></td>
 		<td><?php echo $product->price_in; ?></td>
@@ -293,9 +262,9 @@ for($i=0;$i<$npaginas;$i++){
 function showAdjustModal(productId, operationType) {
     document.getElementById('productId').value = productId;
     document.getElementById('operationType').value = operationType;
-    document.getElementById('adjustInventoryModalLabel').textContent = 
+    document.getElementById('adjustModalLabel').textContent = 
         operationType === 'add' ? 'Agregar al Inventario' : 'Restar del Inventario';
-    var modal = new bootstrap.Modal(document.getElementById('adjustInventoryModal'));
+    var modal = new bootstrap.Modal(document.getElementById('adjustModal'));
     modal.show();
 }
 
@@ -336,7 +305,7 @@ function submitAdjustment() {
             const data = JSON.parse(text);
             if(data.success) {
                 // Cerrar el modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('adjustInventoryModal'));
+                const modal = bootstrap.Modal.getInstance(document.getElementById('adjustModal'));
                 modal.hide();
                 
                 // Guardar el mensaje en una cookie
@@ -392,6 +361,14 @@ function showDeleteModal(productId, productName) {
     document.getElementById('confirmDeleteBtn').href = 'index.php?view=delproduct&id=' + productId;
     var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
     modal.show();
+}
+
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.getElementsByClassName('product-checkbox');
+    for (let checkbox of checkboxes) {
+        checkbox.checked = selectAll.checked;
+    }
 }
 </script>
 

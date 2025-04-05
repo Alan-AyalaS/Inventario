@@ -48,6 +48,7 @@
 		<?php endif; ?>
 <div class="">
 	<a href="index.php?view=newproduct" class="btn btn-secondary">Agregar Producto</a>
+</div>
 <div class="btn-group pull-right">
   <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow: none !important;">
     <i class="fa fa-download"></i> Descargar <span class="caret"></span>
@@ -67,35 +68,127 @@
             <input type="hidden" name="view" value="inventary">
             <div class="form-group me-2">
                 <label for="category_id" class="me-2">Categoría:</label>
-                <?php
-                // Primero, preparamos los datos
-                $categories = CategoryData::getAll();
-                $options = [];
-                $options[] = ['value' => '', 'text' => 'Todas las categorías', 'color' => '#6c757d', 'selected' => false];
-                
-                foreach($categories as $category) {
-                    $selected = (isset($_GET["category_id"]) && $_GET["category_id"] == $category->id);
-                    $options[] = [
-                        'value' => $category->id,
-                        'text' => htmlspecialchars($category->name),
-                        'color' => '#28a745', // Color por defecto, será actualizado por JavaScript
-                        'selected' => $selected
-                    ];
-                }
-                
-                // Luego, generamos el HTML del select
-                echo '<select class="form-control" id="category_id" name="category_id">';
-                foreach($options as $option) {
-                    printf(
-                        '<option value="%s" data-color="%s"%s>%s</option>',
-                        $option['value'],
-                        $option['color'],
-                        $option['selected'] ? ' selected' : '',
-                        $option['text']
-                    );
-                }
-                echo '</select>';
-                ?>
+                <div class="custom-select-wrapper">
+                    <div class="custom-select" id="customCategorySelect">
+                        <div class="custom-select__trigger">
+                            <?php
+                            $categories = CategoryData::getAll();
+                            $selectedCategoryName = 'Todas las categorías';
+                            if (isset($_GET["category_id"]) && $_GET["category_id"] != "") {
+                                foreach ($categories as $category) {
+                                    if ($category->id == $_GET["category_id"]) {
+                                        $selectedCategoryName = htmlspecialchars($category->name);
+                                        break;
+                                    }
+                                }
+                            }
+                            ?>
+                            <span><?php echo $selectedCategoryName; ?></span>
+                            <div class="arrow"></div>
+                        </div>
+                        <div class="custom-options">
+                            <?php
+                            // Primero, preparamos los datos
+                            $options = [];
+                            $options[] = ['value' => '', 'text' => 'Todas las categorías', 'color' => '#6c757d', 'selected' => !isset($_GET["category_id"]) || $_GET["category_id"] == ""];
+                            
+                            foreach($categories as $category) {
+                                $selected = (isset($_GET["category_id"]) && $_GET["category_id"] == $category->id);
+                                $options[] = [
+                                    'value' => $category->id,
+                                    'text' => htmlspecialchars($category->name),
+                                    'color' => '#28a745', // Color por defecto, será actualizado por JavaScript
+                                    'selected' => $selected
+                                ];
+                            }
+                            
+                            // Generar las opciones
+                            foreach($options as $option) {
+                                $selectedClass = $option['selected'] ? 'selected' : '';
+                                printf(
+                                    '<div class="custom-option %s" data-value="%s" data-color="%s">%s</div>',
+                                    $selectedClass,
+                                    $option['value'],
+                                    $option['color'],
+                                    $option['text']
+                                );
+                            }
+                            ?>
+                        </div>
+                    </div>
+                    <select id="category_id" name="category_id" style="display: none;">
+                        <?php
+                        foreach($options as $option) {
+                            printf(
+                                '<option value="%s"%s>%s</option>',
+                                $option['value'],
+                                $option['selected'] ? ' selected' : '',
+                                $option['text']
+                            );
+                        }
+                        ?>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group me-2">
+                <label for="availability" class="me-2">Disponibilidad:</label>
+                <div class="custom-select-wrapper">
+                    <div class="custom-select" id="customAvailabilitySelect">
+                        <div class="custom-select__trigger">
+                            <?php
+                            $availabilityOptions = [
+                                ['value' => '', 'text' => 'Todas las cantidades', 'selected' => !isset($_GET["availability"])],
+                                ['value' => '0', 'text' => 'Sin stock (0)', 'selected' => isset($_GET["availability"]) && $_GET["availability"] === '0'],
+                                ['value' => '1-10', 'text' => 'Stock bajo (1-10)', 'selected' => isset($_GET["availability"]) && $_GET["availability"] === '1-10'],
+                                ['value' => '11-50', 'text' => 'Stock medio (11-50)', 'selected' => isset($_GET["availability"]) && $_GET["availability"] === '11-50'],
+                                ['value' => '51-100', 'text' => 'Stock alto (51-100)', 'selected' => isset($_GET["availability"]) && $_GET["availability"] === '51-100'],
+                                ['value' => '100+', 'text' => 'Stock muy alto (100+)', 'selected' => isset($_GET["availability"]) && $_GET["availability"] === '100+']
+                            ];
+                            
+                            $selectedText = 'Todas las cantidades';
+                            if (isset($_GET["availability"])) {
+                                foreach ($availabilityOptions as $option) {
+                                    if ($option['value'] === $_GET["availability"]) {
+                                        $selectedText = $option['text'];
+                                        break;
+                                    }
+                                }
+                            }
+                            ?>
+                            <span><?php echo htmlspecialchars($selectedText); ?></span>
+                            <div class="arrow"></div>
+                        </div>
+                        <div class="custom-options">
+                            <?php
+                            foreach($availabilityOptions as $option) {
+                                $selectedClass = $option['selected'] ? 'selected' : '';
+                                printf(
+                                    '<div class="custom-option %s" data-value="%s">%s</div>',
+                                    $selectedClass,
+                                    $option['value'],
+                                    $option['text']
+                                );
+                            }
+                            ?>
+                        </div>
+                    </div>
+                    <select id="availability" name="availability" style="display: none;">
+                        <?php
+                        foreach($availabilityOptions as $option) {
+                            printf(
+                                '<option value="%s"%s>%s</option>',
+                                $option['value'],
+                                $option['selected'] ? ' selected' : '',
+                                $option['text']
+                            );
+                        }
+                        ?>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group me-2">
+                <label for="search" class="me-2">Buscar:</label>
+                <input type="text" class="form-control" id="search" name="search" value="<?php echo isset($_GET["search"]) ? htmlspecialchars($_GET["search"]) : ''; ?>" placeholder="Buscar productos...">
             </div>
             <div class="form-group me-2">
                 <label for="date_filter" class="me-2">Fecha:</label>
@@ -112,10 +205,7 @@
                 <label for="limit" class="me-2">Mostrar:</label>
                 <input type="number" name="limit" id="limit" class="form-control" value="<?php echo isset($_GET["limit"]) ? $_GET["limit"] : '10'; ?>" min="1" style="width: 80px;">
             </div>
-            <button type="submit" class="btn btn-primary me-2">Filtrar</button>
-            <?php if(isset($_GET["category_id"]) || isset($_GET["date_filter"])): ?>
-            <a href="index.php?view=inventary" class="btn btn-secondary">Limpiar filtros</a>
-            <?php endif; ?>
+            <a href="index.php?view=inventary" class="btn btn-secondary" id="clearFiltersBtn" style="display: none;">Limpiar filtros</a>
         </form>
     </div>
 </div>
@@ -210,6 +300,18 @@
     </div>
 </div>
 
+<!-- Modal de confirmación para eliminar todos los productos -->
+<div id="deleteAllModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h2>Confirmar Eliminación</h2>
+        <p>¿Estás seguro de que deseas eliminar todos los productos? Esta acción no se puede deshacer.</p>
+        <div class="modal-buttons">
+            <button onclick="document.getElementById('deleteAllModal').style.display='none'">Cancelar</button>
+            <button onclick="confirmDeleteAll()">Confirmar</button>
+        </div>
+    </div>
+</div>
+
 <div class="card">
 	<div class="card-header">INVENTARIO
 	</div>
@@ -232,109 +334,67 @@ if(isset($_GET["limit"]) && $_GET["limit"]!="" && $_GET["limit"]!=$limit){
 error_log("Filtro de fecha: " . (isset($_GET['date_filter']) ? $_GET['date_filter'] : 'no establecido'));
 error_log("Filtro de categoría: " . (isset($_GET['category_id']) ? $_GET['category_id'] : 'no establecido'));
 
-// Verificar si tenemos ambos filtros (categoría y fecha)
-if(isset($_GET['date_filter']) && $_GET['date_filter'] != "" && isset($_GET['category_id']) && $_GET['category_id'] != "") {
-    $category_id = intval($_GET['category_id']);
-    
-    switch($_GET['date_filter']) {
-        case 'this_week':
-            $products = ProductData::getThisWeekByCategory($category_id);
-            break;
-        case 'this_month':
-            $products = ProductData::getThisMonthByCategory($category_id);
-            break;
-        case 'last_3_months':
-            $products = ProductData::getLast3MonthsByCategory($category_id);
-            break;
-        case 'last_6_months':
-            $products = ProductData::getLast6MonthsByCategory($category_id);
-            break;
-        case 'this_year':
-            $products = ProductData::getThisYearByCategory($category_id);
-            break;
-        default:
-            $products = ProductData::getAllByCategoryId($category_id);
-    }
-    // Depuración
-    error_log("Productos recuperados con ambos filtros: " . count($products));
-}
+// Verificar si tenemos filtro de categoría
+if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
+	$category_id = intval($_GET['category_id']);
+	$products = ProductData::getAllByCategoryId($category_id);
+	// Si hay categoría seleccionada, establecer un límite alto para mostrar todos los productos
+	$limit = 1000;
+	error_log("Productos recuperados con filtro de categoría: " . count($products));
+} 
 // Si solo tenemos filtro de fecha
 else if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-    // Depuración: mostrar todos los productos sin filtrar
-    $all_products = ProductData::getAll();
-    $all_categories = array();
-    foreach($all_products as $p) {
-        if(isset($p->category_id) && $p->category_id != null) {
-            if(!isset($all_categories[$p->category_id])) {
-                $all_categories[$p->category_id] = 1;
-            } else {
-                $all_categories[$p->category_id]++;
-            }
-        } else {
-            if(!isset($all_categories['null'])) {
-                $all_categories['null'] = 1;
-            } else {
-                $all_categories['null']++;
-            }
-        }
-    }
-    error_log("TODOS LOS PRODUCTOS: " . count($all_products));
-    error_log("TODAS LAS CATEGORÍAS: " . json_encode($all_categories));
-    
-    switch($_GET['date_filter']) {
-        case 'this_week':
-            $products = ProductData::getThisWeek();
-            break;
-        case 'this_month':
-            $products = ProductData::getThisMonth();
-            break;
-        case 'last_3_months':
-            $products = ProductData::getLast3Months();
-            break;
-        case 'last_6_months':
-            $products = ProductData::getLast6Months();
-            break;
-        case 'this_year':
-            $products = ProductData::getThisYear();
-            break;
-        default:
-            $products = ProductData::getAll();
-    }
-    // Depuración
-    error_log("Productos recuperados solo con filtro de fecha: " . count($products));
-}
-// Si solo tenemos filtro de categoría
-else if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-    $category_id = intval($_GET['category_id']);
-    $products = ProductData::getAllByCategoryId($category_id);
-    // Depuración
-    error_log("Productos recuperados solo con filtro de categoría: " . count($products));
+	switch($_GET['date_filter']) {
+		case 'this_week':
+			$products = ProductData::getThisWeek();
+			break;
+		case 'this_month':
+			$products = ProductData::getThisMonth();
+			break;
+		case 'last_3_months':
+			$products = ProductData::getLast3Months();
+			break;
+		case 'last_6_months':
+			$products = ProductData::getLast6Months();
+			break;
+		case 'this_year':
+			$products = ProductData::getThisYear();
+			break;
+		default:
+			$products = ProductData::getAll();
+	}
+	error_log("Productos recuperados con filtro de fecha: " . count($products));
 }
 // Sin filtros
 else {
-    $products = ProductData::getAll();
-    // Depuración
-    error_log("Productos recuperados sin filtros: " . count($products));
+	$products = ProductData::getAll();
+	error_log("Productos recuperados sin filtros: " . count($products));
 }
 
 if(count($products)>0){
+	// Calcular el número total de páginas
+	$total_records = count($products);
+	$npaginas = ceil($total_records / $limit);
 
-// Calcular el número total de páginas
-$total_records = count($products);
-$npaginas = ceil($total_records / $limit);
+	// Asegurarse de que la página actual no exceda el número total de páginas
+	if ($page > $npaginas) {
+		$page = $npaginas;
+	}
 
-// Asegurarse de que la página actual no exceda el número total de páginas
-if ($page > $npaginas) {
-    $page = $npaginas;
-}
-
-// Obtener los productos para la página actual
-if ($page == 1) {
-    $curr_products = array_slice($products, 0, $limit);
-} else {
-    $start_index = ($page - 1) * $limit;
-    $curr_products = array_slice($products, $start_index, $limit);
-}
+	// Si hay una categoría seleccionada, mostrar todos los productos
+	if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
+		$curr_products = $products;
+		$npaginas = 1;
+		$page = 1;
+	} else {
+		// Obtener los productos para la página actual
+		if ($page == 1) {
+			$curr_products = array_slice($products, 0, $limit);
+		} else {
+			$start_index = ($page - 1) * $limit;
+			$curr_products = array_slice($products, $start_index, $limit);
+		}
+	}
 
 	?>
 
@@ -415,7 +475,7 @@ if($px<=$npaginas):
 					}
 				}
 				?>
-				<span class="badge" style="background-color: <?php echo $categoryColor; ?>; color: white; padding: 5px 10px; border-radius: 4px;">
+				<span class="badge" style="background-color: <?php echo $categoryColor; ?>; color: white; padding: 5px 10px; border-radius: 4px;" data-category-id="<?php echo $product->category_id; ?>">
 					<?php echo htmlspecialchars($categoryName); ?>
 				</span>
 			</td>
@@ -793,91 +853,541 @@ const updateCategoryColor = (() => {
                 localStorage.getItem('category_color_' + categoryId) || '#28a745' : 
                 '#6c757d';
             
-            // Actualizar solo el borde del select
-            select.style.setProperty('border-color', color, 'important');
+            // Actualizar el borde del select personalizado
+            const customSelect = document.querySelector('.custom-select');
+            if (customSelect) {
+                customSelect.style.borderColor = color;
+            }
             
-            // Actualizar los colores de todas las opciones
-            Array.from(select.options).forEach(option => {
-                const optionCategoryId = option.value;
+            // Actualizar los colores de las opciones
+            document.querySelectorAll('.custom-option').forEach(option => {
+                const optionCategoryId = option.dataset.value;
                 if (optionCategoryId) {
                     const optionColor = localStorage.getItem('category_color_' + optionCategoryId) || '#28a745';
-                    option.style.color = optionColor;
-                    option.style.backgroundColor = 'white';
-                } else {
-                    // Opción "Todas las categorías"
-                    option.style.color = '#6c757d';
-                    option.style.backgroundColor = 'white';
+                    option.style.setProperty('--hover-color', optionColor);
+                    option.style.backgroundColor = optionCategoryId === categoryId ? optionColor : 'white';
+                    option.style.color = optionCategoryId === categoryId ? 'white' : '#000';
                 }
             });
         }, 0);
     };
 })();
 
-// Inicializar cuando el DOM esté listo
+// Inicializar el select personalizado de disponibilidad
 document.addEventListener('DOMContentLoaded', () => {
-    const categorySelect = document.getElementById('category_id');
-    if (!categorySelect) return;
+    const customAvailabilitySelect = document.querySelector('#customAvailabilitySelect');
+    const customAvailabilityTrigger = customAvailabilitySelect.querySelector('.custom-select__trigger');
+    const customAvailabilityOptions = customAvailabilitySelect.querySelectorAll('.custom-option');
+    const originalAvailabilitySelect = document.getElementById('availability');
     
-    // Aplicar el color inicial
-    updateCategoryColor(categorySelect);
+    if (!customAvailabilitySelect || !customAvailabilityTrigger || !originalAvailabilitySelect) return;
     
-    // Agregar el evento change
-    categorySelect.addEventListener('change', function() {
-        updateCategoryColor(this);
+    // Abrir/cerrar el select
+    customAvailabilityTrigger.addEventListener('click', () => {
+        customAvailabilitySelect.classList.toggle('open');
     });
     
-    // Agregar evento para mantener los colores al abrir el select
-    categorySelect.addEventListener('click', function() {
-        updateCategoryColor(this);
+    // Seleccionar una opción
+    customAvailabilityOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            const value = option.dataset.value;
+            const text = option.textContent;
+            
+            // Actualizar el select original
+            originalAvailabilitySelect.value = value;
+            
+            // Actualizar el texto mostrado
+            customAvailabilityTrigger.querySelector('span').textContent = text;
+            
+            // Actualizar las clases selected
+            customAvailabilityOptions.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            // Cerrar el select
+            customAvailabilitySelect.classList.remove('open');
+            
+            // Disparar el evento change del select original
+            originalAvailabilitySelect.dispatchEvent(new Event('change'));
+            
+            // Filtrar los productos
+            filterProducts();
+        });
     });
     
-    // Agregar evento para mantener los colores al enfocar el select
-    categorySelect.addEventListener('focus', function() {
-        updateCategoryColor(this);
+    // Cerrar el select al hacer clic fuera
+    document.addEventListener('click', (e) => {
+        if (!customAvailabilitySelect.contains(e.target)) {
+            customAvailabilitySelect.classList.remove('open');
+        }
+    });
+});
+
+// Inicializar el select personalizado de categoría
+document.addEventListener('DOMContentLoaded', () => {
+    const customCategorySelect = document.querySelector('#customCategorySelect');
+    const customCategoryTrigger = customCategorySelect.querySelector('.custom-select__trigger');
+    const customCategoryOptions = customCategorySelect.querySelectorAll('.custom-option');
+    const originalCategorySelect = document.getElementById('category_id');
+    
+    if (!customCategorySelect || !customCategoryTrigger || !originalCategorySelect) return;
+    
+    // Abrir/cerrar el select
+    customCategoryTrigger.addEventListener('click', () => {
+        customCategorySelect.classList.toggle('open');
     });
     
-    // Agregar evento para mantener los colores cuando el select está abierto
-    categorySelect.addEventListener('mousedown', function() {
-        updateCategoryColor(this);
+    // Seleccionar una opción
+    customCategoryOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            const value = option.dataset.value;
+            const text = option.textContent;
+            
+            // Actualizar el select original
+            originalCategorySelect.value = value;
+            
+            // Actualizar el texto mostrado
+            customCategoryTrigger.querySelector('span').textContent = text;
+            
+            // Actualizar las clases selected
+            customCategoryOptions.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            // Cerrar el select
+            customCategorySelect.classList.remove('open');
+            
+            // Actualizar los colores
+            updateCategoryColor(originalCategorySelect);
+            
+            // Filtrar los productos inmediatamente
+            filterProducts();
+        });
     });
+    
+    // Cerrar el select al hacer clic fuera
+    document.addEventListener('click', (e) => {
+        if (!customCategorySelect.contains(e.target)) {
+            customCategorySelect.classList.remove('open');
+        }
+    });
+    
+    // Inicializar el color
+    updateCategoryColor(originalCategorySelect);
+});
+
+// Función para filtrar productos por disponibilidad
+function filterByAvailability(product, availability) {
+    if (!availability) return true;
+    
+    const stock = parseInt(product.querySelector('td:nth-child(8)').textContent);
+    
+    switch(availability) {
+        case '0':
+            return stock === 0;
+        case '1-10':
+            return stock >= 1 && stock <= 10;
+        case '11-50':
+            return stock >= 11 && stock <= 50;
+        case '51-100':
+            return stock >= 51 && stock <= 100;
+        case '100+':
+            return stock > 100;
+        default:
+            return true;
+    }
+}
+
+// Modificar la función de filtrado para incluir la disponibilidad
+function filterProducts() {
+    const searchTerm = document.getElementById('search').value.toLowerCase();
+    const categoryId = document.getElementById('category_id').value;
+    const availability = document.getElementById('availability').value;
+    const dateFilter = document.getElementById('date_filter').value;
+    const limit = document.getElementById('limit').value;
+    const products = document.querySelectorAll('tbody tr');
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+    
+    console.log('=== INICIO DE FILTRADO ===');
+    console.log('Parámetros de filtro:');
+    console.log('- Categoría seleccionada:', categoryId);
+    console.log('- Límite:', limit);
+    console.log('- Total de productos en la tabla:', products.length);
+    
+    // Mostrar u ocultar el botón de limpiar filtros
+    if (searchTerm || categoryId || availability || dateFilter) {
+        clearFiltersBtn.style.display = '';
+    } else {
+        clearFiltersBtn.style.display = 'none';
+    }
+    
+    let visibleCount = 0;
+    let categoryMatchCount = 0;
+    
+    // Primero, mostrar todos los productos para poder filtrarlos
+    products.forEach(product => {
+        product.style.display = '';
+    });
+    
+    // Luego, aplicar los filtros
+    products.forEach((product, index) => {
+        const name = product.querySelector('td:nth-child(3)').textContent.toLowerCase();
+        const categoryCell = product.querySelector('td:nth-child(4)');
+        const badge = categoryCell.querySelector('.badge');
+        const productCategoryId = badge ? badge.getAttribute('data-category-id') : '';
+        const date = product.querySelector('td:nth-child(9)').textContent;
+        const matchesSearch = name.includes(searchTerm);
+        
+        // Debug logs detallados
+        console.log(`=== Producto ${index + 1} ===`);
+        console.log('Nombre:', name);
+        console.log('ID Categoría del producto:', productCategoryId);
+        console.log('ID Categoría seleccionada:', categoryId);
+        console.log('Tipo de dato productCategoryId:', typeof productCategoryId);
+        console.log('Tipo de dato categoryId:', typeof categoryId);
+        
+        // Verificar si la categoría coincide
+        const matchesCategory = !categoryId || productCategoryId === categoryId;
+        
+        if (matchesCategory) {
+            categoryMatchCount++;
+        }
+        
+        console.log('¿Coincide categoría?:', matchesCategory);
+        console.log('================');
+        
+        const matchesAvailability = filterByAvailability(product, availability);
+        const matchesDate = !dateFilter || date === dateFilter;
+        
+        if (matchesSearch && matchesCategory && matchesAvailability && matchesDate) {
+            product.style.display = '';
+            visibleCount++;
+        } else {
+            product.style.display = 'none';
+        }
+    });
+    
+    // Debug: Mostrar estadísticas
+    console.log('=== ESTADÍSTICAS DE FILTRADO ===');
+    console.log('Total de productos:', products.length);
+    console.log('Productos que coinciden con la categoría:', categoryMatchCount);
+    console.log('Productos visibles después del filtrado:', visibleCount);
+    
+    // Actualizar la URL con los parámetros de filtro
+    const params = new URLSearchParams(window.location.search);
+    params.set('view', 'inventary');
+    if (searchTerm) params.set('search', searchTerm);
+    if (categoryId) params.set('category_id', categoryId);
+    if (availability) params.set('availability', availability);
+    if (dateFilter) params.set('date_filter', dateFilter);
+    if (limit) params.set('limit', limit);
+    
+    // Mantener la URL limpia si no hay filtros
+    if (!searchTerm && !categoryId && !availability && !dateFilter) {
+        window.history.replaceState({}, '', 'index.php?view=inventary');
+    } else {
+        window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+    }
+    
+    // Si hay una categoría seleccionada, actualizar el límite para mostrar todos los productos
+    if (categoryId) {
+        console.log('Actualizando límite para categoría:', categoryId);
+        console.log('Productos visibles:', visibleCount);
+        document.getElementById('limit').value = visibleCount;
+        // Ocultar la paginación cuando se filtra por categoría
+        const pagination = document.querySelector('.btn-group.pull-right');
+        if (pagination) {
+            pagination.style.display = 'none';
+            console.log('Paginación ocultada');
+        }
+    } else {
+        // Mostrar la paginación cuando no hay filtro de categoría
+        const pagination = document.querySelector('.btn-group.pull-right');
+        if (pagination) {
+            pagination.style.display = '';
+            console.log('Paginación mostrada');
+        }
+        // Restaurar el límite por defecto
+        document.getElementById('limit').value = '10';
+    }
+    
+    console.log('=== FIN DE FILTRADO ===');
+}
+
+// Agregar event listeners para todos los filtros
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('=== INICIALIZACIÓN DE FILTROS ===');
+    
+    // Limpiar los filtros al recargar la página
+    if (performance.navigation.type === 1) { // 1 indica que la página fue recargada
+        console.log('Página recargada, limpiando filtros');
+        window.location.href = 'index.php?view=inventary';
+        return;
+    }
+    
+    // Filtro de búsqueda
+    document.getElementById('search').addEventListener('input', filterProducts);
+    
+    // Filtro de categoría
+    document.getElementById('category_id').addEventListener('change', () => {
+        const categoryId = document.getElementById('category_id').value;
+        console.log('Cambio de categoría detectado:', categoryId);
+        
+        if (categoryId) {
+            console.log('Categoría seleccionada:', categoryId);
+            // Ocultar la paginación
+            const pagination = document.querySelector('.btn-group.pull-right');
+            if (pagination) {
+                pagination.style.display = 'none';
+                console.log('Paginación ocultada');
+            }
+            // Mostrar todos los productos de la categoría
+            document.getElementById('limit').value = '1000'; // Un número grande para mostrar todos
+            console.log('Límite actualizado a 1000');
+        } else {
+            console.log('No hay categoría seleccionada');
+            // Mostrar la paginación
+            const pagination = document.querySelector('.btn-group.pull-right');
+            if (pagination) {
+                pagination.style.display = '';
+                console.log('Paginación mostrada');
+            }
+            // Restaurar el límite por defecto
+            document.getElementById('limit').value = '10';
+            console.log('Límite restaurado a 10');
+        }
+        filterProducts();
+    });
+    
+    // Filtro de disponibilidad
+    document.getElementById('availability').addEventListener('change', filterProducts);
+    
+    // Filtro de fecha
+    document.getElementById('date_filter').addEventListener('change', filterProducts);
+    
+    // Filtro de límite
+    document.getElementById('limit').addEventListener('change', filterProducts);
+    
+    console.log('=== FIN DE INICIALIZACIÓN DE FILTROS ===');
+});
+
+// Script para crear productos de prueba
+function createTestProducts() {
+    const categories = [
+        { id: 1, name: 'Jerseys' },
+        { id: 2, name: 'Gorras' },
+        { id: 3, name: 'Tenis' },
+        { id: 4, name: 'Balones' },
+        { id: 5, name: 'Variado' }
+    ];
+
+    const products = [];
+    
+    // Crear 10 productos por categoría
+    categories.forEach(category => {
+        for (let i = 1; i <= 10; i++) {
+            // Generar disponibilidad aleatoria entre 0 y 200
+            const availability = Math.floor(Math.random() * 201);
+            
+            products.push({
+                name: `${category.name.toLowerCase()} ${i}`,
+                category_id: category.id,
+                price_in: (Math.random() * 100 + 50).toFixed(2),
+                price_out: (Math.random() * 100 + 100).toFixed(2),
+                unit: 'pz',
+                inventary_min: Math.floor(Math.random() * 10 + 5),
+                availability: availability
+            });
+        }
+    });
+
+    // Enviar los productos al servidor
+    fetch('core/app/controller/ProductController.php?action=create_test_products', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ products })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`Error en la respuesta del servidor: ${response.status} ${response.statusText}\n${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error al crear productos: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al crear productos: ' + error.message);
+    });
+}
+
+// Agregar botón para crear productos de prueba
+document.addEventListener('DOMContentLoaded', () => {
+    const createTestProductsBtn = document.createElement('button');
+    createTestProductsBtn.className = 'btn btn-primary';
+    createTestProductsBtn.textContent = 'Crear Productos de Prueba';
+    createTestProductsBtn.onclick = createTestProducts;
+    
+    const cardHeader = document.querySelector('.card-header');
+    if (cardHeader) {
+        cardHeader.appendChild(createTestProductsBtn);
+    }
 });
 </script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
 
 <style>
-/* Estilos para el select de categorías */
-#category_id {
-    transition: all 0.3s ease !important;
-    border-width: 2px !important;
-    border-style: solid !important;
-    outline: none !important;
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
-    appearance: none !important;
+/* Estilos para el select personalizado */
+.custom-select-wrapper {
+    position: relative;
+    width: 200px;
 }
 
-#category_id:focus {
-    box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25) !important;
+.custom-select {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 2px solid #6c757d;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
 }
 
-/* Estilo para el placeholder */
-#category_id option[value=""] {
+.custom-select__trigger {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 400;
+    color: #000;
+    background-color: white;
+    cursor: pointer;
+}
+
+.arrow {
+    position: relative;
+    height: 10px;
+    width: 10px;
+}
+
+.arrow::before, .arrow::after {
+    content: "";
+    position: absolute;
+    bottom: 0px;
+    width: 0.15rem;
+    height: 100%;
+    transition: all 0.3s;
+}
+
+.arrow::before {
+    left: -5px;
+    transform: rotate(45deg);
+    background-color: #6c757d;
+}
+
+.arrow::after {
+    left: 5px;
+    transform: rotate(-45deg);
+    background-color: #6c757d;
+}
+
+.custom-select.open .arrow::before {
+    left: -5px;
+    transform: rotate(-45deg);
+}
+
+.custom-select.open .arrow::after {
+    left: 5px;
+    transform: rotate(45deg);
+}
+
+.custom-options {
+    position: absolute;
+    display: block;
+    top: 100%;
+    left: 0;
+    right: 0;
+    border: 2px solid #6c757d;
+    border-top: 0;
+    background: #fff;
+    transition: all 0.3s;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 2;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+}
+
+.custom-select.open .custom-options {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: all;
+}
+
+.custom-option {
+    position: relative;
+    display: block;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 400;
+    color: #000;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+/* Estilo para todas las opciones excepto "Todas las categorías" */
+.custom-option[data-value]:not([data-value=""]) {
+    color: #000;
+}
+
+.custom-option[data-value]:not([data-value=""]):hover {
+    color: white !important;
+    background-color: var(--hover-color) !important;
+}
+
+.custom-option[data-value]:not([data-value=""]).selected {
+    color: white !important;
+    background-color: var(--hover-color) !important;
+}
+
+.custom-option.selected::after {
+    content: "✓";
+    position: absolute;
+    right: 10px;
+    color: white !important;
+}
+
+/* Estilo específico para "Todas las categorías" */
+.custom-option[data-value=""] {
     color: #6c757d !important;
 }
 
-/* Estilo para las opciones */
-#category_id option {
-    background-color: white !important;
-}
-
-/* Estilo para el select cuando está abierto */
-#category_id:focus option {
-    background-color: white !important;
-}
-
-/* Estilo para las opciones cuando se pasa el mouse */
-#category_id option:hover {
+.custom-option[data-value=""]:hover {
     background-color: #f8f9fa !important;
+    color: #6c757d !important;
+}
+
+.custom-option[data-value=""].selected {
+    background-color: #f8f9fa !important;
+    color: #6c757d !important;
+}
+
+.custom-option[data-value=""].selected::after {
+    color: #6c757d !important;
 }
 </style>

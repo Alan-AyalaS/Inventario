@@ -46,20 +46,24 @@
 			setcookie("prddel", "", time()-3600, "/");
 			?>
 		<?php endif; ?>
-<div class="">
-	<a href="index.php?view=newproduct" class="btn btn-secondary">Agregar Producto</a>
-</div>
-<div class="btn-group pull-right">
-  <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow: none !important;">
-    <i class="fa fa-download"></i> Descargar <span class="caret"></span>
-  </button>
-  <ul class="dropdown-menu dropdown-menu-end" style="background-color: #28a745; border: none;">
-    <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-excel" style="background-color: transparent !important; transition: color 0.3s ease;">Excel (.xlsx)</a></li>
-    <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-pdf" style="background-color: transparent !important; transition: color 0.3s ease;">PDF (.pdf)</a></li>
-  </ul>
-</div>
-		<div class="clearfix"></div>
-		<br>
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="index.php?view=newproduct" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Agregar Producto
+            </a>
+            <div class="btn-group">
+                <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow: none !important;">
+                    <i class="fa fa-download"></i> Descargar <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" style="background-color: #28a745; border: none;">
+                    <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-excel" style="background-color: transparent !important; transition: color 0.3s ease;">Excel (.xlsx)</a></li>
+                    <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-pdf" style="background-color: transparent !important; transition: color 0.3s ease;">PDF (.pdf)</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+        <br>
 
 <!-- Filtros -->
 <div class="row">
@@ -1327,7 +1331,7 @@ if (getCookie('productCreated') === 'true') {
     background-color: white;
     cursor: pointer;
 }
-/* Comentario */
+/* Comentario de prueba */
 
 .custom-select__trigger {
     position: relative;

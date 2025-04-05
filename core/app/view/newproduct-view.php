@@ -74,9 +74,9 @@ $categories = CategoryData::getAll();
     </div>
   </div>
   <div class="form-group">
-    <label for="inputEmail1" class="col-lg-2 control-label">Minima en inventario:</label>
+    <label for="inputEmail1" class="col-lg-2 control-label">Minima en Inventario</label>
     <div class="col-md-6">
-      <input type="text" name="inventary_min" class="form-control" id="inputEmail1" placeholder="Minima en Inventario (Default 10)">
+      <input type="text" name="inventary_min" class="form-control" id="inventary_min" placeholder="Minima en Inventario" value="10">
     </div>
   </div>
 

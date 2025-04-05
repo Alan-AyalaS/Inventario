@@ -44,6 +44,7 @@ create table product(
 	category_id int,
 	created_at datetime,
 	is_active boolean default 1,
+	availability int default 0,
 	foreign key (category_id) references category(id),
 	foreign key (user_id) references user(id)
 );

@@ -44,7 +44,13 @@ class ProductData {
 
 // partiendo de que ya tenemos creado un objecto ProductData previamente utilizamos el contexto
 	public function update(){
-		$sql = "update ".self::$tablename." set barcode=\"$this->barcode\",name=\"$this->name\",price_in=\"$this->price_in\",price_out=\"$this->price_out\",unit=\"$this->unit\",presentation=\"$this->presentation\",category_id=$this->category_id,inventary_min=\"$this->inventary_min\",description=\"$this->description\",is_active=\"$this->is_active\" where id=$this->id";
+		$sql = "update ".self::$tablename." set barcode=\"$this->barcode\",name=\"$this->name\",price_in=\"$this->price_in\",price_out=\"$this->price_out\",unit=\"$this->unit\",presentation=\"$this->presentation\",category_id=$this->category_id,inventary_min=\"$this->inventary_min\",description=\"$this->description\",is_active=\"$this->is_active\",availability=\"$this->availability\" where id=$this->id";
+		Executor::doit($sql);
+	}
+
+	public function updateAvailability($newAvailability) {
+		$this->availability = $newAvailability;
+		$sql = "update ".self::$tablename." set availability=$this->availability where id=$this->id";
 		Executor::doit($sql);
 	}
 

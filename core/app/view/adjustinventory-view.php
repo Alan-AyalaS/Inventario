@@ -17,13 +17,9 @@ try {
     require_once __DIR__ . "/../../controller/Model.php";
     require_once __DIR__ . "/../model/OperationData.php";
     require_once __DIR__ . "/../model/OperationTypeData.php";
+    require_once __DIR__ . "/../model/ProductData.php";
 
-    if(count($_POST)>0){
-        // Verificar que todos los datos necesarios estén presentes
-        if(!isset($_POST["product_id"]) || !isset($_POST["quantity"]) || !isset($_POST["operation_type"])) {
-            throw new Exception("Faltan datos requeridos en la solicitud");
-        }
-
+    if(isset($_POST["product_id"]) && isset($_POST["quantity"]) && isset($_POST["operation_type"])) {
         $product_id = $_POST["product_id"];
         $quantity = floatval($_POST["quantity"]);
         $operation_type = $_POST["operation_type"];
@@ -53,14 +49,38 @@ try {
         $result = $op->add();
         
         if($result && $result[0]){
+            // Obtener el nombre del producto
+            $product = ProductData::getById($product_id);
+            $product_name = $product ? $product->name : 'Producto';
+            
+            // Calcular la nueva disponibilidad basada en todas las operaciones
+            $operations = OperationData::getAllByProductId($product_id);
+            $newAvailability = 0;
+            foreach ($operations as $op) {
+                if ($op->operation_type_id == 1) { // Entrada
+                    $newAvailability += $op->q;
+                } else { // Salida
+                    $newAvailability -= $op->q;
+                }
+            }
+            $product->updateAvailability($newAvailability);
+            
+            // Crear el mensaje según el tipo de operación
+            $message = $operation_type === 'add' ? 
+                "Se agregaron {$quantity} unidades al producto '{$product_name}'" : 
+                "Se restaron {$quantity} unidades del producto '{$product_name}'";
+            
+            // Establecer la cookie con una duración de 1 minuto
+            setcookie('inventoryAlert', $message, time() + 60, '/', '', false, true);
+            
             $response = [
                 'success' => true,
-                'message' => 'Inventario actualizado correctamente'
+                'message' => $message
             ];
         } else {
             $response = [
                 'success' => false,
-                'message' => 'Error al actualizar el inventario: ' . ($result[1] ?? 'Error desconocido')
+                'message' => 'Error al actualizar el inventario'
             ];
         }
     } else {

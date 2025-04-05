@@ -595,40 +595,34 @@ function submitAdjustment() {
         return;
     }
     
-    console.log('Enviando ajuste:', {
-        product_id: productId,
-        operation_type: operationType,
-        quantity: quantity
-    });
-    
     // Enviar datos al servidor
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'index.php?action=adjust_inventory', true);
+    xhr.open('POST', 'index.php?view=adjustinventory', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.onload = function() {
-        console.log('Respuesta del servidor:', xhr.responseText);
-        
         if (xhr.status === 200) {
             try {
-                const response = JSON.parse(xhr.responseText);
+                // Obtener solo la parte JSON de la respuesta
+                let jsonResponse = xhr.responseText;
+                const htmlIndex = jsonResponse.indexOf('<!DOCTYPE html>');
+                if (htmlIndex !== -1) {
+                    jsonResponse = jsonResponse.substring(0, htmlIndex);
+                }
+                
+                const response = JSON.parse(jsonResponse.trim());
                 console.log('Respuesta procesada:', response);
                 
                 if (response.success) {
                     // Cerrar modal
                     bootstrap.Modal.getInstance(document.getElementById('adjustInventoryModal')).hide();
                     
-                    // Guardar el mensaje para mostrarlo después de recargar
-                    lastOperationMessage = response.message || 'Inventario actualizado correctamente';
+                    // Guardar el mensaje en sessionStorage
+                    sessionStorage.setItem('inventoryAlert', response.message);
                     
-                    // Almacenar el mensaje en sessionStorage para recuperarlo después de la recarga
-                    sessionStorage.setItem('inventoryMessage', lastOperationMessage);
-                    
-                    // Recargar la página para mostrar los cambios
-                    location.reload();
-                    
+                    // Recargar la página
+                    window.location.href = 'index.php?view=inventary';
                 } else {
                     alert('Error: ' + (response.message || 'Error al ajustar el inventario'));
-                    console.error('Detalles del error:', response.debug || response);
                 }
             } catch (e) {
                 console.error('Error parsing JSON response:', e);
@@ -647,26 +641,41 @@ function submitAdjustment() {
     xhr.send(`product_id=${productId}&operation_type=${operationType}&quantity=${quantity}`);
 }
 
-// Verificar si hay un mensaje pendiente al cargar la página
+// Verificar si hay una alerta pendiente al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
-    const message = sessionStorage.getItem('inventoryMessage');
-    if (message) {
-        // Limpiar el mensaje de sessionStorage
-        sessionStorage.removeItem('inventoryMessage');
+    const alertMessage = sessionStorage.getItem('inventoryAlert');
+    if (alertMessage) {
+        // Crear y mostrar la alerta
+        const alertDiv = document.createElement('div');
+        // Determinar el color de la alerta según el tipo de operación
+        const isSubtraction = alertMessage.includes('restaron');
+        alertDiv.className = `alert alert-${isSubtraction ? 'warning' : 'success'} alert-dismissible fade show`;
+        alertDiv.role = 'alert';
+        alertDiv.style.position = 'fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '9999';
+        alertDiv.style.minWidth = '300px';
+        alertDiv.innerHTML = `
+            <strong>¡${isSubtraction ? 'Aviso' : 'Éxito'}!</strong> ${alertMessage}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
         
-        // Mostrar la notificación
-        document.getElementById('alertMessage').textContent = message;
-        const toast = new bootstrap.Toast(document.getElementById('inventoryAlert'));
-        toast.show();
+        // Agregar la alerta al body
+        document.body.appendChild(alertDiv);
+        
+        // Configurar la animación de desvanecimiento
+        setTimeout(() => {
+            alertDiv.style.transition = 'opacity 0.5s';
+            alertDiv.style.opacity = '0';
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 500);
+        }, 3000);
+        
+        // Eliminar el mensaje del sessionStorage
+        sessionStorage.removeItem('inventoryAlert');
     }
-    
-    // Agregar evento para manejar la tecla Enter en el campo de cantidad
-    document.getElementById('quantity').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            submitAdjustment();
-        }
-    });
 });
 
 function showDeleteModal(productId, productName) {
@@ -1235,13 +1244,69 @@ document.addEventListener('DOMContentLoaded', () => {
     const createTestProductsBtn = document.createElement('button');
     createTestProductsBtn.className = 'btn btn-primary';
     createTestProductsBtn.textContent = 'Crear Productos de Prueba';
-    createTestProductsBtn.onclick = createTestProducts;
+    createTestProductsBtn.onclick = () => {
+        window.location.href = 'http://localhost/Sistema%20de%20inventario/create_test_products.php';
+    };
     
     const cardHeader = document.querySelector('.card-header');
     if (cardHeader) {
         cardHeader.appendChild(createTestProductsBtn);
     }
 });
+
+// Función para obtener el valor de una cookie
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+// Función para obtener el artículo correcto según la categoría
+function getArticleForCategory(category) {
+    switch(category.toLowerCase()) {
+        case 'balón':
+            return 'el';
+        case 'tenis':
+            return 'los';
+        case 'variado':
+            return 'el';
+        default:
+            return 'la';
+    }
+}
+
+// Verificar si hay una alerta de producto creado
+if (getCookie('productCreated') === 'true') {
+    const productName = decodeURIComponent(getCookie('productName') || '');
+    const productCategory = getCookie('productCategory') || '';
+    const article = getArticleForCategory(productCategory);
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-success alert-dismissible fade show';
+    alertDiv.style.position = 'fixed';
+    alertDiv.style.top = '20px';
+    alertDiv.style.right = '20px';
+    alertDiv.style.zIndex = '9999';
+    alertDiv.style.minWidth = '300px';
+    alertDiv.innerHTML = `
+        <strong>¡Éxito!</strong> ${article} ${productCategory} "${productName}" se ha creado correctamente.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    // Eliminar la alerta después de 3 segundos
+    setTimeout(() => {
+        alertDiv.classList.remove('show');
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 150);
+    }, 3000);
+    
+    // Eliminar las cookies
+    document.cookie = "productCreated=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "productName=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "productCategory=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+}
 </script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
@@ -1262,6 +1327,7 @@ document.addEventListener('DOMContentLoaded', () => {
     background-color: white;
     cursor: pointer;
 }
+/* Comentario */
 
 .custom-select__trigger {
     position: relative;

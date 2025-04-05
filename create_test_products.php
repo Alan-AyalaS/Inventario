@@ -1,96 +1,125 @@
 <?php
-// Iniciar el contador de tiempo
-$start_time = microtime(true);
+// Incluir solo las clases necesarias
+require_once("core/app/model/ProductData.php");
+require_once("core/app/model/CategoryData.php");
+require_once("core/app/model/OperationData.php");
+require_once("core/app/model/OperationTypeData.php");
+require_once("core/app/model/Executor.php");
 
-// Configurar la respuesta como JSON
-header('Content-Type: application/json');
+// Verificar si el usuario está logueado
+session_start();
+if(!isset($_SESSION["user_id"])){
+    header("Location: index.php");
+    exit;
+}
 
-require_once __DIR__ . "/core/app/model/ProductData.php";
-require_once __DIR__ . "/core/app/model/OperationData.php";
-require_once __DIR__ . "/core/app/model/CategoryData.php";
-require_once __DIR__ . "/core/controller/Database.php";
-require_once __DIR__ . "/core/controller/Executor.php";
-require_once __DIR__ . "/core/controller/Core.php";
+// Función para generar nombres de productos aleatorios
+function generateProductName($category) {
+    $prefixes = ['Basic', 'Premium', 'Pro', 'Elite', 'Super', 'Ultra', 'Mega', 'Gold', 'Silver'];
+    $suffixes = ['Lite', 'Standard', 'Deluxe', 'Plus', 'Max', 'Pro', 'Elite'];
+    
+    $prefix = $prefixes[array_rand($prefixes)];
+    $suffix = $suffixes[array_rand($suffixes)];
+    
+    return $prefix . " " . $category->name . " " . $suffix;
+}
 
-try {
-    // Crear productos de prueba
-    $categories = [
-        ['id' => 1, 'name' => 'Jerseys'],
-        ['id' => 2, 'name' => 'Gorras'],
-        ['id' => 3, 'name' => 'Tenis'],
-        ['id' => 4, 'name' => 'Balones'],
-        ['id' => 5, 'name' => 'Variado']
-    ];
+// Función para generar códigos de barras únicos
+function generateBarcode() {
+    return "TEST" . str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+}
 
-    $created = 0;
-    $errors = [];
-    $products = [];
+// Obtener todas las categorías
+$categories = CategoryData::getAll();
 
-    foreach ($categories as $category) {
-        for ($i = 1; $i <= 10; $i++) {
-            // Generar disponibilidad aleatoria entre 0 y 200
-            $availability = rand(0, 200);
-            
+$total_products = 0;
+$success_count = 0;
+$error_count = 0;
+$errors = array();
+
+echo "<h2>Generando productos de prueba...</h2>";
+
+foreach($categories as $category) {
+    for($i = 0; $i < 10; $i++) {
+        try {
             // Crear el producto
-            $product = new ProductData();
-            $product->name = strtolower($category['name']) . " " . $i;
-            $product->category_id = $category['id'];
-            $product->price_in = number_format(rand(50, 150), 2);
-            $product->price_out = number_format(rand(100, 200), 2);
-            $product->unit = 'pz';
-            $product->inventary_min = rand(5, 15);
-            $product->barcode = "TEST" . rand(1000, 9999);
-            $product->description = "Producto de prueba " . $i;
-            $product->user_id = 1; // ID del usuario que crea el producto
-            $product->presentation = "0";
-            $product->is_active = 1;
+            $p = new ProductData();
+            $p->barcode = generateBarcode();
+            $p->name = generateProductName($category);
+            $p->description = "Producto de prueba generado automáticamente";
+            $p->price_in = rand(100, 1000);
+            $p->price_out = $p->price_in * 1.3; // 30% de ganancia
+            $p->unit = "unidad";
+            $p->user_id = $_SESSION["user_id"];
+            $p->category_id = $category->id;
+            $p->inventary_min = rand(5, 20);
+            $p->presentation = "0";
             
-            // Guardar el producto
-            $product_id = $product->add();
+            // 70% de probabilidad de tener stock inicial
+            $cantidad = (rand(1, 100) <= 70) ? rand(1, 200) : 0;
+            $p->availability = $cantidad;
             
-            if ($product_id) {
-                // Crear una operación inicial con la disponibilidad aleatoria
-                $operation = new OperationData();
-                $operation->product_id = $product_id;
-                $operation->q = $availability;
-                $operation->operation_type_id = 1; // 1 = entrada
-                $operation->created_at = date('Y-m-d H:i:s');
-                $operation->add();
-                $created++;
-                $products[] = [
-                    'id' => $product_id,
-                    'name' => $product->name,
-                    'price' => $product->price_out,
-                    'stock' => $availability,
-                    'category' => $product->category_id,
-                    'is_active' => $product->is_active
-                ];
+            // Agregar el producto
+            $sql = "INSERT INTO product (barcode, name, description, price_in, price_out, user_id, presentation, unit, category_id, inventary_min, availability, created_at) ";
+            $sql .= "VALUES ('" . $p->barcode . "', '" . $p->name . "', '" . $p->description . "', " . $p->price_in . ", " . $p->price_out . ", " . $p->user_id . ", '" . $p->presentation . "', '" . $p->unit . "', " . $p->category_id . ", " . $p->inventary_min . ", " . $p->availability . ", NOW())";
+            
+            $result = Executor::doit($sql);
+            if($result) {
+                $total_products++;
+                
+                // Obtener el ID del producto recién creado
+                $sql = "SELECT id FROM product WHERE barcode = '" . $p->barcode . "' ORDER BY id DESC LIMIT 1";
+                $query = Executor::doit($sql);
+                if($query[0]->num_rows > 0) {
+                    $product_id = $query[0]->fetch_assoc()['id'];
+                    
+                    if($cantidad > 0) {
+                        // Crear la operación de entrada
+                        $op = new OperationData();
+                        $op->product_id = $product_id;
+                        $op->operation_type_id = 1; // 1 = entrada
+                        $op->q = $cantidad;
+                        $op->is_oficial = 1;
+                        $op->created_at = "NOW()";
+                        
+                        $sql = "INSERT INTO operation (product_id, operation_type_id, q, is_oficial, created_at) ";
+                        $sql .= "VALUES (" . $op->product_id . ", " . $op->operation_type_id . ", " . $op->q . ", " . $op->is_oficial . ", NOW())";
+                        
+                        if(Executor::doit($sql)) {
+                            echo "✅ Producto creado: " . $p->name . " (Stock inicial: " . $cantidad . ")<br>";
+                        } else {
+                            throw new Exception("Error al crear operación de entrada");
+                        }
+                    } else {
+                        echo "✅ Producto creado: " . $p->name . " (Sin stock inicial)<br>";
+                    }
+                    
+                    $success_count++;
+                } else {
+                    throw new Exception("No se pudo obtener el ID del producto creado");
+                }
             } else {
-                $errors[] = "Error al crear el producto: " . $product->name;
+                throw new Exception("Error al crear el producto en la base de datos");
             }
+        } catch(Exception $e) {
+            $error_count++;
+            $errors[] = "Error al crear producto: " . $p->name . " - " . $e->getMessage();
+            echo "❌ Error al crear producto: " . $p->name . " - " . $e->getMessage() . "<br>";
         }
     }
+}
 
-    // Calcular el tiempo total de ejecución
-    $total_time = microtime(true) - $start_time;
+echo "<h3>Resumen:</h3>";
+echo "Total de productos a crear: " . $total_products . "<br>";
+echo "Productos creados exitosamente: " . $success_count . "<br>";
+echo "Errores: " . $error_count . "<br>";
 
-    // Preparar la respuesta JSON
-    $response = [
-        'success' => true,
-        'total_products' => $created,
-        'total_operations' => $created,
-        'execution_time' => number_format($total_time, 2),
-        'products' => $products,
-        'errors' => $errors
-    ];
+if(count($errors) > 0) {
+    echo "<h4>Detalles de errores:</h4>";
+    foreach($errors as $error) {
+        echo $error . "<br>";
+    }
+}
 
-    // Enviar la respuesta JSON
-    echo json_encode($response);
-} catch (Exception $e) {
-    // En caso de error, devolver un JSON con el error
-    $response = [
-        'success' => false,
-        'error' => $e->getMessage()
-    ];
-    echo json_encode($response);
-} 
+echo "<br><a href='index.php?view=inventary'>Volver al inventario</a>";
+?> 

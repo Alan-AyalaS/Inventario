@@ -1,10 +1,48 @@
+<?php
+// Inicializar variables al principio
+$products = ProductData::getAll();
+$categories = CategoryData::getAll();
+
+// Obtener productos según los filtros
+if(isset($_GET["search"]) && $_GET["search"] != "") {
+	$products = ProductData::getLike($_GET["search"]);
+} else if(isset($_GET["category_id"]) && $_GET["category_id"] != "") {
+	$products = ProductData::getAllByCategoryId($_GET["category_id"]);
+}
+
+// Filtrar por disponibilidad si está seleccionado
+if(isset($_GET["availability"]) && $_GET["availability"] != "") {
+	$filtered_products = [];
+	foreach($products as $product) {
+		$q = OperationData::getQYesF($product->id);
+		switch($_GET["availability"]) {
+			case '0':
+				if($q == 0) $filtered_products[] = $product;
+				break;
+			case '1-10':
+				if($q >= 1 && $q <= 10) $filtered_products[] = $product;
+				break;
+			case '11-50':
+				if($q >= 11 && $q <= 50) $filtered_products[] = $product;
+				break;
+			case '51-100':
+				if($q >= 51 && $q <= 100) $filtered_products[] = $product;
+				break;
+			case '100+':
+				if($q > 100) $filtered_products[] = $product;
+				break;
+		}
+	}
+	$products = $filtered_products;
+}
+?>
 <div class="row">
 	<div class="col-md-12">
 <!-- Single button -->
 
 		<h1><i class="glyphicon glyphicon-stats"></i> Inventario de Productos 
 			<small class="text-muted">
-				(<?php echo count(ProductData::getAll()); ?> productos registrados)
+				(<?php echo count($products); ?> productos registrados)
 			</small>
 		</h1>
 		<?php if(isset($_COOKIE["prdupd"])):?>
@@ -80,7 +118,6 @@
                     <div class="custom-select" id="customCategorySelect">
                         <div class="custom-select__trigger">
                             <?php
-                            $categories = CategoryData::getAll();
                             $selectedCategoryName = 'Todas las categorías';
                             if (isset($_GET["category_id"]) && $_GET["category_id"] != "") {
                                 foreach ($categories as $category) {
@@ -95,46 +132,21 @@
                             <div class="arrow"></div>
                         </div>
                         <div class="custom-options">
-                            <?php
-                            // Primero, preparamos los datos
-                            $options = [];
-                            $options[] = ['value' => '', 'text' => 'Todas las categorías', 'color' => '#6c757d', 'selected' => !isset($_GET["category_id"]) || $_GET["category_id"] == ""];
-                            
-                            foreach($categories as $category) {
-                                $selected = (isset($_GET["category_id"]) && $_GET["category_id"] == $category->id);
-                                $options[] = [
-                                    'value' => $category->id,
-                                    'text' => htmlspecialchars($category->name),
-                                    'color' => '#28a745', // Color por defecto, será actualizado por JavaScript
-                                    'selected' => $selected
-                                ];
-                            }
-                            
-                            // Generar las opciones
-                            foreach($options as $option) {
-                                $selectedClass = $option['selected'] ? 'selected' : '';
-                                printf(
-                                    '<div class="custom-option %s" data-value="%s" data-color="%s">%s</div>',
-                                    $selectedClass,
-                                    $option['value'],
-                                    $option['color'],
-                                    $option['text']
-                                );
-                            }
-                            ?>
+                            <div class="custom-option" data-value="" data-color="#6c757d">Todas las categorías</div>
+                            <?php foreach($categories as $category): ?>
+                                <div class="custom-option" data-value="<?php echo $category->id; ?>" data-color="#28a745">
+                                    <?php echo htmlspecialchars($category->name); ?>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                     <select id="category_id" name="category_id" style="display: none;">
-                        <?php
-                        foreach($options as $option) {
-                            printf(
-                                '<option value="%s"%s>%s</option>',
-                                $option['value'],
-                                $option['selected'] ? ' selected' : '',
-                                $option['text']
-                            );
-                        }
-                        ?>
+                        <option value="">Todas las categorías</option>
+                        <?php foreach($categories as $category): ?>
+                            <option value="<?php echo $category->id; ?>" <?php echo (isset($_GET["category_id"]) && $_GET["category_id"] == $category->id) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($category->name); ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
             </div>
@@ -145,12 +157,12 @@
                         <div class="custom-select__trigger">
                             <?php
                             $availabilityOptions = [
-                                ['value' => '', 'text' => 'Todas las cantidades', 'selected' => !isset($_GET["availability"])],
-                                ['value' => '0', 'text' => 'Sin stock (0)', 'selected' => isset($_GET["availability"]) && $_GET["availability"] === '0'],
-                                ['value' => '1-10', 'text' => 'Stock bajo (1-10)', 'selected' => isset($_GET["availability"]) && $_GET["availability"] === '1-10'],
-                                ['value' => '11-50', 'text' => 'Stock medio (11-50)', 'selected' => isset($_GET["availability"]) && $_GET["availability"] === '11-50'],
-                                ['value' => '51-100', 'text' => 'Stock alto (51-100)', 'selected' => isset($_GET["availability"]) && $_GET["availability"] === '51-100'],
-                                ['value' => '100+', 'text' => 'Stock muy alto (100+)', 'selected' => isset($_GET["availability"]) && $_GET["availability"] === '100+']
+                                ['value' => '', 'text' => 'Todas las cantidades'],
+                                ['value' => '0', 'text' => 'Sin stock (0)'],
+                                ['value' => '1-10', 'text' => 'Stock bajo (1-10)'],
+                                ['value' => '11-50', 'text' => 'Stock medio (11-50)'],
+                                ['value' => '51-100', 'text' => 'Stock alto (51-100)'],
+                                ['value' => '100+', 'text' => 'Stock muy alto (100+)']
                             ];
                             
                             $selectedText = 'Todas las cantidades';
@@ -167,41 +179,25 @@
                             <div class="arrow"></div>
                         </div>
                         <div class="custom-options">
-                            <?php
-                            foreach($availabilityOptions as $option) {
-                                $selectedClass = $option['selected'] ? 'selected' : '';
-                                printf(
-                                    '<div class="custom-option %s" data-value="%s">%s</div>',
-                                    $selectedClass,
-                                    $option['value'],
-                                    $option['text']
-                                );
-                            }
-                            ?>
+                            <?php foreach($availabilityOptions as $option): ?>
+                                <div class="custom-option" data-value="<?php echo $option['value']; ?>">
+                                    <?php echo htmlspecialchars($option['text']); ?>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                     <select id="availability" name="availability" style="display: none;">
-                        <?php
-                        foreach($availabilityOptions as $option) {
-                            printf(
-                                '<option value="%s"%s>%s</option>',
-                                $option['value'],
-                                $option['selected'] ? ' selected' : '',
-                                $option['text']
-                            );
-                        }
-                        ?>
+                        <?php foreach($availabilityOptions as $option): ?>
+                            <option value="<?php echo $option['value']; ?>" <?php echo (isset($_GET["availability"]) && $_GET["availability"] === $option['value']) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($option['text']); ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
             </div>
             <div class="form-group me-2">
                 <label for="search" class="me-2">Buscar:</label>
-                <div class="input-group">
-                    <input type="text" class="form-control" id="search" name="search" value="<?php echo isset($_GET["search"]) ? htmlspecialchars($_GET["search"]) : ''; ?>" placeholder="Buscar productos...">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-search"></i>
-                    </button>
-                </div>
+                <input type="text" name="search" id="search" class="form-control" value="<?php echo isset($_GET["search"]) ? $_GET["search"] : ''; ?>" placeholder="Buscar productos..." oninput="filterProducts()">
             </div>
             <div class="form-group me-2">
                 <label for="date_filter" class="me-2">Fecha:</label>
@@ -216,7 +212,7 @@
             </div>
             <div class="form-group me-2">
                 <label for="limit" class="me-2">Mostrar:</label>
-                <input type="number" name="limit" id="limit" class="form-control" value="<?php echo isset($_GET["limit"]) ? $_GET["limit"] : '10'; ?>" min="1" style="width: 80px;" onchange="this.form.submit()">
+                <input type="number" name="limit" id="limit" class="form-control" value="<?php echo isset($_GET["limit"]) ? $_GET["limit"] : count($products); ?>" min="1" style="width: 80px;" onchange="this.form.submit()">
             </div>
             <button type="submit" class="btn btn-primary" style="display: none;">Aplicar</button>
             <a href="index.php?view=inventary" class="btn btn-secondary" id="clearFiltersBtn" style="display: none;">Limpiar filtros</a>
@@ -330,245 +326,265 @@
 	<div class="card-header">INVENTARIO
 	</div>
 		<div class="card-body">
-
-
-
-
-<?php
-$page = 1;
-if(isset($_GET["page"])){
-	$page=$_GET["page"];
-}
-$limit=10;
-if(isset($_GET["limit"]) && $_GET["limit"]!="" && $_GET["limit"]!=$limit){
-	$limit=$_GET["limit"];
-}
-
-// Imprimir las variables de fecha y categoría para debug
-error_log("Filtro de fecha: " . (isset($_GET['date_filter']) ? $_GET['date_filter'] : 'no establecido'));
-error_log("Filtro de categoría: " . (isset($_GET['category_id']) ? $_GET['category_id'] : 'no establecido'));
-
-// Obtener productos según los filtros
-if(isset($_GET["search"]) && $_GET["search"] != "") {
-	$products = ProductData::getLike($_GET["search"]);
-} else if(isset($_GET["category_id"]) && $_GET["category_id"] != "") {
-	$products = ProductData::getAllByCategoryId($_GET["category_id"]);
-} else {
-	$products = ProductData::getAll();
-}
-
-// Filtrar por disponibilidad si está seleccionado
-if(isset($_GET["availability"]) && $_GET["availability"] != "") {
-	$filtered_products = [];
-	foreach($products as $product) {
-		$q = OperationData::getQYesF($product->id);
-		switch($_GET["availability"]) {
-			case '0':
-				if($q == 0) $filtered_products[] = $product;
-				break;
-			case '1-10':
-				if($q >= 1 && $q <= 10) $filtered_products[] = $product;
-				break;
-			case '11-50':
-				if($q >= 11 && $q <= 50) $filtered_products[] = $product;
-				break;
-			case '51-100':
-				if($q >= 51 && $q <= 100) $filtered_products[] = $product;
-				break;
-			case '100+':
-				if($q > 100) $filtered_products[] = $product;
-				break;
-		}
-	}
-	$products = $filtered_products;
-}
-
-if(count($products)>0){
-	// Calcular el número total de páginas
-	$total_records = count($products);
-	$npaginas = ceil($total_records / $limit);
-
-	// Asegurarse de que la página actual no exceda el número total de páginas
-	if ($page > $npaginas) {
-		$page = $npaginas;
-	}
-
-	// Si hay una categoría seleccionada, mostrar todos los productos
-	if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-		$curr_products = $products;
-		$npaginas = 1;
-		$page = 1;
-	} else {
-		// Obtener los productos para la página actual
-		if ($page == 1) {
-			$curr_products = array_slice($products, 0, $limit);
-		} else {
-			$start_index = ($page - 1) * $limit;
-			$curr_products = array_slice($products, $start_index, $limit);
-		}
-	}
-
-	?>
-
-	<h3>Pagina <?php echo $page." de ".$npaginas; ?></h3>
-<div class="btn-group pull-right">
-<?php
-$px=$page-1;
-if($px>0):
-    // Construir la URL con los parámetros de filtro actuales
-    $url = "index.php?view=inventary&limit=$limit&page=".($px);
-    if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-        $url .= "&category_id=".$_GET['category_id'];
-    }
-    if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-        $url .= "&date_filter=".$_GET['date_filter'];
-    }
-?>
-<a class="btn btn-sm btn-default" href="<?php echo $url; ?>"><i class="glyphicon glyphicon-chevron-left"></i> Atras </a>
-<?php endif; ?>
-
-<?php 
-$px=$page+1;
-if($px<=$npaginas):
-    // Construir la URL con los parámetros de filtro actuales
-    $url = "index.php?view=inventary&limit=$limit&page=".($px);
-    if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-        $url .= "&category_id=".$_GET['category_id'];
-    }
-    if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-        $url .= "&date_filter=".$_GET['date_filter'];
-    }
-?>
-<a class="btn btn-sm btn-default" href="<?php echo $url; ?>">Adelante <i class="glyphicon glyphicon-chevron-right"></i></a>
-<?php endif; ?>
-</div>
-<div class="clearfix"></div>
-<br><table class="table table-bordered table-hover">
-	<thead>
-		<tr>
-			<th style="width: 50px;">
-				<input type="checkbox" id="selectAll" class="form-check-input">
-			</th>
-			<th>Codigo</th>
-			<th>Nombre</th>
-			<th>Categoría</th>
-			<th>Precio de Entrada</th>
-			<th>Precio de Salida</th>
-			<th>Unidad</th>
-			<th>Disponible</th>
-			<th>Minima en Inventario</th>
-			<th style="width: 130px;">Acciones</th>
-		</tr>
-	</thead>
-	<tbody>
-		<?php foreach($curr_products as $product):
-		$q=OperationData::getQYesF($product->id);
-		?>
-		<tr class="<?php if($q<=$product->inventary_min/2){ echo "danger";}else if($q<=$product->inventary_min){ echo "warning";}?>">
-			<td>
-				<input type="checkbox" class="form-check-input product-checkbox" value="<?php echo $product->id; ?>">
-			</td>
-			<td><?php echo $product->id; ?></td>
-			<td><a href="index.php?view=producthistory&id=<?php echo $product->id; ?>" style="text-decoration: none; color: inherit;"><?php echo $product->name; ?></a></td>
-			<td>
-				<?php 
-				$categoryColor = '#6c757d'; // Color por defecto
-				$categoryName = 'Sin categoría';
-				
-				if (!empty($product->category_id)) {
-					$categoryColor = isset($_COOKIE['category_color_' . $product->category_id]) 
-						? $_COOKIE['category_color_' . $product->category_id] 
-						: '#6c757d';
-					
-					// Obtener el nombre de la categoría
-					$category = CategoryData::getById($product->category_id);
-					if ($category) {
-						$categoryName = $category->name;
-					}
-				}
-				?>
-				<span class="badge" style="background-color: <?php echo $categoryColor; ?>; color: white; padding: 5px 10px; border-radius: 4px;" data-category-id="<?php echo $product->category_id; ?>">
-					<?php echo htmlspecialchars($categoryName); ?>
-				</span>
-			</td>
-			<td><?php echo $product->price_in; ?></td>
-			<td><?php echo $product->price_out; ?></td>
-			<td><?php echo $product->unit; ?></td>
-			<td>
-				<?php 
-				$available = OperationData::getQYesF($product->id);
-				$min_q = $product->inventary_min;
-				// Calcular qué tan cerca está del mínimo (100% = en el mínimo, 0% = muy por encima)
-				$color = '#28a745'; // Verde por defecto
-				
-				if ($available <= 0) {
-					// Si no hay inventario disponible, mostrar en rojo
-					$color = '#dc3545';
+			<?php
+			// Verificar si hay filtros activos (excluyendo el campo "Mostrar")
+			$has_filters = false;
+			
+			// Verificar búsqueda
+			if(isset($_GET["search"]) && $_GET["search"] != "") {
+				$has_filters = true;
+			}
+			
+			// Verificar categoría (solo si no es "Todas las categorías")
+			if(isset($_GET["category_id"]) && $_GET["category_id"] != "") {
+				$has_filters = true;
+			}
+			
+			// Verificar disponibilidad
+			if(isset($_GET["availability"]) && $_GET["availability"] != "") {
+				$has_filters = true;
+			}
+			
+			// Verificar fecha
+			if(isset($_GET["date_filter"]) && $_GET["date_filter"] != "") {
+				$has_filters = true;
+			}
+			
+			// Verificar si el único parámetro es el campo "Mostrar"
+			$only_limit = count($_GET) == 2 && isset($_GET["view"]) && isset($_GET["limit"]);
+			
+			// Verificar si se seleccionó "Todas las categorías"
+			$all_categories = isset($_GET["category_id"]) && $_GET["category_id"] == "";
+			
+			// Determinar si se debe mostrar la alerta
+			$show_alert = $has_filters && !$only_limit && !$all_categories;
+			
+			// Si se seleccionó "Todas las categorías", no mostrar la alerta
+			if ($all_categories) {
+				$show_alert = false;
+			}
+			?>
+			<div id="filterAlert" class="alert alert-info" <?php echo $show_alert ? '' : 'style="display: none;"'; ?>>
+				<?php
+				$total_products = count($products);
+				if(isset($_GET["search"]) && $_GET["search"] != "") {
+					echo "Mostrando $total_products productos que coinciden con la búsqueda";
+				} else if(isset($_GET["category_id"]) && $_GET["category_id"] != "") {
+					echo "Mostrando $total_products productos de la categoría seleccionada";
+				} else if(isset($_GET["availability"]) && $_GET["availability"] != "") {
+					echo "Mostrando $total_products productos con la disponibilidad seleccionada";
+				} else if(isset($_GET["date_filter"]) && $_GET["date_filter"] != "") {
+					echo "Mostrando $total_products productos del período seleccionado";
 				} else {
-					$percentage = ($min_q / $available) * 100;
-					
-					// Determinar el color según el porcentaje
-					if($percentage >= 80) {
-						$color = '#dc3545'; // Rojo si está muy cerca del mínimo (80% o más)
-					} else if($percentage >= 60) {
-						$color = '#fd7e14'; // Naranja si está cerca del mínimo (60-80%)
-					} else if($percentage >= 40) {
-						$color = '#ffc107'; // Amarillo si está moderadamente cerca (40-60%)
+					echo "Mostrando todos los $total_products productos";
+				}
+				?>
+			</div>
+
+			<?php
+			$page = 1;
+			if(isset($_GET["page"])){
+				$page=$_GET["page"];
+			}
+			$limit=count($products);
+			if(isset($_GET["limit"]) && $_GET["limit"]!="" && $_GET["limit"]!=$limit){
+				$limit=$_GET["limit"];
+			}
+			// Asegurar que el límite nunca sea 0
+			if($limit <= 0) {
+				$limit = count($products);
+			}
+
+			// Imprimir las variables de fecha y categoría para debug
+			error_log("Filtro de fecha: " . (isset($_GET['date_filter']) ? $_GET['date_filter'] : 'no establecido'));
+			error_log("Filtro de categoría: " . (isset($_GET['category_id']) ? $_GET['category_id'] : 'no establecido'));
+
+			if(count($products)>0){
+				// Calcular el número total de páginas
+				$total_records = count($products);
+				$npaginas = ceil($total_records / $limit);
+
+				// Asegurarse de que la página actual no exceda el número total de páginas
+				if ($page > $npaginas) {
+					$page = $npaginas;
+				}
+
+				// Si hay una categoría seleccionada, mostrar todos los productos
+				if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
+					$curr_products = $products;
+					$npaginas = 1;
+					$page = 1;
+				} else {
+					// Obtener los productos para la página actual
+					if ($page == 1) {
+						$curr_products = array_slice($products, 0, $limit);
+					} else {
+						$start_index = ($page - 1) * $limit;
+						$curr_products = array_slice($products, $start_index, $limit);
 					}
 				}
-				
-				// Aplicar el estilo con el color calculado
-				echo "<span style='background-color: $color; color: white; padding: 5px 10px; border-radius: 5px;'>$available</span>";
+
 				?>
-			</td>
-			<td><?php echo $product->inventary_min; ?></td>
-			<td>
-				<button type="button" class="btn btn-sm btn-success" onclick="showAdjustModal(<?php echo $product->id; ?>, 'add')">
-					<i class="bi bi-plus-circle"></i>
-				</button>
-				<button type="button" class="btn btn-sm btn-danger" onclick="showAdjustModal(<?php echo $product->id; ?>, 'subtract')">
-					<i class="bi bi-dash-circle"></i>
-				</button>
-				<a href="index.php?view=editproduct&id=<?php echo $product->id; ?>" class="btn btn-sm btn-warning">
-					<i class="bi bi-pencil"></i>
-				</a>
-				<button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal(<?php echo $product->id; ?>, '<?php echo addslashes($product->name); ?>')">
-					<i class="bi bi-trash"></i>
-				</button>
-			</td>
-		</tr>
-		<?php endforeach;?>
-	</tbody>
-</table>
-<div class="btn-group pull-right">
-<?php
-for($i=0;$i<$npaginas;$i++){
-    // Construir la URL con los parámetros de filtro actuales
-    $url = "index.php?view=inventary&limit=$limit&page=".($i+1);
-    if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-        $url .= "&category_id=".$_GET['category_id'];
-    }
-    if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-        $url .= "&date_filter=".$_GET['date_filter'];
-    }
-    
-    $active_class = ($page == ($i+1)) ? 'btn-primary' : 'btn-default';
-    echo "<a href='$url' class='btn $active_class btn-sm'>".($i+1)."</a> ";
-}
-?>
-</div>
 
-	<?php
-}else{
-	?>
-	<div class="jumbotron">
-		<h2>No hay productos</h2>
-		<p>No se han agregado productos a la base de datos, puedes agregar uno dando click en el boton <b>"Agregar Producto"</b>.</p>
-	</div>
-	<?php
-}
+				<h3>Pagina <?php echo $page." de ".$npaginas; ?></h3>
+			<div class="btn-group pull-right">
+			<?php
+			$px=$page-1;
+			if($px>0):
+			    // Construir la URL con los parámetros de filtro actuales
+			    $url = "index.php?view=inventary&limit=$limit&page=".($px);
+			    if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
+			        $url .= "&category_id=".$_GET['category_id'];
+			    }
+			    if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
+			        $url .= "&date_filter=".$_GET['date_filter'];
+			    }
+			?>
+			<a class="btn btn-sm btn-default" href="<?php echo $url; ?>"><i class="glyphicon glyphicon-chevron-left"></i> Atras </a>
+			<?php endif; ?>
 
-?>
+			<?php 
+			$px=$page+1;
+			if($px<=$npaginas):
+			    // Construir la URL con los parámetros de filtro actuales
+			    $url = "index.php?view=inventary&limit=$limit&page=".($px);
+			    if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
+			        $url .= "&category_id=".$_GET['category_id'];
+			    }
+			    if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
+			        $url .= "&date_filter=".$_GET['date_filter'];
+			    }
+			?>
+			<a class="btn btn-sm btn-default" href="<?php echo $url; ?>">Adelante <i class="glyphicon glyphicon-chevron-right"></i></a>
+			<?php endif; ?>
+			</div>
+			<div class="clearfix"></div>
+			<br><table class="table table-bordered table-hover">
+				<thead>
+					<tr>
+						<th style="width: 50px;">
+							<input type="checkbox" id="selectAll" class="form-check-input">
+						</th>
+						<th>Codigo</th>
+						<th>Nombre</th>
+						<th>Categoría</th>
+						<th>Precio de Entrada</th>
+						<th>Precio de Salida</th>
+						<th>Unidad</th>
+						<th>Disponible</th>
+						<th>Minima en Inventario</th>
+						<th style="width: 130px;">Acciones</th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach($curr_products as $product):
+					$q=OperationData::getQYesF($product->id);
+					?>
+					<tr class="<?php if($q<=$product->inventary_min/2){ echo "danger";}else if($q<=$product->inventary_min){ echo "warning";}?>">
+						<td>
+							<input type="checkbox" class="form-check-input product-checkbox" value="<?php echo $product->id; ?>">
+						</td>
+						<td><?php echo $product->id; ?></td>
+						<td><a href="index.php?view=producthistory&id=<?php echo $product->id; ?>" style="text-decoration: none; color: inherit;"><?php echo $product->name; ?></a></td>
+						<td>
+							<?php 
+							$categoryColor = '#6c757d'; // Color por defecto
+							$categoryName = 'Sin categoría';
+							
+							if (!empty($product->category_id)) {
+								$categoryColor = isset($_COOKIE['category_color_' . $product->category_id]) 
+									? $_COOKIE['category_color_' . $product->category_id] 
+									: '#6c757d';
+								
+								// Obtener el nombre de la categoría
+								$category = CategoryData::getById($product->category_id);
+								if ($category) {
+									$categoryName = $category->name;
+								}
+							}
+							?>
+							<span class="badge" style="background-color: <?php echo $categoryColor; ?>; color: white; padding: 5px 10px; border-radius: 4px;" data-category-id="<?php echo $product->category_id; ?>">
+								<?php echo htmlspecialchars($categoryName); ?>
+							</span>
+						</td>
+						<td><?php echo $product->price_in; ?></td>
+						<td><?php echo $product->price_out; ?></td>
+						<td><?php echo $product->unit; ?></td>
+						<td>
+							<?php 
+							$available = OperationData::getQYesF($product->id);
+							$min_q = $product->inventary_min;
+							// Calcular qué tan cerca está del mínimo (100% = en el mínimo, 0% = muy por encima)
+							$color = '#28a745'; // Verde por defecto
+							
+							if ($available <= 0) {
+								// Si no hay inventario disponible, mostrar en rojo
+								$color = '#dc3545';
+							} else {
+								$percentage = ($min_q / $available) * 100;
+								
+								// Determinar el color según el porcentaje
+								if($percentage >= 80) {
+									$color = '#dc3545'; // Rojo si está muy cerca del mínimo (80% o más)
+								} else if($percentage >= 60) {
+									$color = '#fd7e14'; // Naranja si está cerca del mínimo (60-80%)
+								} else if($percentage >= 40) {
+									$color = '#ffc107'; // Amarillo si está moderadamente cerca (40-60%)
+								}
+							}
+							
+							// Aplicar el estilo con el color calculado
+							echo "<span style='background-color: $color; color: white; padding: 5px 10px; border-radius: 5px;'>$available</span>";
+							?>
+						</td>
+						<td><?php echo $product->inventary_min; ?></td>
+						<td>
+							<button type="button" class="btn btn-sm btn-success" onclick="showAdjustModal(<?php echo $product->id; ?>, 'add')">
+								<i class="bi bi-plus-circle"></i>
+							</button>
+							<button type="button" class="btn btn-sm btn-danger" onclick="showAdjustModal(<?php echo $product->id; ?>, 'subtract')">
+								<i class="bi bi-dash-circle"></i>
+							</button>
+							<a href="index.php?view=editproduct&id=<?php echo $product->id; ?>" class="btn btn-sm btn-warning">
+								<i class="bi bi-pencil"></i>
+							</a>
+							<button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal(<?php echo $product->id; ?>, '<?php echo addslashes($product->name); ?>')">
+								<i class="bi bi-trash"></i>
+							</button>
+						</td>
+					</tr>
+					<?php endforeach;?>
+				</tbody>
+			</table>
+			<div class="btn-group pull-right">
+			<?php
+			for($i=0;$i<$npaginas;$i++){
+			    // Construir la URL con los parámetros de filtro actuales
+			    $url = "index.php?view=inventary&limit=$limit&page=".($i+1);
+			    if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
+			        $url .= "&category_id=".$_GET['category_id'];
+			    }
+			    if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
+			        $url .= "&date_filter=".$_GET['date_filter'];
+			    }
+			    
+			    $active_class = ($page == ($i+1)) ? 'btn-primary' : 'btn-default';
+			    echo "<a href='$url' class='btn $active_class btn-sm'>".($i+1)."</a> ";
+			}
+			?>
+			</div>
+
+				<?php
+			}else{
+				?>
+				<div class="jumbotron">
+					<h2>No hay productos</h2>
+					<p>No se han agregado productos a la base de datos, puedes agregar uno dando click en el boton <b>"Agregar Producto"</b>.</p>
+				</div>
+				<?php
+			}
+
+			?>
 		</div>
 </div>
 	</div>
@@ -1035,21 +1051,15 @@ function filterByAvailability(product, availability) {
     }
 }
 
-// Modificar la función de filtrado para incluir la disponibilidad
+// Modificar la función de filtrado para incluir la actualización de la alerta
 function filterProducts() {
     const searchTerm = document.getElementById('search').value.toLowerCase();
     const categoryId = document.getElementById('category_id').value;
     const availability = document.getElementById('availability').value;
     const dateFilter = document.getElementById('date_filter').value;
-    const limit = document.getElementById('limit').value;
     const products = document.querySelectorAll('tbody tr');
     const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-    
-    console.log('=== INICIO DE FILTRADO ===');
-    console.log('Parámetros de filtro:');
-    console.log('- Categoría seleccionada:', categoryId);
-    console.log('- Límite:', limit);
-    console.log('- Total de productos en la tabla:', products.length);
+    const filterAlert = document.getElementById('filterAlert');
     
     // Mostrar u ocultar el botón de limpiar filtros
     if (searchTerm || categoryId || availability || dateFilter) {
@@ -1059,7 +1069,6 @@ function filterProducts() {
     }
     
     let visibleCount = 0;
-    let categoryMatchCount = 0;
     
     // Primero, mostrar todos los productos para poder filtrarlos
     products.forEach(product => {
@@ -1067,32 +1076,14 @@ function filterProducts() {
     });
     
     // Luego, aplicar los filtros
-    products.forEach((product, index) => {
+    products.forEach(product => {
         const name = product.querySelector('td:nth-child(3)').textContent.toLowerCase();
         const categoryCell = product.querySelector('td:nth-child(4)');
         const badge = categoryCell.querySelector('.badge');
         const productCategoryId = badge ? badge.getAttribute('data-category-id') : '';
         const date = product.querySelector('td:nth-child(9)').textContent;
         const matchesSearch = name.includes(searchTerm);
-        
-        // Debug logs detallados
-        console.log(`=== Producto ${index + 1} ===`);
-        console.log('Nombre:', name);
-        console.log('ID Categoría del producto:', productCategoryId);
-        console.log('ID Categoría seleccionada:', categoryId);
-        console.log('Tipo de dato productCategoryId:', typeof productCategoryId);
-        console.log('Tipo de dato categoryId:', typeof categoryId);
-        
-        // Verificar si la categoría coincide
         const matchesCategory = !categoryId || productCategoryId === categoryId;
-        
-        if (matchesCategory) {
-            categoryMatchCount++;
-        }
-        
-        console.log('¿Coincide categoría?:', matchesCategory);
-        console.log('================');
-        
         const matchesAvailability = filterByAvailability(product, availability);
         const matchesDate = !dateFilter || date === dateFilter;
         
@@ -1104,51 +1095,21 @@ function filterProducts() {
         }
     });
     
-    // Debug: Mostrar estadísticas
-    console.log('=== ESTADÍSTICAS DE FILTRADO ===');
-    console.log('Total de productos:', products.length);
-    console.log('Productos que coinciden con la categoría:', categoryMatchCount);
-    console.log('Productos visibles después del filtrado:', visibleCount);
-    
-    // Actualizar la URL con los parámetros de filtro
-    const params = new URLSearchParams(window.location.search);
-    params.set('view', 'inventary');
-    if (searchTerm) params.set('search', searchTerm);
-    if (categoryId) params.set('category_id', categoryId);
-    if (availability) params.set('availability', availability);
-    if (dateFilter) params.set('date_filter', dateFilter);
-    if (limit) params.set('limit', limit);
-    
-    // Mantener la URL limpia si no hay filtros
-    if (!searchTerm && !categoryId && !availability && !dateFilter) {
-        window.history.replaceState({}, '', 'index.php?view=inventary');
-    } else {
-        window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
-    }
-    
-    // Si hay una categoría seleccionada, actualizar el límite para mostrar todos los productos
-    if (categoryId) {
-        console.log('Actualizando límite para categoría:', categoryId);
-        console.log('Productos visibles:', visibleCount);
-        document.getElementById('limit').value = visibleCount;
-        // Ocultar la paginación cuando se filtra por categoría
-        const pagination = document.querySelector('.btn-group.pull-right');
-        if (pagination) {
-            pagination.style.display = 'none';
-            console.log('Paginación ocultada');
+    // Actualizar la alerta de filtrado
+    if (filterAlert) {
+        filterAlert.style.display = 'block';
+        if (searchTerm) {
+            filterAlert.textContent = `Mostrando ${visibleCount} productos que coinciden con la búsqueda`;
+        } else if (categoryId) {
+            filterAlert.textContent = `Mostrando ${visibleCount} productos de la categoría seleccionada`;
+        } else if (availability) {
+            filterAlert.textContent = `Mostrando ${visibleCount} productos con la disponibilidad seleccionada`;
+        } else if (dateFilter) {
+            filterAlert.textContent = `Mostrando ${visibleCount} productos del período seleccionado`;
+        } else {
+            filterAlert.textContent = `Mostrando todos los ${visibleCount} productos`;
         }
-    } else {
-        // Mostrar la paginación cuando no hay filtro de categoría
-        const pagination = document.querySelector('.btn-group.pull-right');
-        if (pagination) {
-            pagination.style.display = '';
-            console.log('Paginación mostrada');
-        }
-        // Restaurar el límite por defecto
-        document.getElementById('limit').value = '10';
     }
-    
-    console.log('=== FIN DE FILTRADO ===');
 }
 
 // Función para crear productos de prueba

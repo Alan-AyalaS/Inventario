@@ -395,9 +395,20 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
 				$limit = count($products);
 			}
 
-			// Imprimir las variables de fecha y categoría para debug
-			error_log("Filtro de fecha: " . (isset($_GET['date_filter']) ? $_GET['date_filter'] : 'no establecido'));
-			error_log("Filtro de categoría: " . (isset($_GET['category_id']) ? $_GET['category_id'] : 'no establecido'));
+			// Verificar si el límite es diferente al total de productos
+			$total_products = count($products);
+			$is_full_list = ($limit == $total_products);
+
+			// Si el límite es diferente al total y hay filtros, aplicar filtros en el servidor
+			if (!$is_full_list && (isset($_GET['category_id']) || isset($_GET['search']) || isset($_GET['availability']) || isset($_GET['date_filter']))) {
+				$curr_products = $products;
+				$npaginas = 1;
+				$page = 1;
+			} else {
+				// Obtener los productos para la página actual
+				$start_index = ($page - 1) * $limit;
+				$curr_products = array_slice($products, $start_index, $limit);
+			}
 
 			if(count($products)>0){
 				// Calcular el número total de páginas
@@ -407,21 +418,6 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
 				// Asegurarse de que la página actual no exceda el número total de páginas
 				if ($page > $npaginas) {
 					$page = $npaginas;
-				}
-
-				// Si hay una categoría seleccionada, mostrar todos los productos
-				if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-					$curr_products = $products;
-					$npaginas = 1;
-					$page = 1;
-				} else {
-					// Obtener los productos para la página actual
-					if ($page == 1) {
-						$curr_products = array_slice($products, 0, $limit);
-					} else {
-						$start_index = ($page - 1) * $limit;
-						$curr_products = array_slice($products, $start_index, $limit);
-					}
 				}
 
 				?>
@@ -1057,9 +1053,26 @@ function filterProducts() {
     const categoryId = document.getElementById('category_id').value;
     const availability = document.getElementById('availability').value;
     const dateFilter = document.getElementById('date_filter').value;
+    const limit = document.getElementById('limit').value;
+    const totalProducts = document.querySelectorAll('tbody tr').length;
     const products = document.querySelectorAll('tbody tr');
     const clearFiltersBtn = document.getElementById('clearFiltersBtn');
     const filterAlert = document.getElementById('filterAlert');
+    
+    // Verificar si el límite es igual al total de productos
+    const isFullList = (parseInt(limit) === totalProducts);
+    
+    // Si no es la lista completa, redirigir al servidor
+    if (!isFullList) {
+        let url = 'index.php?view=inventary';
+        if (searchTerm) url += '&search=' + encodeURIComponent(searchTerm);
+        if (categoryId) url += '&category_id=' + encodeURIComponent(categoryId);
+        if (availability) url += '&availability=' + encodeURIComponent(availability);
+        if (dateFilter) url += '&date_filter=' + encodeURIComponent(dateFilter);
+        if (limit) url += '&limit=' + encodeURIComponent(limit);
+        window.location.href = url;
+        return;
+    }
     
     // Mostrar u ocultar el botón de limpiar filtros
     if (searchTerm || categoryId || availability || dateFilter) {

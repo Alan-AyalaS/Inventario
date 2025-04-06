@@ -192,7 +192,12 @@
             </div>
             <div class="form-group me-2">
                 <label for="search" class="me-2">Buscar:</label>
-                <input type="text" class="form-control" id="search" name="search" value="<?php echo isset($_GET["search"]) ? htmlspecialchars($_GET["search"]) : ''; ?>" placeholder="Buscar productos...">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="search" name="search" value="<?php echo isset($_GET["search"]) ? htmlspecialchars($_GET["search"]) : ''; ?>" placeholder="Buscar productos...">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
             </div>
             <div class="form-group me-2">
                 <label for="date_filter" class="me-2">Fecha:</label>
@@ -339,41 +344,39 @@ if(isset($_GET["limit"]) && $_GET["limit"]!="" && $_GET["limit"]!=$limit){
 error_log("Filtro de fecha: " . (isset($_GET['date_filter']) ? $_GET['date_filter'] : 'no establecido'));
 error_log("Filtro de categoría: " . (isset($_GET['category_id']) ? $_GET['category_id'] : 'no establecido'));
 
-// Verificar si tenemos filtro de categoría
-if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-	$category_id = intval($_GET['category_id']);
-	$products = ProductData::getAllByCategoryId($category_id);
-	// Si hay categoría seleccionada, establecer un límite alto para mostrar todos los productos
-	$limit = 1000;
-	error_log("Productos recuperados con filtro de categoría: " . count($products));
-} 
-// Si solo tenemos filtro de fecha
-else if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-	switch($_GET['date_filter']) {
-		case 'this_week':
-			$products = ProductData::getThisWeek();
-			break;
-		case 'this_month':
-			$products = ProductData::getThisMonth();
-			break;
-		case 'last_3_months':
-			$products = ProductData::getLast3Months();
-			break;
-		case 'last_6_months':
-			$products = ProductData::getLast6Months();
-			break;
-		case 'this_year':
-			$products = ProductData::getThisYear();
-			break;
-		default:
-			$products = ProductData::getAll();
-	}
-	error_log("Productos recuperados con filtro de fecha: " . count($products));
-}
-// Sin filtros
-else {
+// Obtener productos según los filtros
+if(isset($_GET["search"]) && $_GET["search"] != "") {
+	$products = ProductData::getLike($_GET["search"]);
+} else if(isset($_GET["category_id"]) && $_GET["category_id"] != "") {
+	$products = ProductData::getAllByCategoryId($_GET["category_id"]);
+} else {
 	$products = ProductData::getAll();
-	error_log("Productos recuperados sin filtros: " . count($products));
+}
+
+// Filtrar por disponibilidad si está seleccionado
+if(isset($_GET["availability"]) && $_GET["availability"] != "") {
+	$filtered_products = [];
+	foreach($products as $product) {
+		$q = OperationData::getQYesF($product->id);
+		switch($_GET["availability"]) {
+			case '0':
+				if($q == 0) $filtered_products[] = $product;
+				break;
+			case '1-10':
+				if($q >= 1 && $q <= 10) $filtered_products[] = $product;
+				break;
+			case '11-50':
+				if($q >= 11 && $q <= 50) $filtered_products[] = $product;
+				break;
+			case '51-100':
+				if($q >= 51 && $q <= 100) $filtered_products[] = $product;
+				break;
+			case '100+':
+				if($q > 100) $filtered_products[] = $product;
+				break;
+		}
+	}
+	$products = $filtered_products;
 }
 
 if(count($products)>0){
@@ -1273,6 +1276,51 @@ if (getCookie('productCreated') === 'true') {
     document.cookie = "productName=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     document.cookie = "productCategory=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 }
+
+// Función para mostrar/ocultar el botón de limpiar filtros
+function updateClearFiltersButton() {
+    const searchInput = document.getElementById('search');
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+    const categorySelect = document.getElementById('category_id');
+    const availabilitySelect = document.getElementById('availability');
+    const dateFilter = document.getElementById('date_filter');
+    
+    // Mostrar el botón si hay algún filtro activo
+    if (searchInput.value.trim() !== '' || 
+        categorySelect.value !== '' || 
+        availabilitySelect.value !== '' || 
+        dateFilter.value !== '') {
+        clearFiltersBtn.style.display = '';
+    } else {
+        clearFiltersBtn.style.display = 'none';
+    }
+}
+
+// Agregar evento al campo de búsqueda
+document.getElementById('search').addEventListener('input', updateClearFiltersButton);
+
+// Agregar eventos a los otros filtros
+document.getElementById('category_id').addEventListener('change', updateClearFiltersButton);
+document.getElementById('availability').addEventListener('change', updateClearFiltersButton);
+document.getElementById('date_filter').addEventListener('change', updateClearFiltersButton);
+
+// Función para limpiar todos los filtros excepto "mostrar"
+function clearFilters() {
+    const limitValue = document.getElementById('limit').value;
+    // Redirigir a la página base con solo el parámetro de límite
+    window.location.href = `index.php?view=inventary&limit=${limitValue}`;
+}
+
+// Asignar la función al botón de limpiar filtros
+document.getElementById('clearFiltersBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    clearFilters();
+});
+
+// Verificar si hay filtros activos al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    updateClearFiltersButton();
+});
 </script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">

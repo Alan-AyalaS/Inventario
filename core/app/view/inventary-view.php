@@ -68,7 +68,7 @@
 <!-- Filtros -->
 <div class="row">
     <div class="col-md-12">
-        <form method="get" action="" class="form-inline d-flex align-items-end">
+        <form method="get" action="index.php" class="form-inline d-flex align-items-end">
             <input type="hidden" name="view" value="inventary">
             <div class="form-group me-2">
                 <label for="category_id" class="me-2">Categoría:</label>
@@ -207,8 +207,9 @@
             </div>
             <div class="form-group me-2">
                 <label for="limit" class="me-2">Mostrar:</label>
-                <input type="number" name="limit" id="limit" class="form-control" value="<?php echo isset($_GET["limit"]) ? $_GET["limit"] : '10'; ?>" min="1" style="width: 80px;">
+                <input type="number" name="limit" id="limit" class="form-control" value="<?php echo isset($_GET["limit"]) ? $_GET["limit"] : '10'; ?>" min="1" style="width: 80px;" onchange="this.form.submit()">
             </div>
+            <button type="submit" class="btn btn-primary" style="display: none;">Aplicar</button>
             <a href="index.php?view=inventary" class="btn btn-secondary" id="clearFiltersBtn" style="display: none;">Limpiar filtros</a>
         </form>
     </div>

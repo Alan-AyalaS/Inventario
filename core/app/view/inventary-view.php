@@ -196,7 +196,12 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
             </div>
             <div class="form-group me-2">
                 <label for="search" class="me-2">Buscar:</label>
-                <input type="text" name="search" id="search" class="form-control" value="<?php echo isset($_GET["search"]) ? $_GET["search"] : ''; ?>" placeholder="Buscar productos..." oninput="filterProducts()">
+                <div class="input-group">
+                    <input type="text" name="search" id="search" class="form-control" value="<?php echo isset($_GET["search"]) ? $_GET["search"] : ''; ?>" placeholder="Buscar productos...">
+                    <button class="btn btn-primary" type="button" id="searchBtn">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
             </div>
             <div class="form-group me-2">
                 <label for="date_filter" class="me-2">Fecha:</label>
@@ -209,9 +214,13 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                     <option value="this_year" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_year"){ echo "selected"; } ?>>Este año</option>
                 </select>
             </div>
-            <div class="form-group me-2">
-                <label for="limit" class="me-2">Mostrar:</label>
-                <input type="number" name="limit" id="limit" class="form-control" min="1" max="<?php echo count($products); ?>" value="<?php echo isset($_GET["limit"]) ? $_GET["limit"] : 100; ?>" onchange="updateLimit(this.value)">
+            <div class="col-md-1">
+                <div class="input-group">
+                    <input type="number" class="form-control" id="limit" name="limit" min="1" value="<?php echo isset($_GET['limit']) ? $_GET['limit'] : 100; ?>" style="width: 80px;">
+                    <button class="btn btn-primary" type="button" onclick="applyLimitFilter()">
+                        <i class="bi bi-filter"></i>
+                    </button>
+                </div>
             </div>
             <button type="button" class="btn btn-secondary" id="clearFiltersBtn" style="display: none;" onclick="clearFilters()">Limpiar filtros</button>
         </div>
@@ -589,9 +598,10 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
 // Variable global para almacenar el mensaje de la operación
 let lastOperationMessage = '';
 
-// Almacenar todos los productos en una variable global
+// Variables globales para los datos
 let allProducts = <?php echo json_encode($products); ?>;
-let currentProducts = allProducts;
+let categoriesData = <?php echo json_encode($categories); ?>;
+let filteredProducts = [...allProducts];
 
 function showAdjustModal(productId, operationType) {
     document.getElementById('productId').value = productId;
@@ -887,96 +897,18 @@ window.addEventListener('load', function() {
     // ... (mantener el resto del código de inicialización)
 });
 
-// Función para actualizar el color del select según la categoría seleccionada
-const updateCategoryColor = (() => {
-    let timeoutId;
-    
-    return (select) => {
-        if (!select || !(select instanceof HTMLSelectElement)) return;
-        
-        // Cancelar cualquier actualización pendiente
-        if (timeoutId) clearTimeout(timeoutId);
-        
-        timeoutId = setTimeout(() => {
-            const selectedOption = select.options[select.selectedIndex];
-            const categoryId = selectedOption.value;
-            
-            // Obtener el color de localStorage o usar el color por defecto
-            const color = categoryId ? 
-                localStorage.getItem('category_color_' + categoryId) || '#28a745' : 
-                '#6c757d';
-            
-            // Actualizar el borde del select personalizado
-            const customSelect = document.querySelector('.custom-select');
-            if (customSelect) {
-                customSelect.style.borderColor = color;
-            }
-            
-            // Actualizar los colores de las opciones
-            document.querySelectorAll('.custom-option').forEach(option => {
-                const optionCategoryId = option.dataset.value;
-                if (optionCategoryId) {
-                    const optionColor = localStorage.getItem('category_color_' + optionCategoryId) || '#28a745';
-                    option.style.setProperty('--hover-color', optionColor);
-                    option.style.backgroundColor = optionCategoryId === categoryId ? optionColor : 'white';
-                    option.style.color = optionCategoryId === categoryId ? 'white' : '#000';
-                }
-            });
-        }, 0);
-    };
-})();
-
-// Inicializar el select personalizado de disponibilidad
-window.addEventListener('load', function() {
-    const customAvailabilitySelect = document.querySelector('#customAvailabilitySelect');
-    const customAvailabilityTrigger = customAvailabilitySelect.querySelector('.custom-select__trigger');
-    const customAvailabilityOptions = customAvailabilitySelect.querySelectorAll('.custom-option');
-    const originalAvailabilitySelect = document.getElementById('availability');
-    
-    if (!customAvailabilitySelect || !customAvailabilityTrigger || !originalAvailabilitySelect) return;
-    
-    // Abrir/cerrar el select
-    customAvailabilityTrigger.addEventListener('click', () => {
-        customAvailabilitySelect.classList.toggle('open');
-    });
-    
-    // Seleccionar una opción
-    customAvailabilityOptions.forEach(option => {
-        option.addEventListener('click', () => {
-            const value = option.dataset.value;
-            const text = option.textContent;
-            
-            // Actualizar el select original
-            originalAvailabilitySelect.value = value;
-            
-            // Actualizar el texto mostrado
-            customAvailabilityTrigger.querySelector('span').textContent = text;
-            
-            // Actualizar las clases selected
-            customAvailabilityOptions.forEach(opt => opt.classList.remove('selected'));
-            option.classList.add('selected');
-            
-            // Cerrar el select
-            customAvailabilitySelect.classList.remove('open');
-            
-            // Disparar el evento change del select original
-            originalAvailabilitySelect.dispatchEvent(new Event('change'));
-            
-            // Filtrar los productos
-            filterProducts();
-        });
-    });
-    
-    // Cerrar el select al hacer clic fuera
-    document.addEventListener('click', (e) => {
-        if (!customAvailabilitySelect.contains(e.target)) {
-            customAvailabilitySelect.classList.remove('open');
-        }
-    });
-});
+// Función para actualizar el color de la categoría
+function updateCategoryColor(select) {
+    const selectedOption = select.options[select.selectedIndex];
+    const color = selectedOption.dataset.color || '#000000';
+    const customSelect = document.querySelector('#customCategorySelect');
+    if (customSelect) {
+        customSelect.style.setProperty('--select-color', color);
+    }
+}
 
 // Inicializar el select personalizado de categoría
-window.addEventListener('load', function() {
+document.addEventListener('DOMContentLoaded', function() {
     const customCategorySelect = document.querySelector('#customCategorySelect');
     const customCategoryTrigger = customCategorySelect.querySelector('.custom-select__trigger');
     const customCategoryOptions = customCategorySelect.querySelectorAll('.custom-option');
@@ -985,13 +917,15 @@ window.addEventListener('load', function() {
     if (!customCategorySelect || !customCategoryTrigger || !originalCategorySelect) return;
     
     // Abrir/cerrar el select
-    customCategoryTrigger.addEventListener('click', () => {
+    customCategoryTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
         customCategorySelect.classList.toggle('open');
     });
     
     // Seleccionar una opción
     customCategoryOptions.forEach(option => {
-        option.addEventListener('click', () => {
+        option.addEventListener('click', (e) => {
+            e.stopPropagation();
             const value = option.dataset.value;
             const text = option.textContent;
             
@@ -1011,8 +945,13 @@ window.addEventListener('load', function() {
             // Actualizar los colores
             updateCategoryColor(originalCategorySelect);
             
-            // Filtrar los productos inmediatamente
-            filterProducts();
+            // Actualizar el botón de limpiar filtros
+            updateClearFiltersButton();
+            
+            // Aplicar el filtro
+            const url = new URL(window.location.href);
+            url.searchParams.set('category_id', value);
+            window.location.href = url.toString();
         });
     });
     
@@ -1022,107 +961,254 @@ window.addEventListener('load', function() {
             customCategorySelect.classList.remove('open');
         }
     });
-    
-    // Inicializar el color
-    updateCategoryColor(originalCategorySelect);
 });
 
-// Función para filtrar productos por disponibilidad
-function filterByAvailability(product, availability) {
-    if (!availability) return true;
+// Inicializar el select personalizado de disponibilidad
+document.addEventListener('DOMContentLoaded', function() {
+    const customAvailabilitySelect = document.querySelector('#customAvailabilitySelect');
+    const customAvailabilityTrigger = customAvailabilitySelect.querySelector('.custom-select__trigger');
+    const customAvailabilityOptions = customAvailabilitySelect.querySelectorAll('.custom-option');
+    const originalAvailabilitySelect = document.getElementById('availability');
     
-    const stock = parseInt(product.querySelector('td:nth-child(8)').textContent);
+    if (!customAvailabilitySelect || !customAvailabilityTrigger || !originalAvailabilitySelect) return;
     
-    switch(availability) {
-        case '0':
-            return stock === 0;
-        case '1-10':
-            return stock >= 1 && stock <= 10;
-        case '11-50':
-            return stock >= 11 && stock <= 50;
-        case '51-100':
-            return stock >= 51 && stock <= 100;
-        case '100+':
-            return stock > 100;
-        default:
-            return true;
+    // Abrir/cerrar el select
+    customAvailabilityTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        customAvailabilitySelect.classList.toggle('open');
+    });
+    
+    // Seleccionar una opción
+    customAvailabilityOptions.forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const value = option.dataset.value;
+            const text = option.textContent;
+            
+            // Actualizar el select original
+            originalAvailabilitySelect.value = value;
+            
+            // Actualizar el texto mostrado
+            customAvailabilityTrigger.querySelector('span').textContent = text;
+            
+            // Actualizar las clases selected
+            customAvailabilityOptions.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            // Cerrar el select
+            customAvailabilitySelect.classList.remove('open');
+            
+            // Actualizar el botón de limpiar filtros
+            updateClearFiltersButton();
+            
+            // Aplicar el filtro
+            const url = new URL(window.location.href);
+            url.searchParams.set('availability', value);
+            window.location.href = url.toString();
+        });
+    });
+    
+    // Cerrar el select al hacer clic fuera
+    document.addEventListener('click', (e) => {
+        if (!customAvailabilitySelect.contains(e.target)) {
+            customAvailabilitySelect.classList.remove('open');
+        }
+    });
+});
+
+// Evento para el botón de búsqueda
+document.getElementById('searchBtn').addEventListener('click', function() {
+    const searchTerm = document.getElementById('search').value;
+    const url = new URL(window.location.href);
+    url.searchParams.set('search', searchTerm);
+    window.location.href = url.toString();
+});
+
+// Evento para aplicar la búsqueda al presionar Enter
+document.getElementById('search').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        const searchTerm = document.getElementById('search').value;
+        const url = new URL(window.location.href);
+        url.searchParams.set('search', searchTerm);
+        window.location.href = url.toString();
     }
+});
+
+// Evento para el input de búsqueda (solo para mostrar/ocultar el botón de limpiar)
+document.getElementById('search').addEventListener('input', function() {
+    updateClearFiltersButton();
+});
+
+// Función para actualizar la visibilidad del botón de limpiar filtros
+function updateClearFiltersButton() {
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+    if (clearFiltersBtn) {
+        const searchTerm = document.getElementById('search').value;
+        const categoryId = document.getElementById('category_id').value;
+        const availability = document.getElementById('availability').value;
+        const dateFilter = document.getElementById('date_filter').value;
+        
+        // Mostrar el botón si hay algún filtro activo
+        clearFiltersBtn.style.display = (searchTerm || categoryId || availability || dateFilter) ? '' : 'none';
+    }
+}
+
+// Función para limpiar filtros
+function clearFilters() {
+    // Ocultar el botón de limpiar filtros
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+    if (clearFiltersBtn) {
+        clearFiltersBtn.style.display = 'none';
+    }
+    
+    // Recargar la página sin filtros
+    const url = new URL(window.location.href);
+    url.searchParams.delete('search');
+    url.searchParams.delete('category_id');
+    url.searchParams.delete('availability');
+    url.searchParams.delete('date_filter');
+    url.searchParams.delete('limit');
+    window.location.href = url.toString();
 }
 
 // Función para filtrar productos
 function filterProducts() {
+    // Obtener valores actuales de los filtros
     const searchTerm = document.getElementById('search').value.toLowerCase();
     const categoryId = document.getElementById('category_id').value;
     const availability = document.getElementById('availability').value;
-    const dateFilter = document.getElementById('date_filter').value;
-    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-    const filterAlert = document.getElementById('filterAlert');
     
-    // Mostrar u ocultar el botón de limpiar filtros
-    if (searchTerm || categoryId || availability || dateFilter) {
-        clearFiltersBtn.style.display = '';
-    } else {
-        clearFiltersBtn.style.display = 'none';
+    // Resetear productos filtrados
+    filteredProducts = [...allProducts];
+    
+    // Aplicar filtros secuencialmente
+    if (searchTerm) {
+        filteredProducts = filteredProducts.filter(product => 
+            product.name.toLowerCase().includes(searchTerm) || 
+            product.id.toString().includes(searchTerm)
+        );
     }
     
-    // Filtrar los productos
-    let filteredProducts = allProducts.filter(product => {
-        const matchesSearch = product.name.toLowerCase().includes(searchTerm);
-        const matchesCategory = !categoryId || product.category_id === categoryId;
-        const matchesAvailability = filterByAvailability(product, availability);
-        const matchesDate = !dateFilter || product.date === dateFilter;
-        
-        return matchesSearch && matchesCategory && matchesAvailability && matchesDate;
-    });
+    if (categoryId) {
+        filteredProducts = filteredProducts.filter(product => 
+            product.category_id == categoryId
+        );
+    }
     
-    // Actualizar la tabla
-    updateTable(filteredProducts);
+    if (availability) {
+        filteredProducts = filteredProducts.filter(product => {
+            const q = parseFloat(product.availability) || 0;
+            switch(availability) {
+                case '0': return q === 0;
+                case '1-10': return q >= 1 && q <= 10;
+                case '11-50': return q >= 11 && q <= 50;
+                case '51-100': return q >= 51 && q <= 100;
+                case '100+': return q > 100;
+                default: return true;
+            }
+        });
+    }
     
-    // Actualizar la alerta de filtrado
-    if (filterAlert) {
-        filterAlert.style.display = 'block';
-        if (searchTerm) {
-            filterAlert.textContent = `Mostrando ${filteredProducts.length} productos que coinciden con la búsqueda`;
-        } else if (categoryId) {
-            filterAlert.textContent = `Mostrando ${filteredProducts.length} productos de la categoría seleccionada`;
-        } else if (availability) {
-            filterAlert.textContent = `Mostrando ${filteredProducts.length} productos con la disponibilidad seleccionada`;
-        } else if (dateFilter) {
-            filterAlert.textContent = `Mostrando ${filteredProducts.length} productos del período seleccionado`;
-        } else {
-            filterAlert.textContent = `Mostrando todos los ${filteredProducts.length} productos`;
-        }
+    // Actualizar la tabla inmediatamente
+    updateTableWithClientData();
+    
+    // Mostrar u ocultar el botón de limpiar filtros
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+    if (clearFiltersBtn) {
+        clearFiltersBtn.style.display = (searchTerm || categoryId || availability) ? '' : 'none';
     }
 }
 
-// Inicializar la tabla con todos los productos al cargar la página
-document.addEventListener('DOMContentLoaded', function() {
-    updateTable(allProducts);
-});
-
-// Función para actualizar la tabla con los productos filtrados
-function updateTable(filteredProducts) {
-    const tbody = document.querySelector('tbody');
-    const limit = parseInt(document.getElementById('limit').value) || 100;
-    const currentPage = parseInt(new URLSearchParams(window.location.search).get('page')) || 1;
+// Función para actualizar la tabla con los datos del cliente
+function updateTableWithClientData() {
+    const tbody = document.querySelector('#inventoryTable tbody');
+    if (!tbody) return;
     
-    // Calcular el número total de páginas
-    const totalPages = Math.ceil(filteredProducts.length / limit);
-    
-    // Asegurar que la página actual no exceda el número total de páginas
-    const page = Math.min(currentPage, totalPages);
-    
-    // Calcular el rango de productos a mostrar
-    const startIndex = (page - 1) * limit;
-    const endIndex = Math.min(startIndex + limit, filteredProducts.length);
-    const productsToShow = filteredProducts.slice(startIndex, endIndex);
-    
-    // Limpiar la tabla
     tbody.innerHTML = '';
-    
-    // Agregar los productos filtrados
-    productsToShow.forEach(product => {
+
+    // Obtener parámetros de paginación
+    const urlParams = new URLSearchParams(window.location.search);
+    const limit = parseInt(urlParams.get('limit')) || 100;
+    const currentPage = parseInt(urlParams.get('page')) || 1;
+
+    // Calcular índices para la paginación
+    const startIndex = (currentPage - 1) * limit;
+    const endIndex = startIndex + limit;
+    const currentProducts = filteredProducts.slice(startIndex, endIndex);
+
+    // Actualizar paginación
+    const totalPages = Math.ceil(filteredProducts.length / limit);
+    const paginationContainer = document.querySelector('.btn-group.pull-right');
+    if (paginationContainer) {
+        let paginationHTML = '';
+        
+        // Botón Atrás
+        if (currentPage > 1) {
+            const prevPage = currentPage - 1;
+            paginationHTML += `<a class="btn btn-sm btn-default" href="index.php?view=inventary&limit=${limit}&page=${prevPage}"><i class="glyphicon glyphicon-chevron-left"></i> Atras </a>`;
+        }
+
+        // Números de página
+        for (let i = 1; i <= totalPages; i++) {
+            const activeClass = i === currentPage ? 'btn-primary' : 'btn-default';
+            paginationHTML += `<a class="btn ${activeClass} btn-sm" href="index.php?view=inventary&limit=${limit}&page=${i}">${i}</a>`;
+        }
+
+        // Botón Adelante
+        if (currentPage < totalPages) {
+            const nextPage = currentPage + 1;
+            paginationHTML += `<a class="btn btn-sm btn-default" href="index.php?view=inventary&limit=${limit}&page=${nextPage}">Adelante <i class="glyphicon glyphicon-chevron-right"></i></a>`;
+        }
+
+        paginationContainer.innerHTML = paginationHTML;
+    }
+
+    // Actualizar texto de página actual
+    const pageInfo = document.querySelector('h3');
+    if (pageInfo) {
+        pageInfo.textContent = `Pagina ${currentPage} de ${totalPages}`;
+    }
+
+    // Actualizar tabla con productos
+    currentProducts.forEach(product => {
         const tr = document.createElement('tr');
+        const q = parseFloat(product.availability) || 0;
+        const minQ = parseFloat(product.inventary_min) || 0;
+        
+        // Determinar clase de la fila según disponibilidad
+        if(q <= minQ/2) {
+            tr.className = 'danger';
+        } else if(q <= minQ) {
+            tr.className = 'warning';
+        }
+
+        // Obtener nombre y color de la categoría
+        let categoryName = 'Sin categoría';
+        let categoryColor = '#6c757d';
+        
+        if (product.category_id) {
+            const category = categoriesData.find(c => c.id == product.category_id);
+            if (category) {
+                categoryName = category.name;
+                categoryColor = localStorage.getItem('category_color_' + category.id) || '#28a745';
+            }
+        }
+
+        // Determinar color de disponibilidad
+        let availabilityColor = '#28a745';
+        if (q <= 0) {
+            availabilityColor = '#dc3545';
+        } else {
+            const percentage = (minQ / q) * 100;
+            if(percentage >= 80) {
+                availabilityColor = '#dc3545';
+            } else if(percentage >= 60) {
+                availabilityColor = '#fd7e14';
+            } else if(percentage >= 40) {
+                availabilityColor = '#ffc107';
+            }
+        }
+
         tr.innerHTML = `
             <td>
                 <input type="checkbox" class="form-check-input product-checkbox" value="${product.id}">
@@ -1130,15 +1216,19 @@ function updateTable(filteredProducts) {
             <td>${product.id}</td>
             <td><a href="index.php?view=producthistory&id=${product.id}" style="text-decoration: none; color: inherit;">${product.name}</a></td>
             <td>
-                <span class="badge" style="background-color: #28a745; color: white; padding: 5px 10px; border-radius: 4px;" data-category-id="${product.category_id}">
-                    ${product.category_name}
+                <span class="badge" style="background-color: ${categoryColor}; color: white; padding: 5px 10px; border-radius: 4px;" data-category-id="${product.category_id || ''}">
+                    ${categoryName}
                 </span>
             </td>
             <td>${product.price_in}</td>
             <td>${product.price_out}</td>
             <td>${product.unit}</td>
-            <td>${product.available}</td>
-            <td>${product.inventary_min}</td>
+            <td>
+                <span style="background-color: ${availabilityColor}; color: white; padding: 5px 10px; border-radius: 5px;">
+                    ${q}
+                </span>
+            </td>
+            <td>${minQ}</td>
             <td>
                 <button type="button" class="btn btn-sm btn-success" onclick="showAdjustModal(${product.id}, 'add')">
                     <i class="bi bi-plus-circle"></i>
@@ -1156,116 +1246,64 @@ function updateTable(filteredProducts) {
         `;
         tbody.appendChild(tr);
     });
-    
-    // Actualizar la paginación
-    updatePagination(filteredProducts.length, page, totalPages);
-}
 
-// Función para actualizar la paginación
-function updatePagination(totalProducts, currentPage, totalPages) {
-    const paginationContainer = document.querySelector('.btn-group.pull-right');
-    if (!paginationContainer) return;
-    
-    // Limpiar la paginación existente
-    paginationContainer.innerHTML = '';
-    
-    // Agregar botón de página anterior
-    if (currentPage > 1) {
-        const prevButton = document.createElement('a');
-        prevButton.className = 'btn btn-sm btn-default';
-        prevButton.href = '#';
-        prevButton.innerHTML = '<i class="glyphicon glyphicon-chevron-left"></i> Atras';
-        prevButton.onclick = (e) => {
-            e.preventDefault();
-            changePage(currentPage - 1);
-        };
-        paginationContainer.appendChild(prevButton);
-    }
-    
-    // Agregar números de página
-    for (let i = 1; i <= totalPages; i++) {
-        const pageButton = document.createElement('a');
-        pageButton.className = `btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-default'}`;
-        pageButton.href = '#';
-        pageButton.textContent = i;
-        pageButton.onclick = (e) => {
-            e.preventDefault();
-            changePage(i);
-        };
-        paginationContainer.appendChild(pageButton);
-    }
-    
-    // Agregar botón de página siguiente
-    if (currentPage < totalPages) {
-        const nextButton = document.createElement('a');
-        nextButton.className = 'btn btn-sm btn-default';
-        nextButton.href = '#';
-        nextButton.innerHTML = 'Adelante <i class="glyphicon glyphicon-chevron-right"></i>';
-        nextButton.onclick = (e) => {
-            e.preventDefault();
-            changePage(currentPage + 1);
-        };
-        paginationContainer.appendChild(nextButton);
-    }
-    
-    // Actualizar el texto de la página actual
-    const pageInfo = document.querySelector('h3');
-    if (pageInfo) {
-        pageInfo.textContent = `Pagina ${currentPage} de ${totalPages}`;
+    // Actualizar alerta de filtrado
+    const filterAlert = document.getElementById('filterAlert');
+    if (filterAlert) {
+        const totalFiltered = filteredProducts.length;
+        let filterMessage = '';
+        
+        if (document.getElementById('search').value) {
+            filterMessage = `Mostrando ${totalFiltered} productos que coinciden con la búsqueda`;
+        } else if (document.getElementById('category_id').value) {
+            const categoryId = document.getElementById('category_id').value;
+            const category = categoriesData.find(c => c.id == categoryId);
+            const categoryName = category ? category.name : 'Todas las categorías';
+            filterMessage = `Mostrando ${totalFiltered} productos de la categoría "${categoryName}"`;
+        } else if (document.getElementById('availability').value) {
+            let availabilityText = '';
+            switch(document.getElementById('availability').value) {
+                case '0': availabilityText = 'Sin stock (0)'; break;
+                case '1-10': availabilityText = 'Stock bajo (1-10)'; break;
+                case '11-50': availabilityText = 'Stock medio (11-50)'; break;
+                case '51-100': availabilityText = 'Stock alto (51-100)'; break;
+                case '100+': availabilityText = 'Stock muy alto (100+)'; break;
+            }
+            filterMessage = `Mostrando ${totalFiltered} productos con ${availabilityText}`;
+        } else {
+            filterMessage = `Mostrando todos los ${totalFiltered} productos`;
+        }
+        
+        filterAlert.style.display = 'block';
+        filterAlert.textContent = filterMessage;
     }
 }
 
-// Función para cambiar de página
-function changePage(newPage) {
+// Inicializar la tabla al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    updateTableWithClientData();
+    updateClearFiltersButton();
+});
+
+// Función para aplicar el filtro de límite
+function applyLimitFilter() {
+    const limit = document.getElementById('limit').value;
     const url = new URL(window.location.href);
-    url.searchParams.set('page', newPage);
-    window.history.pushState({}, '', url);
-    filterProducts();
+    url.searchParams.set('limit', limit);
+    window.location.href = url.toString();
 }
 
-// Función para actualizar el límite de productos mostrados
-function updateLimit(newLimit) {
-    const totalProducts = <?php echo count($products); ?>;
-    const limitInput = document.getElementById('limit');
-    
-    // Asegurar que el valor esté dentro del rango
-    if (newLimit < 1) {
-        newLimit = totalProducts;
-    } else if (newLimit > totalProducts) {
-        newLimit = 1;
+// Evento para el input de límite (solo para mostrar/ocultar el botón de limpiar)
+document.getElementById('limit').addEventListener('input', function() {
+    updateClearFiltersButton();
+});
+
+// Evento para aplicar el filtro al presionar Enter
+document.getElementById('limit').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        applyLimitFilter();
     }
-    
-    // Actualizar el valor del input
-    limitInput.value = newLimit;
-    
-    // Actualizar la URL sin recargar la página
-    const url = new URL(window.location.href);
-    url.searchParams.set('limit', newLimit);
-    url.searchParams.set('page', '1');
-    window.history.pushState({}, '', url);
-    
-    // Aplicar los filtros actuales
-    filterProducts();
-}
-
-// Función para limpiar todos los filtros
-function clearFilters() {
-    // Resetear los valores de los filtros
-    document.getElementById('search').value = '';
-    document.getElementById('category_id').value = '';
-    document.getElementById('availability').value = '';
-    document.getElementById('date_filter').value = '';
-    
-    // Actualizar los selects personalizados
-    document.querySelector('#customCategorySelect .custom-select__trigger span').textContent = 'Todas las categorías';
-    document.querySelector('#customAvailabilitySelect .custom-select__trigger span').textContent = 'Todas las cantidades';
-    
-    // Ocultar el botón de limpiar filtros
-    document.getElementById('clearFiltersBtn').style.display = 'none';
-    
-    // Aplicar los filtros
-    filterProducts();
-}
+});
 </script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">

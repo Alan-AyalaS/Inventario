@@ -1,0 +1,1 @@
+ALTER TABLE operation ADD COLUMN talla VARCHAR(10) DEFAULT '1'; 

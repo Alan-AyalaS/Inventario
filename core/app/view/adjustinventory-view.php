@@ -19,10 +19,11 @@ try {
     require_once __DIR__ . "/../model/OperationTypeData.php";
     require_once __DIR__ . "/../model/ProductData.php";
 
-    if(isset($_POST["product_id"]) && isset($_POST["quantity"]) && isset($_POST["operation_type"])) {
+    if(isset($_POST["product_id"]) && isset($_POST["quantity"]) && isset($_POST["operation_type"]) && isset($_POST["talla"])) {
         $product_id = $_POST["product_id"];
         $quantity = floatval($_POST["quantity"]);
         $operation_type = $_POST["operation_type"];
+        $talla = $_POST["talla"];
         
         // Verificar que los tipos de operación existan
         $entrada = OperationTypeData::getByName("entrada");
@@ -44,64 +45,34 @@ try {
         $op->q = $quantity;
         $op->sell_id = null;
         $op->is_oficial = 1;
+        $op->talla = $talla;
         $op->created_at = "NOW()";
         
         $result = $op->add();
         
-        if($result && $result[0]){
-            // Obtener el nombre del producto
+        if($result[0]) {
+            // Actualizar la disponibilidad del producto
             $product = ProductData::getById($product_id);
-            $product_name = $product ? $product->name : 'Producto';
-            
-            // Calcular la nueva disponibilidad basada en todas las operaciones
-            $operations = OperationData::getAllByProductId($product_id);
-            $newAvailability = 0;
-            foreach ($operations as $op) {
-                if ($op->operation_type_id == 1) { // Entrada
-                    $newAvailability += $op->q;
-                } else { // Salida
-                    $newAvailability -= $op->q;
-                }
+            if($product) {
+                $product->updateAvailability($quantity);
             }
-            $product->updateAvailability($newAvailability);
             
-            // Crear el mensaje según el tipo de operación
-            $message = $operation_type === 'add' ? 
-                "Se agregaron {$quantity} unidades al producto '{$product_name}'" : 
-                "Se restaron {$quantity} unidades del producto '{$product_name}'";
-            
-            // Establecer la cookie con una duración de 1 minuto
-            setcookie('inventoryAlert', $message, time() + 60, '/', '', false, true);
-            
-            $response = [
+            echo json_encode([
                 'success' => true,
-                'message' => $message
-            ];
+                'message' => $operation_type === 'add' ? 
+                    "Se agregaron $quantity unidades de talla $talla al inventario" : 
+                    "Se restaron $quantity unidades de talla $talla del inventario"
+            ]);
         } else {
-            $response = [
-                'success' => false,
-                'message' => 'Error al actualizar el inventario'
-            ];
+            throw new Exception("Error al guardar la operación");
         }
     } else {
-        $response = [
-            'success' => false,
-            'message' => 'No se recibieron datos POST'
-        ];
+        throw new Exception("Faltan parámetros requeridos");
     }
-} catch (Exception $e) {
-    $response = [
+} catch(Exception $e) {
+    echo json_encode([
         'success' => false,
-        'message' => 'Error: ' . $e->getMessage()
-    ];
+        'message' => $e->getMessage()
+    ]);
 }
-
-// Limpiar cualquier salida no deseada
-ob_clean();
-
-// Enviar la respuesta JSON
-echo json_encode($response);
-
-// Terminar la ejecución
-exit;
 ?> 

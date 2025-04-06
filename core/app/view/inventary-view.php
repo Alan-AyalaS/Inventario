@@ -167,8 +167,12 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                                 </div>
                                 <div class="custom-options">
                                     <div class="custom-option" data-value="" data-color="#6c757d">Todas las categorías</div>
-                                    <?php foreach($categories as $category): ?>
-                                        <div class="custom-option" data-value="<?php echo $category->id; ?>" data-color="#28a745">
+                                    <?php foreach($categories as $category): 
+                                        $categoryColor = isset($_COOKIE['category_color_' . $category->id]) 
+                                            ? $_COOKIE['category_color_' . $category->id] 
+                                            : '#28a745';
+                                    ?>
+                                        <div class="custom-option" data-value="<?php echo $category->id; ?>" data-color="<?php echo $categoryColor; ?>">
                                             <?php echo htmlspecialchars($category->name); ?>
                                         </div>
                                     <?php endforeach; ?>
@@ -285,30 +289,53 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
         </div>
 
         <!-- Modal para ajustar inventario -->
-        <div class="modal fade" id="adjustInventoryModal" tabindex="-1" aria-labelledby="adjustInventoryModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="adjustInventoryModalLabel">Ajustar Inventario</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <form id="adjustInventoryForm" onsubmit="submitAdjustment(); return false;">
-                  <input type="hidden" id="productId" name="product_id">
-                  <input type="hidden" id="operationType" name="operation_type">
-                  <div class="mb-3">
-                    <label for="quantity" class="form-label">Cantidad</label>
-                    <input type="number" class="form-control" id="quantity" name="quantity" min="0.01" step="0.01" required>
-                  </div>
-                  <button type="submit" style="display: none;">Submit</button>
-                </form>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="submitAdjustment()">Aceptar</button>
-              </div>
+        <div class="modal fade" id="adjustModal" tabindex="-1" aria-labelledby="adjustModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="adjustModalLabel">Ajustar Inventario</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="adjustForm" method="post" action="index.php?view=adjustinventory">
+                            <input type="hidden" name="product_id" id="productId">
+                            <input type="hidden" name="operation_type" id="operationType">
+                            
+                            <div class="mb-3">
+                                <label for="talla" class="form-label">Talla</label>
+                                <select class="form-select" id="talla" name="talla" required>
+                                    <option value="">Seleccione una talla</option>
+                                    <option value="S">S</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                    <option value="XL">XL</option>
+                                    <option value="XXL">XXL</option>
+                                    <option value="16">16</option>
+                                    <option value="18">18</option>
+                                    <option value="20">20</option>
+                                    <option value="22">22</option>
+                                    <option value="24">24</option>
+                                    <option value="26">26</option>
+                                    <option value="28">28</option>
+                                    <option value="6">6</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="1">1</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="quantity" class="form-label">Cantidad</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" onclick="submitAdjustForm()">Ajustar</button>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
 
         <!-- Alerta dinámica -->
@@ -529,15 +556,13 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach($curr_products as $product):
-                            $q=OperationData::getQYesF($product->id);
-                            ?>
-                            <tr class="<?php if($q<=$product->inventary_min/2){ echo "danger";}else if($q<=$product->inventary_min){ echo "warning";}?>">
+                            <?php foreach($curr_products as $product): ?>
+                            <tr>
                                 <td>
-                                    <input type="checkbox" class="form-check-input product-checkbox" value="<?php echo $product->id; ?>">
+                                    <input type="checkbox" class="product-checkbox" value="<?php echo $product->id; ?>">
                                 </td>
                                 <td><?php echo $product->id; ?></td>
-                                <td><a href="index.php?view=producthistory&id=<?php echo $product->id; ?>" style="text-decoration: none; color: inherit;"><?php echo $product->name; ?></a></td>
+                                <td><?php echo $product->name; ?></td>
                                 <td>
                                     <?php 
                                     $categoryColor = '#6c757d'; // Color por defecto
@@ -564,15 +589,33 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                                 <td><?php echo $product->unit; ?></td>
                                 <td class="text-center">
                                     <?php 
-                                    $available = OperationData::getQYesF($product->id);
+                                    // Obtener todas las operaciones del producto
+                                    $operations = OperationData::getAllByProductId($product->id);
+                                    $tallas = [];
+                                    $total = 0;
+                                    
+                                    // Agrupar por talla
+                                    foreach($operations as $op) {
+                                        $talla = $op->talla ?? '1';
+                                        if(!isset($tallas[$talla])) {
+                                            $tallas[$talla] = 0;
+                                        }
+                                        if($op->operation_type_id == 1) { // Entrada
+                                            $tallas[$talla] += $op->q;
+                                        } else { // Salida
+                                            $tallas[$talla] -= $op->q;
+                                        }
+                                        $total += $op->operation_type_id == 1 ? $op->q : -$op->q;
+                                    }
+                                    
+                                    // Determinar el color según el total
                                     $min_q = $product->inventary_min;
                                     $percentage = 0;
                                     if($min_q > 0) {
-                                        $percentage = ($available / $min_q) * 100;
+                                        $percentage = ($total / $min_q) * 100;
                                     }
                                     
-                                    // Determinar el color según el porcentaje
-                                    if($available <= 0) {
+                                    if($total <= 0) {
                                         $color = '#dc3545'; // Rojo si no hay stock
                                     } else if($percentage <= 50) {
                                         $color = '#dc3545'; // Rojo si está por debajo del 50% del mínimo
@@ -582,8 +625,16 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                                         $color = '#28a745'; // Verde si está por encima del 80% del mínimo
                                     }
                                     ?>
-                                    <span class="badge" style="background-color: <?php echo $color; ?>; color: white; padding: 5px 10px; border-radius: 4px; font-size: 14px;">
-                                        <?php echo $available; ?>
+                                    <span class="badge" style="background-color: <?php echo $color; ?>; color: white; padding: 5px 10px; border-radius: 4px; font-size: 14px;" data-bs-toggle="tooltip" data-bs-html="true" title="<?php 
+                                        $tooltip = '';
+                                        foreach($tallas as $talla => $cantidad) {
+                                            if($cantidad > 0) {
+                                                $tooltip .= "Talla $talla: $cantidad<br>";
+                                            }
+                                        }
+                                        echo $tooltip;
+                                    ?>">
+                                        <?php echo $total; ?>
                                     </span>
                                 </td>
                                 <td><?php echo $product->inventary_min; ?></td>
@@ -602,7 +653,7 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                                     </button>
                                 </td>
                             </tr>
-                            <?php endforeach;?>
+                            <?php endforeach; ?>
                         </tbody>
                     </table>
                     <div class="btn-group pull-right">
@@ -653,75 +704,28 @@ let filteredProducts = [...allProducts];
 function showAdjustModal(productId, operationType) {
     document.getElementById('productId').value = productId;
     document.getElementById('operationType').value = operationType;
-    document.getElementById('adjustInventoryModalLabel').textContent = 
+    document.getElementById('adjustModalLabel').textContent = 
         operationType === 'add' ? 'Agregar al Inventario' : 'Restar del Inventario';
-    
-    // Resetear el valor de cantidad
-    document.getElementById('quantity').value = '';
-    
-    var modal = new bootstrap.Modal(document.getElementById('adjustInventoryModal'));
+    var modal = new bootstrap.Modal(document.getElementById('adjustModal'));
     modal.show();
-    
-    // Enfocar el campo de cantidad después de mostrar el modal
-    setTimeout(() => {
-        document.getElementById('quantity').focus();
-    }, 500);
 }
 
-function submitAdjustment() {
-    const productId = document.getElementById('productId').value;
-    const operationType = document.getElementById('operationType').value;
+function submitAdjustForm() {
+    const form = document.getElementById('adjustForm');
+    const talla = document.getElementById('talla').value;
     const quantity = document.getElementById('quantity').value;
     
-    if (!quantity || isNaN(quantity) || quantity <= 0) {
-        alert('Por favor, ingrese una cantidad válida');
+    if(!talla) {
+        alert('Por favor seleccione una talla');
         return;
     }
     
-    // Enviar datos al servidor
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'index.php?view=adjustinventory', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            try {
-                // Obtener solo la parte JSON de la respuesta
-                let jsonResponse = xhr.responseText;
-                const htmlIndex = jsonResponse.indexOf('<!DOCTYPE html>');
-                if (htmlIndex !== -1) {
-                    jsonResponse = jsonResponse.substring(0, htmlIndex);
-                }
-                
-                const response = JSON.parse(jsonResponse.trim());
-                console.log('Respuesta procesada:', response);
-                
-                if (response.success) {
-                    // Cerrar modal
-                    bootstrap.Modal.getInstance(document.getElementById('adjustInventoryModal')).hide();
-                    
-                    // Guardar el mensaje en sessionStorage
-                    sessionStorage.setItem('inventoryAlert', response.message);
-                    
-                    // Recargar la página
-                    window.location.href = 'index.php?view=inventary';
-                } else {
-                    alert('Error: ' + (response.message || 'Error al ajustar el inventario'));
-                }
-            } catch (e) {
-                console.error('Error parsing JSON response:', e);
-                console.error('Texto recibido:', xhr.responseText);
-                alert('Error en la respuesta del servidor. Revise la consola para más detalles.');
-            }
-        } else {
-            alert('Error de comunicación con el servidor');
-            console.error('Error de comunicación:', xhr.status, xhr.statusText);
-        }
-    };
-    xhr.onerror = function() {
-        console.error('Error de red al realizar la solicitud');
-        alert('Error de red al realizar la solicitud');
-    };
-    xhr.send(`product_id=${productId}&operation_type=${operationType}&quantity=${quantity}`);
+    if(!quantity || quantity <= 0) {
+        alert('Por favor ingrese una cantidad válida');
+        return;
+    }
+    
+    form.submit();
 }
 
 // Verificar si hay una alerta pendiente al cargar la página
@@ -975,6 +979,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
             const value = option.dataset.value;
             const text = option.textContent;
+            const color = option.dataset.color;
             
             // Actualizar el select original
             originalCategorySelect.value = value;
@@ -999,6 +1004,23 @@ document.addEventListener('DOMContentLoaded', function() {
             const url = new URL(window.location.href);
             url.searchParams.set('category_id', value);
             window.location.href = url.toString();
+        });
+
+        // Aplicar el color al hover
+        option.addEventListener('mouseover', (e) => {
+            if (option.dataset.value !== "") {
+                const color = option.dataset.color;
+                option.style.setProperty('--hover-color', color);
+                option.style.backgroundColor = color;
+                option.style.color = 'white';
+            }
+        });
+
+        option.addEventListener('mouseout', (e) => {
+            if (option.dataset.value !== "") {
+                option.style.backgroundColor = 'white';
+                option.style.color = '#000';
+            }
         });
     });
     
@@ -1411,6 +1433,14 @@ function applyOrder(url) {
     window.location.href = newUrl.toString();
     return false;
 }
+
+// Inicializar tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
 </script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
@@ -1534,11 +1564,8 @@ function applyOrder(url) {
     background-color: var(--hover-color) !important;
 }
 
-.custom-option.selected::after {
-    content: "✓";
-    position: absolute;
-    right: 10px;
-    color: white !important;
+.custom-option[data-value]:not([data-value=""]) {
+    --hover-color: attr(data-color);
 }
 
 /* Estilo específico para "Todas las categorías" */

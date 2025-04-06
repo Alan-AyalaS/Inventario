@@ -1,13 +1,23 @@
 <?php
 // Inicializar variables al principio
-$products = ProductData::getAll();
+$order = isset($_GET["order"]) ? $_GET["order"] : "desc";
+$products = ProductData::getAll($order);
 $categories = CategoryData::getAll();
 
 // Obtener productos según los filtros
-if(isset($_GET["search"]) && $_GET["search"] != "") {
-	$products = ProductData::getLike($_GET["search"]);
-} else if(isset($_GET["category_id"]) && $_GET["category_id"] != "") {
+if(isset($_GET["category_id"]) && $_GET["category_id"] != "") {
 	$products = ProductData::getAllByCategoryId($_GET["category_id"]);
+}
+
+if(isset($_GET["search"]) && $_GET["search"] != "") {
+	$search_products = [];
+	foreach($products as $product) {
+		if(stripos($product->name, $_GET["search"]) !== false || 
+		   stripos($product->id, $_GET["search"]) !== false) {
+			$search_products[] = $product;
+		}
+	}
+	$products = $search_products;
 }
 
 // Filtrar por disponibilidad si está seleccionado
@@ -63,6 +73,33 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
 				setTimeout(closeAlert, 5000);
 			</script>
 		<?php setcookie("prdupd","",time()-18600); endif; ?>
+
+		<?php if(isset($_COOKIE["prdadd"])):?>
+			<div class="alert alert-success alert-dismissible fade show" role="alert" id="addAlert">
+				<strong>¡Éxito!</strong> El producto "<?php echo $_COOKIE["prdadd"]; ?>" se ha creado correctamente.
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="closeAddAlert()"></button>
+			</div>
+			<script>
+				function closeAddAlert() {
+					document.getElementById('addAlert').style.transition = 'opacity 0.5s';
+					document.getElementById('addAlert').style.opacity = '0';
+					setTimeout(function() {
+						document.getElementById('addAlert').style.display = 'none';
+					}, 500);
+				}
+				
+				// Cierre automático después de 5 segundos
+				setTimeout(closeAddAlert, 5000);
+				
+				// Eliminar la cookie inmediatamente para evitar que la alerta aparezca nuevamente
+				document.cookie = "prdadd=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/";
+			</script>
+			<?php 
+			// Eliminar la cookie desde PHP también para mayor seguridad
+			setcookie("prdadd", "", time()-3600, "/");
+			?>
+		<?php endif; ?>
+
 		<?php if(isset($_COOKIE["prddel"])):?>
 			<div class="alert alert-danger alert-dismissible fade show" role="alert" id="deleteAlert">
 				<strong>¡Eliminado!</strong> El producto "<?php echo $_COOKIE["prddel"]; ?>" ha sido eliminado correctamente.
@@ -94,503 +131,513 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
             <a href="index.php?view=newproduct" class="btn btn-primary">
                 <i class="bi bi-plus-circle"></i> Agregar Producto
             </a>
-            <div class="btn-group">
-                <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow: none !important;">
-                    <i class="fa fa-download"></i> Descargar <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end" style="background-color: #28a745; border: none;">
-                    <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-excel" style="background-color: transparent !important; transition: color 0.3s ease;">Excel (.xlsx)</a></li>
-                    <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-pdf" style="background-color: transparent !important; transition: color 0.3s ease;">PDF (.pdf)</a></li>
-                </ul>
-            </div>
+            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow: none !important;">
+                <i class="fa fa-download"></i> Descargar <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" style="background-color: #28a745; border: none;">
+                <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-excel" style="background-color: transparent !important; transition: color 0.3s ease;">Excel (.xlsx)</a></li>
+                <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-pdf" style="background-color: transparent !important; transition: color 0.3s ease;">PDF (.pdf)</a></li>
+            </ul>
         </div>
         <div class="clearfix"></div>
         <br>
 
-<!-- Filtros -->
-<div class="row">
-    <div class="col-md-12">
-        <div class="form-inline d-flex align-items-end">
-            <div class="form-group me-2">
-                <label for="category_id" class="me-2">Categoría:</label>
-                <div class="custom-select-wrapper">
-                    <div class="custom-select" id="customCategorySelect">
-                        <div class="custom-select__trigger">
-                            <?php
-                            $selectedCategoryName = 'Todas las categorías';
-                            if (isset($_GET["category_id"]) && $_GET["category_id"] != "") {
-                                foreach ($categories as $category) {
-                                    if ($category->id == $_GET["category_id"]) {
-                                        $selectedCategoryName = htmlspecialchars($category->name);
-                                        break;
+        <!-- Filtros -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-inline d-flex align-items-end">
+                    <div class="form-group me-2">
+                        <label for="category_id" class="me-2">Categoría:</label>
+                        <div class="custom-select-wrapper">
+                            <div class="custom-select" id="customCategorySelect">
+                                <div class="custom-select__trigger">
+                                    <?php
+                                    $selectedCategoryName = 'Todas las categorías';
+                                    if (isset($_GET["category_id"]) && $_GET["category_id"] != "") {
+                                        foreach ($categories as $category) {
+                                            if ($category->id == $_GET["category_id"]) {
+                                                $selectedCategoryName = htmlspecialchars($category->name);
+                                                break;
+                                            }
+                                        }
                                     }
-                                }
-                            }
-                            ?>
-                            <span><?php echo $selectedCategoryName; ?></span>
-                            <div class="arrow"></div>
-                        </div>
-                        <div class="custom-options">
-                            <div class="custom-option" data-value="" data-color="#6c757d">Todas las categorías</div>
-                            <?php foreach($categories as $category): ?>
-                                <div class="custom-option" data-value="<?php echo $category->id; ?>" data-color="#28a745">
-                                    <?php echo htmlspecialchars($category->name); ?>
+                                    ?>
+                                    <span><?php echo $selectedCategoryName; ?></span>
+                                    <div class="arrow"></div>
                                 </div>
-                            <?php endforeach; ?>
+                                <div class="custom-options">
+                                    <div class="custom-option" data-value="" data-color="#6c757d">Todas las categorías</div>
+                                    <?php foreach($categories as $category): ?>
+                                        <div class="custom-option" data-value="<?php echo $category->id; ?>" data-color="#28a745">
+                                            <?php echo htmlspecialchars($category->name); ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                            <select id="category_id" name="category_id" style="display: none;">
+                                <option value="">Todas las categorías</option>
+                                <?php foreach($categories as $category): ?>
+                                    <option value="<?php echo $category->id; ?>" <?php echo (isset($_GET["category_id"]) && $_GET["category_id"] == $category->id) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($category->name); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                     </div>
-                    <select id="category_id" name="category_id" style="display: none;">
-                        <option value="">Todas las categorías</option>
-                        <?php foreach($categories as $category): ?>
-                            <option value="<?php echo $category->id; ?>" <?php echo (isset($_GET["category_id"]) && $_GET["category_id"] == $category->id) ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($category->name); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-            </div>
-            <div class="form-group me-2">
-                <label for="availability" class="me-2">Disponibilidad:</label>
-                <div class="custom-select-wrapper">
-                    <div class="custom-select" id="customAvailabilitySelect">
-                        <div class="custom-select__trigger">
-                            <?php
-                            $availabilityOptions = [
-                                ['value' => '', 'text' => 'Todas las cantidades'],
-                                ['value' => '0', 'text' => 'Sin stock (0)'],
-                                ['value' => '1-10', 'text' => 'Stock bajo (1-10)'],
-                                ['value' => '11-50', 'text' => 'Stock medio (11-50)'],
-                                ['value' => '51-100', 'text' => 'Stock alto (51-100)'],
-                                ['value' => '100+', 'text' => 'Stock muy alto (100+)']
-                            ];
-                            
-                            $selectedText = 'Todas las cantidades';
-                            if (isset($_GET["availability"])) {
-                                foreach ($availabilityOptions as $option) {
-                                    if ($option['value'] === $_GET["availability"]) {
-                                        $selectedText = $option['text'];
-                                        break;
+                    <div class="form-group me-2">
+                        <label for="availability" class="me-2">Disponibilidad:</label>
+                        <div class="custom-select-wrapper">
+                            <div class="custom-select" id="customAvailabilitySelect">
+                                <div class="custom-select__trigger">
+                                    <?php
+                                    $availabilityOptions = [
+                                        ['value' => '', 'text' => 'Todas las cantidades'],
+                                        ['value' => '0', 'text' => 'Sin stock (0)'],
+                                        ['value' => '1-10', 'text' => 'Stock bajo (1-10)'],
+                                        ['value' => '11-50', 'text' => 'Stock medio (11-50)'],
+                                        ['value' => '51-100', 'text' => 'Stock alto (51-100)'],
+                                        ['value' => '100+', 'text' => 'Stock muy alto (100+)']
+                                    ];
+                                    
+                                    $selectedText = 'Todas las cantidades';
+                                    if (isset($_GET["availability"])) {
+                                        foreach ($availabilityOptions as $option) {
+                                            if ($option['value'] === $_GET["availability"]) {
+                                                $selectedText = $option['text'];
+                                                break;
+                                            }
+                                        }
                                     }
-                                }
-                            }
-                            ?>
-                            <span><?php echo htmlspecialchars($selectedText); ?></span>
-                            <div class="arrow"></div>
-                        </div>
-                        <div class="custom-options">
-                            <?php foreach($availabilityOptions as $option): ?>
-                                <div class="custom-option" data-value="<?php echo $option['value']; ?>">
-                                    <?php echo htmlspecialchars($option['text']); ?>
+                                    ?>
+                                    <span><?php echo htmlspecialchars($selectedText); ?></span>
+                                    <div class="arrow"></div>
                                 </div>
-                            <?php endforeach; ?>
+                                <div class="custom-options">
+                                    <?php foreach($availabilityOptions as $option): ?>
+                                        <div class="custom-option" data-value="<?php echo $option['value']; ?>">
+                                            <?php echo htmlspecialchars($option['text']); ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                            <select id="availability" name="availability" style="display: none;">
+                                <?php foreach($availabilityOptions as $option): ?>
+                                    <option value="<?php echo $option['value']; ?>" <?php echo (isset($_GET["availability"]) && $_GET["availability"] === $option['value']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($option['text']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                     </div>
-                    <select id="availability" name="availability" style="display: none;">
-                        <?php foreach($availabilityOptions as $option): ?>
-                            <option value="<?php echo $option['value']; ?>" <?php echo (isset($_GET["availability"]) && $_GET["availability"] === $option['value']) ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($option['text']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                    <div class="form-group me-2">
+                        <label for="search" class="me-2">Buscar:</label>
+                        <div class="input-group">
+                            <input type="text" name="search" id="search" class="form-control" value="<?php echo isset($_GET["search"]) ? $_GET["search"] : ''; ?>" placeholder="Buscar productos...">
+                            <button class="btn btn-primary" type="button" id="searchBtn">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group me-2">
+                        <label for="date_filter" class="me-2">Fecha:</label>
+                        <select name="date_filter" id="date_filter" class="form-control" onchange="filterProducts()">
+                            <option value="">Todas las fechas</option>
+                            <option value="this_week" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_week"){ echo "selected"; } ?>>Esta semana</option>
+                            <option value="this_month" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_month"){ echo "selected"; } ?>>Este mes</option>
+                            <option value="last_3_months" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="last_3_months"){ echo "selected"; } ?>>Últimos 3 meses</option>
+                            <option value="last_6_months" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="last_6_months"){ echo "selected"; } ?>>Últimos 6 meses</option>
+                            <option value="this_year" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_year"){ echo "selected"; } ?>>Este año</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="limit" name="limit" min="1" value="<?php echo isset($_GET['limit']) ? $_GET['limit'] : 100; ?>" style="width: 80px;">
+                            <button class="btn btn-primary" type="button" onclick="applyLimitFilter()">
+                                <i class="bi bi-filter"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" id="clearFiltersBtn" style="display: none;" onclick="clearFilters()">Limpiar filtros</button>
+                    <div class="ms-auto">
+                        <a href="index.php?view=inventary&order=<?php echo $order == 'desc' ? 'asc' : 'desc'; ?><?php 
+                            if(isset($_GET['category_id'])) echo '&category_id='.$_GET['category_id'];
+                            if(isset($_GET['availability'])) echo '&availability='.$_GET['availability'];
+                            if(isset($_GET['search'])) echo '&search='.$_GET['search'];
+                            if(isset($_GET['date_filter'])) echo '&date_filter='.$_GET['date_filter'];
+                            if(isset($_GET['limit'])) echo '&limit='.$_GET['limit'];
+                            if(isset($_GET['page'])) echo '&page='.$_GET['page'];
+                        ?>" class="btn btn-secondary">
+                            <i class="bi bi-sort-<?php echo $order == 'desc' ? 'down' : 'up'; ?>"></i> 
+                            <?php echo $order == 'desc' ? 'Más recientes primero' : 'Más antiguos primero'; ?>
+                        </a>
+                    </div>
                 </div>
             </div>
-            <div class="form-group me-2">
-                <label for="search" class="me-2">Buscar:</label>
-                <div class="input-group">
-                    <input type="text" name="search" id="search" class="form-control" value="<?php echo isset($_GET["search"]) ? $_GET["search"] : ''; ?>" placeholder="Buscar productos...">
-                    <button class="btn btn-primary" type="button" id="searchBtn">
-                        <i class="bi bi-search"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="form-group me-2">
-                <label for="date_filter" class="me-2">Fecha:</label>
-                <select name="date_filter" id="date_filter" class="form-control" onchange="filterProducts()">
-                    <option value="">Todas las fechas</option>
-                    <option value="this_week" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_week"){ echo "selected"; } ?>>Esta semana</option>
-                    <option value="this_month" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_month"){ echo "selected"; } ?>>Este mes</option>
-                    <option value="last_3_months" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="last_3_months"){ echo "selected"; } ?>>Últimos 3 meses</option>
-                    <option value="last_6_months" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="last_6_months"){ echo "selected"; } ?>>Últimos 6 meses</option>
-                    <option value="this_year" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_year"){ echo "selected"; } ?>>Este año</option>
-                </select>
-            </div>
-            <div class="col-md-1">
-                <div class="input-group">
-                    <input type="number" class="form-control" id="limit" name="limit" min="1" value="<?php echo isset($_GET['limit']) ? $_GET['limit'] : 100; ?>" style="width: 80px;">
-                    <button class="btn btn-primary" type="button" onclick="applyLimitFilter()">
-                        <i class="bi bi-filter"></i>
-                    </button>
-                </div>
-            </div>
-            <button type="button" class="btn btn-secondary" id="clearFiltersBtn" style="display: none;" onclick="clearFilters()">Limpiar filtros</button>
         </div>
-    </div>
-</div>
 
-<!-- Botón para eliminar seleccionados -->
-<div class="row mt-3">
-    <div class="col-md-12">
-        <button type="button" class="btn btn-danger" id="deleteSelected" disabled>
-            <i class="fas fa-trash"></i> Eliminar seleccionados
-        </button>
-    </div>
-</div>
-
-<!-- Modal para ajustar inventario -->
-<div class="modal fade" id="adjustInventoryModal" tabindex="-1" aria-labelledby="adjustInventoryModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="adjustInventoryModalLabel">Ajustar Inventario</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="adjustInventoryForm" onsubmit="submitAdjustment(); return false;">
-          <input type="hidden" id="productId" name="product_id">
-          <input type="hidden" id="operationType" name="operation_type">
-          <div class="mb-3">
-            <label for="quantity" class="form-label">Cantidad</label>
-            <input type="number" class="form-control" id="quantity" name="quantity" min="0.01" step="0.01" required>
-          </div>
-          <button type="submit" style="display: none;">Submit</button>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" onclick="submitAdjustment()">Aceptar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Alerta dinámica -->
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-  <div id="inventoryAlert" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="d-flex">
-      <div class="toast-body">
-        <i class="bi bi-check-circle-fill me-2"></i>
-        <span id="alertMessage"></span>
-      </div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal de confirmación para eliminación -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title" id="deleteModalLabel">Confirmar eliminación</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p class="mb-0">¿Está seguro que desea eliminar el producto <strong id="productNameToDelete"></strong>?</p>
-        <p class="text-danger mt-3 mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Esta acción no se puede deshacer. Se eliminarán también todas las operaciones de inventario asociadas a este producto.</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <a href="#" id="confirmDeleteBtn" class="btn btn-danger">Eliminar producto</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal para eliminar productos seleccionados -->
-<div class="modal fade" id="deleteSelectedModal" tabindex="-1" role="dialog" aria-labelledby="deleteSelectedModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteSelectedModalLabel">Eliminar productos seleccionados</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+        <!-- Botón para eliminar seleccionados -->
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <button type="button" class="btn btn-danger" id="deleteSelected" disabled>
+                    <i class="fas fa-trash"></i> Eliminar seleccionados
                 </button>
             </div>
-            <div class="modal-body">
-                ¿Estás seguro de que deseas eliminar los productos seleccionados? Esta acción no se puede deshacer.
+        </div>
+
+        <!-- Modal para ajustar inventario -->
+        <div class="modal fade" id="adjustInventoryModal" tabindex="-1" aria-labelledby="adjustInventoryModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="adjustInventoryModalLabel">Ajustar Inventario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form id="adjustInventoryForm" onsubmit="submitAdjustment(); return false;">
+                  <input type="hidden" id="productId" name="product_id">
+                  <input type="hidden" id="operationType" name="operation_type">
+                  <div class="mb-3">
+                    <label for="quantity" class="form-label">Cantidad</label>
+                    <input type="number" class="form-control" id="quantity" name="quantity" min="0.01" step="0.01" required>
+                  </div>
+                  <button type="submit" style="display: none;">Submit</button>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="submitAdjustment()">Aceptar</button>
+              </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteSelected">Eliminar</button>
+          </div>
+        </div>
+
+        <!-- Alerta dinámica -->
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+          <div id="inventoryAlert" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+              <div class="toast-body">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <span id="alertMessage"></span>
+              </div>
+              <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal de confirmación para eliminación -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">Confirmar eliminación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <p class="mb-0">¿Está seguro que desea eliminar el producto <strong id="productNameToDelete"></strong>?</p>
+                <p class="text-danger mt-3 mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Esta acción no se puede deshacer. Se eliminarán también todas las operaciones de inventario asociadas a este producto.</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <a href="#" id="confirmDeleteBtn" class="btn btn-danger">Eliminar producto</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal para eliminar productos seleccionados -->
+        <div class="modal fade" id="deleteSelectedModal" tabindex="-1" role="dialog" aria-labelledby="deleteSelectedModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteSelectedModalLabel">Eliminar productos seleccionados</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        ¿Estás seguro de que deseas eliminar los productos seleccionados? Esta acción no se puede deshacer.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-danger" id="confirmDeleteSelected">Eliminar</button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- Modal de confirmación para eliminar todos los productos -->
-<div id="deleteAllModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <h2>Confirmar Eliminación</h2>
-        <p>¿Estás seguro de que deseas eliminar todos los productos? Esta acción no se puede deshacer.</p>
-        <div class="modal-buttons">
-            <button onclick="document.getElementById('deleteAllModal').style.display='none'">Cancelar</button>
-            <button onclick="confirmDeleteAll()">Confirmar</button>
+        <!-- Modal de confirmación para eliminar todos los productos -->
+        <div id="deleteAllModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h2>Confirmar Eliminación</h2>
+                <p>¿Estás seguro de que deseas eliminar todos los productos? Esta acción no se puede deshacer.</p>
+                <div class="modal-buttons">
+                    <button onclick="document.getElementById('deleteAllModal').style.display='none'">Cancelar</button>
+                    <button onclick="confirmDeleteAll()">Confirmar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">INVENTARIO
+            </div>
+                <div class="card-body">
+                    <?php
+                    // Verificar si hay filtros activos (excluyendo el campo "Mostrar")
+                    $has_filters = false;
+                    
+                    // Verificar búsqueda
+                    if(isset($_GET["search"]) && $_GET["search"] != "") {
+                        $has_filters = true;
+                    }
+                    
+                    // Verificar categoría (solo si no es "Todas las categorías")
+                    if(isset($_GET["category_id"]) && $_GET["category_id"] != "") {
+                        $has_filters = true;
+                    }
+                    
+                    // Verificar disponibilidad
+                    if(isset($_GET["availability"]) && $_GET["availability"] != "") {
+                        $has_filters = true;
+                    }
+                    
+                    // Verificar fecha
+                    if(isset($_GET["date_filter"]) && $_GET["date_filter"] != "") {
+                        $has_filters = true;
+                    }
+                    
+                    // Verificar si el único parámetro es el campo "Mostrar"
+                    $only_limit = count($_GET) == 2 && isset($_GET["view"]) && isset($_GET["limit"]);
+                    
+                    // Verificar si se seleccionó "Todas las categorías"
+                    $all_categories = isset($_GET["category_id"]) && $_GET["category_id"] == "";
+                    
+                    // Determinar si se debe mostrar la alerta
+                    $show_alert = $has_filters && !$only_limit && !$all_categories;
+                    
+                    // Si se seleccionó "Todas las categorías", no mostrar la alerta
+                    if ($all_categories) {
+                        $show_alert = false;
+                    }
+                    ?>
+                    <div id="filterAlert" class="alert alert-info" <?php echo $show_alert ? '' : 'style="display: none;"'; ?>>
+                        <?php
+                        $total_products = count($products);
+                        if(isset($_GET["search"]) && $_GET["search"] != "") {
+                            echo "Mostrando $total_products productos que coinciden con la búsqueda";
+                        } else if(isset($_GET["category_id"]) && $_GET["category_id"] != "") {
+                            echo "Mostrando $total_products productos de la categoría seleccionada";
+                        } else if(isset($_GET["availability"]) && $_GET["availability"] != "") {
+                            echo "Mostrando $total_products productos con la disponibilidad seleccionada";
+                        } else if(isset($_GET["date_filter"]) && $_GET["date_filter"] != "") {
+                            echo "Mostrando $total_products productos del período seleccionado";
+                        } else {
+                            echo "Mostrando todos los $total_products productos";
+                        }
+                        ?>
+                    </div>
+
+                    <?php
+                    $page = 1;
+                    if(isset($_GET["page"])){
+                        $page=$_GET["page"];
+                    }
+                    $limit = 100; // Valor predeterminado
+                    if(isset($_GET["limit"]) && $_GET["limit"]!=""){
+                        $limit = intval($_GET["limit"]);
+                    }
+                    // Asegurar que el límite nunca sea 0
+                    if($limit <= 0) {
+                        $limit = 100;
+                    }
+
+                    // Verificar si el límite es diferente al total de productos
+                    $total_products = count($products);
+                    $is_full_list = ($limit == $total_products);
+
+                    // Si el límite es diferente al total y hay filtros, aplicar filtros en el servidor
+                    if (!$is_full_list && (isset($_GET['category_id']) || isset($_GET['search']) || isset($_GET['availability']) || isset($_GET['date_filter']))) {
+                        $curr_products = $products;
+                        $npaginas = 1;
+                        $page = 1;
+                    } else {
+                        // Obtener los productos para la página actual
+                        $start_index = ($page - 1) * $limit;
+                        $curr_products = array_slice($products, $start_index, $limit);
+                    }
+
+                    if(count($products)>0){
+                        // Calcular el número total de páginas
+                        $total_records = count($products);
+                        $npaginas = ceil($total_records / $limit);
+
+                        // Asegurarse de que la página actual no exceda el número total de páginas
+                        if ($page > $npaginas) {
+                            $page = $npaginas;
+                        }
+
+                        ?>
+
+                        <h3>Pagina <?php echo $page." de ".$npaginas; ?></h3>
+                    <div class="btn-group pull-right">
+                    <?php
+                    $px=$page-1;
+                    if($px>0):
+                        // Construir la URL con los parámetros de filtro actuales
+                        $url = "index.php?view=inventary&limit=$limit&page=".($px);
+                        if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
+                            $url .= "&category_id=".$_GET['category_id'];
+                        }
+                        if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
+                            $url .= "&date_filter=".$_GET['date_filter'];
+                        }
+                    ?>
+                    <a class="btn btn-sm btn-default" href="<?php echo $url; ?>"><i class="glyphicon glyphicon-chevron-left"></i> Atras </a>
+                    <?php endif; ?>
+
+                    <?php 
+                    for($i=0;$i<$npaginas;$i++) {
+                        // Construir la URL con los parámetros de filtro actuales
+                        $url = "index.php?view=inventary&limit=$limit&page=".($i+1);
+                        if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
+                            $url .= "&category_id=".$_GET['category_id'];
+                        }
+                        if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
+                            $url .= "&date_filter=".$_GET['date_filter'];
+                        }
+                        
+                        $active_class = ($page == ($i+1)) ? 'btn-primary' : 'btn-default';
+                        echo "<a href='$url' class='btn $active_class btn-sm'>".($i+1)."</a> ";
+                    }
+                    ?>
+                    </div>
+                    <div class="clearfix"></div>
+                    <br><table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">
+                                    <input type="checkbox" id="selectAll" class="form-check-input">
+                                </th>
+                                <th style="width: 80px;">Codigo</th>
+                                <th style="width: 150px;">Nombre</th>
+                                <th style="width: 120px;">Categoría</th>
+                                <th style="width: 100px;">Precio de Entrada</th>
+                                <th style="width: 100px;">Precio de Salida</th>
+                                <th style="width: 80px;">Unidad</th>
+                                <th style="width: 80px;">Disponible</th>
+                                <th style="width: 100px;">Mínima en Inventario</th>
+                                <th style="width: 150px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach($curr_products as $product):
+                            $q=OperationData::getQYesF($product->id);
+                            ?>
+                            <tr class="<?php if($q<=$product->inventary_min/2){ echo "danger";}else if($q<=$product->inventary_min){ echo "warning";}?>">
+                                <td>
+                                    <input type="checkbox" class="form-check-input product-checkbox" value="<?php echo $product->id; ?>">
+                                </td>
+                                <td><?php echo $product->id; ?></td>
+                                <td><a href="index.php?view=producthistory&id=<?php echo $product->id; ?>" style="text-decoration: none; color: inherit;"><?php echo $product->name; ?></a></td>
+                                <td>
+                                    <?php 
+                                    $categoryColor = '#6c757d'; // Color por defecto
+                                    $categoryName = 'Sin categoría';
+                                    
+                                    if (!empty($product->category_id)) {
+                                        $categoryColor = isset($_COOKIE['category_color_' . $product->category_id]) 
+                                            ? $_COOKIE['category_color_' . $product->category_id] 
+                                            : '#6c757d';
+                                        
+                                        // Obtener el nombre de la categoría
+                                        $category = CategoryData::getById($product->category_id);
+                                        if ($category) {
+                                            $categoryName = $category->name;
+                                        }
+                                    }
+                                    ?>
+                                    <span class="badge" style="background-color: <?php echo $categoryColor; ?>; color: white; padding: 5px 10px; border-radius: 4px;" data-category-id="<?php echo $product->category_id; ?>">
+                                        <?php echo htmlspecialchars($categoryName); ?>
+                                    </span>
+                                </td>
+                                <td><?php echo $product->price_in; ?></td>
+                                <td><?php echo $product->price_out; ?></td>
+                                <td><?php echo $product->unit; ?></td>
+                                <td class="text-center">
+                                    <?php 
+                                    $available = OperationData::getQYesF($product->id);
+                                    $min_q = $product->inventary_min;
+                                    $percentage = 0;
+                                    if($min_q > 0) {
+                                        $percentage = ($available / $min_q) * 100;
+                                    }
+                                    
+                                    // Determinar el color según el porcentaje
+                                    if($available <= 0) {
+                                        $color = '#dc3545'; // Rojo si no hay stock
+                                    } else if($percentage <= 50) {
+                                        $color = '#dc3545'; // Rojo si está por debajo del 50% del mínimo
+                                    } else if($percentage <= 80) {
+                                        $color = '#ffc107'; // Amarillo si está entre 50% y 80% del mínimo
+                                    } else {
+                                        $color = '#28a745'; // Verde si está por encima del 80% del mínimo
+                                    }
+                                    ?>
+                                    <span class="badge" style="background-color: <?php echo $color; ?>; color: white; padding: 5px 10px; border-radius: 4px; font-size: 14px;">
+                                        <?php echo $available; ?>
+                                    </span>
+                                </td>
+                                <td><?php echo $product->inventary_min; ?></td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-success" onclick="showAdjustModal(<?php echo $product->id; ?>, 'add')">
+                                        <i class="bi bi-plus-circle"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="showAdjustModal(<?php echo $product->id; ?>, 'subtract')">
+                                        <i class="bi bi-dash-circle"></i>
+                                    </button>
+                                    <a href="index.php?view=editproduct&id=<?php echo $product->id; ?>" class="btn btn-sm btn-warning">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal(<?php echo $product->id; ?>, '<?php echo addslashes($product->name); ?>')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <?php endforeach;?>
+                        </tbody>
+                    </table>
+                    <div class="btn-group pull-right">
+                    <?php
+                    for($i=0;$i<$npaginas;$i++){
+                        // Construir la URL con los parámetros de filtro actuales
+                        $url = "index.php?view=inventary&limit=$limit&page=".($i+1);
+                        if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
+                            $url .= "&category_id=".$_GET['category_id'];
+                        }
+                        if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
+                            $url .= "&date_filter=".$_GET['date_filter'];
+                        }
+                        
+                        $active_class = ($page == ($i+1)) ? 'btn-primary' : 'btn-default';
+                        echo "<a href='$url' class='btn $active_class btn-sm'>".($i+1)."</a> ";
+                    }
+                    ?>
+                    </div>
+
+                        <?php
+                    }else{
+                        ?>
+                        <div class="jumbotron">
+                            <h2>No hay productos</h2>
+                            <p>No se han agregado productos a la base de datos, puedes agregar uno dando click en el boton <b>"Agregar Producto"</b>.</p>
+                        </div>
+                        <?php
+                    }
+
+                    ?>
+                </div>
+        </div>
         </div>
     </div>
-</div>
-
-<div class="card">
-	<div class="card-header">INVENTARIO
-	</div>
-		<div class="card-body">
-			<?php
-			// Verificar si hay filtros activos (excluyendo el campo "Mostrar")
-			$has_filters = false;
-			
-			// Verificar búsqueda
-			if(isset($_GET["search"]) && $_GET["search"] != "") {
-				$has_filters = true;
-			}
-			
-			// Verificar categoría (solo si no es "Todas las categorías")
-			if(isset($_GET["category_id"]) && $_GET["category_id"] != "") {
-				$has_filters = true;
-			}
-			
-			// Verificar disponibilidad
-			if(isset($_GET["availability"]) && $_GET["availability"] != "") {
-				$has_filters = true;
-			}
-			
-			// Verificar fecha
-			if(isset($_GET["date_filter"]) && $_GET["date_filter"] != "") {
-				$has_filters = true;
-			}
-			
-			// Verificar si el único parámetro es el campo "Mostrar"
-			$only_limit = count($_GET) == 2 && isset($_GET["view"]) && isset($_GET["limit"]);
-			
-			// Verificar si se seleccionó "Todas las categorías"
-			$all_categories = isset($_GET["category_id"]) && $_GET["category_id"] == "";
-			
-			// Determinar si se debe mostrar la alerta
-			$show_alert = $has_filters && !$only_limit && !$all_categories;
-			
-			// Si se seleccionó "Todas las categorías", no mostrar la alerta
-			if ($all_categories) {
-				$show_alert = false;
-			}
-			?>
-			<div id="filterAlert" class="alert alert-info" <?php echo $show_alert ? '' : 'style="display: none;"'; ?>>
-				<?php
-				$total_products = count($products);
-				if(isset($_GET["search"]) && $_GET["search"] != "") {
-					echo "Mostrando $total_products productos que coinciden con la búsqueda";
-				} else if(isset($_GET["category_id"]) && $_GET["category_id"] != "") {
-					echo "Mostrando $total_products productos de la categoría seleccionada";
-				} else if(isset($_GET["availability"]) && $_GET["availability"] != "") {
-					echo "Mostrando $total_products productos con la disponibilidad seleccionada";
-				} else if(isset($_GET["date_filter"]) && $_GET["date_filter"] != "") {
-					echo "Mostrando $total_products productos del período seleccionado";
-				} else {
-					echo "Mostrando todos los $total_products productos";
-				}
-				?>
-			</div>
-
-			<?php
-			$page = 1;
-			if(isset($_GET["page"])){
-				$page=$_GET["page"];
-			}
-			$limit = 100; // Valor predeterminado
-			if(isset($_GET["limit"]) && $_GET["limit"]!=""){
-				$limit = intval($_GET["limit"]);
-			}
-			// Asegurar que el límite nunca sea 0
-			if($limit <= 0) {
-				$limit = 100;
-			}
-
-			// Verificar si el límite es diferente al total de productos
-			$total_products = count($products);
-			$is_full_list = ($limit == $total_products);
-
-			// Si el límite es diferente al total y hay filtros, aplicar filtros en el servidor
-			if (!$is_full_list && (isset($_GET['category_id']) || isset($_GET['search']) || isset($_GET['availability']) || isset($_GET['date_filter']))) {
-				$curr_products = $products;
-				$npaginas = 1;
-				$page = 1;
-			} else {
-				// Obtener los productos para la página actual
-				$start_index = ($page - 1) * $limit;
-				$curr_products = array_slice($products, $start_index, $limit);
-			}
-
-			if(count($products)>0){
-				// Calcular el número total de páginas
-				$total_records = count($products);
-				$npaginas = ceil($total_records / $limit);
-
-				// Asegurarse de que la página actual no exceda el número total de páginas
-				if ($page > $npaginas) {
-					$page = $npaginas;
-				}
-
-				?>
-
-				<h3>Pagina <?php echo $page." de ".$npaginas; ?></h3>
-			<div class="btn-group pull-right">
-			<?php
-			$px=$page-1;
-			if($px>0):
-			    // Construir la URL con los parámetros de filtro actuales
-			    $url = "index.php?view=inventary&limit=$limit&page=".($px);
-			    if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-			        $url .= "&category_id=".$_GET['category_id'];
-			    }
-			    if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-			        $url .= "&date_filter=".$_GET['date_filter'];
-			    }
-			?>
-			<a class="btn btn-sm btn-default" href="<?php echo $url; ?>"><i class="glyphicon glyphicon-chevron-left"></i> Atras </a>
-			<?php endif; ?>
-
-			<?php 
-			$px=$page+1;
-			if($px<=$npaginas):
-			    // Construir la URL con los parámetros de filtro actuales
-			    $url = "index.php?view=inventary&limit=$limit&page=".($px);
-			    if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-			        $url .= "&category_id=".$_GET['category_id'];
-			    }
-			    if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-			        $url .= "&date_filter=".$_GET['date_filter'];
-			    }
-			?>
-			<a class="btn btn-sm btn-default" href="<?php echo $url; ?>">Adelante <i class="glyphicon glyphicon-chevron-right"></i></a>
-			<?php endif; ?>
-			</div>
-			<div class="clearfix"></div>
-			<br><table class="table table-bordered table-hover">
-				<thead>
-					<tr>
-						<th style="width: 50px;">
-							<input type="checkbox" id="selectAll" class="form-check-input">
-						</th>
-						<th>Codigo</th>
-						<th>Nombre</th>
-						<th>Categoría</th>
-						<th>Precio de Entrada</th>
-						<th>Precio de Salida</th>
-						<th>Unidad</th>
-						<th>Disponible</th>
-						<th>Minima en Inventario</th>
-						<th style="width: 130px;">Acciones</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php foreach($curr_products as $product):
-					$q=OperationData::getQYesF($product->id);
-					?>
-					<tr class="<?php if($q<=$product->inventary_min/2){ echo "danger";}else if($q<=$product->inventary_min){ echo "warning";}?>">
-						<td>
-							<input type="checkbox" class="form-check-input product-checkbox" value="<?php echo $product->id; ?>">
-						</td>
-						<td><?php echo $product->id; ?></td>
-						<td><a href="index.php?view=producthistory&id=<?php echo $product->id; ?>" style="text-decoration: none; color: inherit;"><?php echo $product->name; ?></a></td>
-						<td>
-							<?php 
-							$categoryColor = '#6c757d'; // Color por defecto
-							$categoryName = 'Sin categoría';
-							
-							if (!empty($product->category_id)) {
-								$categoryColor = isset($_COOKIE['category_color_' . $product->category_id]) 
-									? $_COOKIE['category_color_' . $product->category_id] 
-									: '#6c757d';
-								
-								// Obtener el nombre de la categoría
-								$category = CategoryData::getById($product->category_id);
-								if ($category) {
-									$categoryName = $category->name;
-								}
-							}
-							?>
-							<span class="badge" style="background-color: <?php echo $categoryColor; ?>; color: white; padding: 5px 10px; border-radius: 4px;" data-category-id="<?php echo $product->category_id; ?>">
-								<?php echo htmlspecialchars($categoryName); ?>
-							</span>
-						</td>
-						<td><?php echo $product->price_in; ?></td>
-						<td><?php echo $product->price_out; ?></td>
-						<td><?php echo $product->unit; ?></td>
-						<td>
-							<?php 
-							$available = OperationData::getQYesF($product->id);
-							$min_q = $product->inventary_min;
-							// Calcular qué tan cerca está del mínimo (100% = en el mínimo, 0% = muy por encima)
-							$color = '#28a745'; // Verde por defecto
-							
-							if ($available <= 0) {
-								// Si no hay inventario disponible, mostrar en rojo
-								$color = '#dc3545';
-							} else {
-								$percentage = ($min_q / $available) * 100;
-								
-								// Determinar el color según el porcentaje
-								if($percentage >= 80) {
-									$color = '#dc3545'; // Rojo si está muy cerca del mínimo (80% o más)
-								} else if($percentage >= 60) {
-									$color = '#fd7e14'; // Naranja si está cerca del mínimo (60-80%)
-								} else if($percentage >= 40) {
-									$color = '#ffc107'; // Amarillo si está moderadamente cerca (40-60%)
-								}
-							}
-							
-							// Aplicar el estilo con el color calculado
-							echo "<span style='background-color: $color; color: white; padding: 5px 10px; border-radius: 5px;'>$available</span>";
-							?>
-						</td>
-						<td><?php echo $product->inventary_min; ?></td>
-						<td>
-							<button type="button" class="btn btn-sm btn-success" onclick="showAdjustModal(<?php echo $product->id; ?>, 'add')">
-								<i class="bi bi-plus-circle"></i>
-							</button>
-							<button type="button" class="btn btn-sm btn-danger" onclick="showAdjustModal(<?php echo $product->id; ?>, 'subtract')">
-								<i class="bi bi-dash-circle"></i>
-							</button>
-							<a href="index.php?view=editproduct&id=<?php echo $product->id; ?>" class="btn btn-sm btn-warning">
-								<i class="bi bi-pencil"></i>
-							</a>
-							<button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal(<?php echo $product->id; ?>, '<?php echo addslashes($product->name); ?>')">
-								<i class="bi bi-trash"></i>
-							</button>
-						</td>
-					</tr>
-					<?php endforeach;?>
-				</tbody>
-			</table>
-			<div class="btn-group pull-right">
-			<?php
-			for($i=0;$i<$npaginas;$i++){
-			    // Construir la URL con los parámetros de filtro actuales
-			    $url = "index.php?view=inventary&limit=$limit&page=".($i+1);
-			    if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-			        $url .= "&category_id=".$_GET['category_id'];
-			    }
-			    if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-			        $url .= "&date_filter=".$_GET['date_filter'];
-			    }
-			    
-			    $active_class = ($page == ($i+1)) ? 'btn-primary' : 'btn-default';
-			    echo "<a href='$url' class='btn $active_class btn-sm'>".($i+1)."</a> ";
-			}
-			?>
-			</div>
-
-				<?php
-			}else{
-				?>
-				<div class="jumbotron">
-					<h2>No hay productos</h2>
-					<p>No se han agregado productos a la base de datos, puedes agregar uno dando click en el boton <b>"Agregar Producto"</b>.</p>
-				</div>
-				<?php
-			}
-
-			?>
-		</div>
-</div>
-	</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -1020,7 +1067,26 @@ document.addEventListener('DOMContentLoaded', function() {
 document.getElementById('searchBtn').addEventListener('click', function() {
     const searchTerm = document.getElementById('search').value;
     const url = new URL(window.location.href);
-    url.searchParams.set('search', searchTerm);
+    
+    // Mantener los filtros existentes
+    const categoryId = document.getElementById('category_id').value;
+    const availability = document.getElementById('availability').value;
+    const dateFilter = document.getElementById('date_filter').value;
+    const limit = document.getElementById('limit').value;
+    
+    // Actualizar la URL manteniendo los filtros
+    if (searchTerm) {
+        url.searchParams.set('search', searchTerm);
+    } else {
+        url.searchParams.delete('search');
+    }
+    
+    // Mantener los otros filtros
+    if (categoryId) url.searchParams.set('category_id', categoryId);
+    if (availability) url.searchParams.set('availability', availability);
+    if (dateFilter) url.searchParams.set('date_filter', dateFilter);
+    if (limit) url.searchParams.set('limit', limit);
+    
     window.location.href = url.toString();
 });
 
@@ -1029,7 +1095,26 @@ document.getElementById('search').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
         const searchTerm = document.getElementById('search').value;
         const url = new URL(window.location.href);
-        url.searchParams.set('search', searchTerm);
+        
+        // Mantener los filtros existentes
+        const categoryId = document.getElementById('category_id').value;
+        const availability = document.getElementById('availability').value;
+        const dateFilter = document.getElementById('date_filter').value;
+        const limit = document.getElementById('limit').value;
+        
+        // Actualizar la URL manteniendo los filtros
+        if (searchTerm) {
+            url.searchParams.set('search', searchTerm);
+        } else {
+            url.searchParams.delete('search');
+        }
+        
+        // Mantener los otros filtros
+        if (categoryId) url.searchParams.set('category_id', categoryId);
+        if (availability) url.searchParams.set('availability', availability);
+        if (dateFilter) url.searchParams.set('date_filter', dateFilter);
+        if (limit) url.searchParams.set('limit', limit);
+        
         window.location.href = url.toString();
     }
 });
@@ -1145,19 +1230,19 @@ function updateTableWithClientData() {
         // Botón Atrás
         if (currentPage > 1) {
             const prevPage = currentPage - 1;
-            paginationHTML += `<a class="btn btn-sm btn-default" href="index.php?view=inventary&limit=${limit}&page=${prevPage}"><i class="glyphicon glyphicon-chevron-left"></i> Atras </a>`;
+            paginationHTML += `<a class="btn btn-sm btn-default" href="index.php?view=inventary&limit=$limit&page=${prevPage}"><i class="glyphicon glyphicon-chevron-left"></i> Atras </a>`;
         }
 
         // Números de página
         for (let i = 1; i <= totalPages; i++) {
             const activeClass = i === currentPage ? 'btn-primary' : 'btn-default';
-            paginationHTML += `<a class="btn ${activeClass} btn-sm" href="index.php?view=inventary&limit=${limit}&page=${i}">${i}</a>`;
+            paginationHTML += `<a class="btn ${activeClass} btn-sm" href="index.php?view=inventary&limit=$limit&page=${i}">${i}</a>`;
         }
 
         // Botón Adelante
         if (currentPage < totalPages) {
             const nextPage = currentPage + 1;
-            paginationHTML += `<a class="btn btn-sm btn-default" href="index.php?view=inventary&limit=${limit}&page=${nextPage}">Adelante <i class="glyphicon glyphicon-chevron-right"></i></a>`;
+            paginationHTML += `<a class="btn btn-sm btn-default" href="index.php?view=inventary&limit=$limit&page=${nextPage}">Adelante <i class="glyphicon glyphicon-chevron-right"></i></a>`;
         }
 
         paginationContainer.innerHTML = paginationHTML;
@@ -1200,12 +1285,12 @@ function updateTableWithClientData() {
             availabilityColor = '#dc3545';
         } else {
             const percentage = (minQ / q) * 100;
-            if(percentage >= 80) {
+            if(percentage <= 50) {
                 availabilityColor = '#dc3545';
-            } else if(percentage >= 60) {
-                availabilityColor = '#fd7e14';
-            } else if(percentage >= 40) {
+            } else if(percentage <= 80) {
                 availabilityColor = '#ffc107';
+            } else {
+                availabilityColor = '#28a745';
             }
         }
 
@@ -1304,6 +1389,28 @@ document.getElementById('limit').addEventListener('keypress', function(e) {
         applyLimitFilter();
     }
 });
+
+// Función para aplicar el orden manteniendo los filtros
+function applyOrder(url) {
+    // Obtener los valores actuales de los filtros
+    const categoryId = document.getElementById('category_id').value;
+    const availability = document.getElementById('availability').value;
+    const searchTerm = document.getElementById('search').value;
+    const dateFilter = document.getElementById('date_filter').value;
+    const limit = document.getElementById('limit').value;
+    
+    // Construir la URL con los parámetros actuales
+    let newUrl = new URL(url);
+    if (categoryId) newUrl.searchParams.set('category_id', categoryId);
+    if (availability) newUrl.searchParams.set('availability', availability);
+    if (searchTerm) newUrl.searchParams.set('search', searchTerm);
+    if (dateFilter) newUrl.searchParams.set('date_filter', dateFilter);
+    if (limit) newUrl.searchParams.set('limit', limit);
+    
+    // Redirigir a la nueva URL
+    window.location.href = newUrl.toString();
+    return false;
+}
 </script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
@@ -1324,7 +1431,6 @@ document.getElementById('limit').addEventListener('keypress', function(e) {
     background-color: white;
     cursor: pointer;
 }
-/* Comentario de prueba */
 
 .custom-select__trigger {
     position: relative;

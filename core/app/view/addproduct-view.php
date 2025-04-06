@@ -67,21 +67,16 @@ if(count($_POST)>0){
     $category = CategoryData::getById($product->category_id);
     $categoryName = $category ? $category->name : '';
 
-    // Establecer las cookies para la alerta con el nombre ya decodificado
-    setcookie("productCreated", "true", time() + 3600, "/");
-    setcookie("productName", $productName, time() + 3600, "/");
-    setcookie("productCategory", $categoryName, time() + 3600, "/");
+    // Establecer la cookie para la alerta con el nombre del producto
+    setcookie("prdadd", $productName, time() + 60, "/");
     
     print "<script>window.location='index.php?view=inventary';</script>";
     exit;
   }
 
   // Establecer la cookie para mostrar la alerta
-  setcookie("productCreated", "true", time() + 3600, "/");
-  
-  // Aplicar doble decodificación para estar seguros
   $productName = urldecode(urldecode($product->name));
-  setcookie("productName", $productName, time() + 3600, "/");
+  setcookie("prdadd", $productName, time() + 60, "/");
 
   print "<script>window.location='index.php?view=inventary';</script>";
 }

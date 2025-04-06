@@ -74,8 +74,8 @@ class ProductData {
 
 
 
-	public static function getAll(){
-		$sql = "select * from ".self::$tablename;
+	public static function getAll($order = 'desc'){
+		$sql = "select * from ".self::$tablename." order by created_at ".$order;
 		$query = Executor::doit($sql);
 		return Model::many($query[0],new ProductData());
 	}

@@ -2,7 +2,11 @@
 	<div class="col-md-12">
 <!-- Single button -->
 
-		<h1><i class="glyphicon glyphicon-stats"></i> Inventario de Productos</h1>
+		<h1><i class="glyphicon glyphicon-stats"></i> Inventario de Productos 
+			<small class="text-muted">
+				(<?php echo count(ProductData::getAll()); ?> productos registrados)
+			</small>
+		</h1>
 		<?php if(isset($_COOKIE["prdupd"])):?>
 			<div class="alert alert-success alert-dismissible fade show" role="alert" id="successAlert">
 				<strong>¡Éxito!</strong> El producto se ha actualizado correctamente.

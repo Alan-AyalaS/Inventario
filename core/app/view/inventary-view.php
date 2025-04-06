@@ -646,40 +646,42 @@ function submitAdjustment() {
 }
 
 // Verificar si hay una alerta pendiente al cargar la página
-document.addEventListener('DOMContentLoaded', function() {
-    const alertMessage = sessionStorage.getItem('inventoryAlert');
-    if (alertMessage) {
-        // Crear y mostrar la alerta
-        const alertDiv = document.createElement('div');
-        // Determinar el color de la alerta según el tipo de operación
-        const isSubtraction = alertMessage.includes('restaron');
-        alertDiv.className = `alert alert-${isSubtraction ? 'warning' : 'success'} alert-dismissible fade show`;
-        alertDiv.role = 'alert';
-        alertDiv.style.position = 'fixed';
-        alertDiv.style.top = '20px';
-        alertDiv.style.right = '20px';
-        alertDiv.style.zIndex = '9999';
-        alertDiv.style.minWidth = '300px';
-        alertDiv.innerHTML = `
-            <strong>¡${isSubtraction ? 'Aviso' : 'Éxito'}!</strong> ${alertMessage}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        
-        // Agregar la alerta al body
-        document.body.appendChild(alertDiv);
-        
-        // Configurar la animación de desvanecimiento
-        setTimeout(() => {
-            alertDiv.style.transition = 'opacity 0.5s';
-            alertDiv.style.opacity = '0';
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        const alertMessage = sessionStorage.getItem('inventoryAlert');
+        if (alertMessage) {
+            // Crear y mostrar la alerta
+            const alertDiv = document.createElement('div');
+            // Determinar el color de la alerta según el tipo de operación
+            const isSubtraction = alertMessage.includes('restaron');
+            alertDiv.className = `alert alert-${isSubtraction ? 'warning' : 'success'} alert-dismissible fade show`;
+            alertDiv.role = 'alert';
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.style.minWidth = '300px';
+            alertDiv.innerHTML = `
+                <strong>¡${isSubtraction ? 'Aviso' : 'Éxito'}!</strong> ${alertMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            // Agregar la alerta al body
+            document.body.appendChild(alertDiv);
+            
+            // Configurar la animación de desvanecimiento
             setTimeout(() => {
-                alertDiv.remove();
-            }, 500);
-        }, 3000);
-        
-        // Eliminar el mensaje del sessionStorage
-        sessionStorage.removeItem('inventoryAlert');
-    }
+                alertDiv.style.transition = 'opacity 0.5s';
+                alertDiv.style.opacity = '0';
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 500);
+            }, 3000);
+            
+            // Eliminar el mensaje del sessionStorage
+            sessionStorage.removeItem('inventoryAlert');
+        }
+    }, 500); // Esperar 500ms después de que la página se cargue completamente
 });
 
 function showDeleteModal(productId, productName) {
@@ -708,8 +710,9 @@ function showDeleteModal(productId, productName) {
     modal.show();
 }
 
-// Funcionalidad para selección múltiple
-document.addEventListener('DOMContentLoaded', function() {
+// Inicializar todos los componentes cuando la página cargue
+window.addEventListener('load', function() {
+    // Inicializar selección múltiple
     const selectAll = document.getElementById('selectAll');
     const checkboxes = document.querySelectorAll('.product-checkbox');
     const deleteSelectedBtn = document.getElementById('deleteSelected');
@@ -717,22 +720,32 @@ document.addEventListener('DOMContentLoaded', function() {
     let lastChecked = null;
 
     // Seleccionar/deseleccionar todos
-    selectAll.addEventListener('change', function() {
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = this.checked;
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateDeleteButton();
         });
-        updateDeleteButton();
-    });
+    }
 
     // Actualizar botón de eliminar seleccionados
     function updateDeleteButton() {
         const selectedCount = document.querySelectorAll('.product-checkbox:checked').length;
-        deleteSelectedBtn.disabled = selectedCount === 0;
+        if (deleteSelectedBtn) {
+            deleteSelectedBtn.disabled = selectedCount === 0;
+        }
     }
 
     // Manejar selección con Shift
     function handleCheckboxClick(e) {
-        if (e.shiftKey && lastChecked) {
+        if (!lastChecked) {
+            lastChecked = this;
+            updateDeleteButton();
+            return;
+        }
+
+        if (e.shiftKey) {
             const checkboxesArray = Array.from(checkboxes);
             const start = checkboxesArray.indexOf(lastChecked);
             const end = checkboxesArray.indexOf(this);
@@ -740,7 +753,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const startIndex = Math.min(start, end);
             const endIndex = Math.max(start, end);
             
-            const isChecked = lastChecked.checked;
+            const isChecked = this.checked;
             
             for (let i = startIndex; i <= endIndex; i++) {
                 checkboxesArray[i].checked = isChecked;
@@ -757,94 +770,99 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Mostrar modal de confirmación
-    deleteSelectedBtn.addEventListener('click', function() {
-        $('#deleteSelectedModal').modal('show');
-    });
+    if (deleteSelectedBtn) {
+        deleteSelectedBtn.addEventListener('click', function() {
+            $('#deleteSelectedModal').modal('show');
+        });
+    }
 
     // Eliminar productos seleccionados
-    confirmDeleteSelectedBtn.addEventListener('click', function() {
-        const selectedIds = Array.from(document.querySelectorAll('.product-checkbox:checked'))
-            .map(checkbox => checkbox.value);
+    if (confirmDeleteSelectedBtn) {
+        confirmDeleteSelectedBtn.addEventListener('click', function() {
+            const selectedIds = Array.from(document.querySelectorAll('.product-checkbox:checked'))
+                .map(checkbox => checkbox.value);
 
-        console.log('Enviando solicitud para eliminar productos:', selectedIds);
+            console.log('Enviando solicitud para eliminar productos:', selectedIds);
 
-        // Enviar solicitud para eliminar
-        fetch('index.php?view=deleteproducts', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({ product_ids: selectedIds })
-        })
-        .then(response => {
-            console.log('Estado de la respuesta:', response.status);
-            console.log('Tipo de contenido:', response.headers.get('content-type'));
-            
-            if (!response.ok) {
-                throw new Error('Error en la respuesta del servidor: ' + response.status);
-            }
-            
-            return response.text().then(text => {
-                console.log('Texto de respuesta:', text);
-                try {
-                    return JSON.parse(text);
-                } catch (e) {
-                    console.error('Error al parsear JSON:', e);
-                    console.error('Texto recibido:', text);
-                    throw new Error('La respuesta no es un JSON válido. Texto recibido: ' + text.substring(0, 100));
+            // Enviar solicitud para eliminar
+            fetch('index.php?view=deleteproducts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'product_ids=' + encodeURIComponent(JSON.stringify(selectedIds))
+            })
+            .then(response => {
+                console.log('Estado de la respuesta:', response.status);
+                console.log('Tipo de contenido:', response.headers.get('content-type'));
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor: ' + response.status);
                 }
+                return response.text().then(text => {
+                    console.log('Respuesta recibida:', text);
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('Error al parsear JSON:', e);
+                        throw new Error('La respuesta del servidor no es válida: ' + text);
+                    }
+                });
+            })
+            .then(data => {
+                console.log('Datos procesados:', data);
+                if (data.success) {
+                    // Guardar el mensaje en localStorage para mostrarlo después de recargar
+                    const count = selectedIds.length;
+                    localStorage.setItem('deleteSuccessMessage', `Se eliminaron exitosamente ${count} producto${count > 1 ? 's' : ''}.`);
+                    // Recargar la página
+                    window.location.href = window.location.href;
+                } else {
+                    alert('Error al eliminar los productos: ' + (data.message || 'Error desconocido'));
+                }
+            })
+            .catch(error => {
+                console.error('Error completo:', error);
+                alert('Error al eliminar los productos: ' + error.message);
             });
-        })
-        .then(data => {
-            console.log('Datos procesados:', data);
-            if (data.success) {
-                // Guardar el mensaje en sessionStorage para mostrarlo después de recargar
-                sessionStorage.setItem('deleteSuccessMessage', data.message);
-                
-                // Recargar la página
-                window.location.reload();
-            } else {
-                alert('Error al eliminar los productos: ' + (data.message || 'Error desconocido'));
-            }
-        })
-        .catch(error => {
-            console.error('Error completo:', error);
-            alert('Error al eliminar los productos. Detalles: ' + error.message);
+
+            $('#deleteSelectedModal').modal('hide');
         });
-
-        $('#deleteSelectedModal').modal('hide');
-    });
-
-    // Mostrar alerta de éxito después de recargar la página
-    const successMessage = sessionStorage.getItem('deleteSuccessMessage');
-    if (successMessage) {
-        // Crear y mostrar la alerta
-        const alertDiv = document.createElement('div');
-        alertDiv.className = 'alert alert-success alert-dismissible fade show';
-        alertDiv.role = 'alert';
-        alertDiv.innerHTML = `
-            <strong>¡Éxito!</strong> ${successMessage}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        
-        // Insertar la alerta al principio del card-body
-        const cardBody = document.querySelector('.card-body');
-        if (cardBody) {
-            cardBody.insertBefore(alertDiv, cardBody.firstChild);
-        }
-        
-        // Eliminar el mensaje del sessionStorage
-        sessionStorage.removeItem('deleteSuccessMessage');
-        
-        // Cerrar automáticamente la alerta después de 5 segundos
-        setTimeout(() => {
-            const closeButton = alertDiv.querySelector('.btn-close');
-            if (closeButton) {
-                closeButton.click();
-            }
-        }, 5000);
     }
+
+    // Verificar si hay mensaje de éxito en localStorage
+    setTimeout(function() {
+        const successMessage = localStorage.getItem('deleteSuccessMessage');
+        if (successMessage) {
+            // Crear y mostrar la alerta
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+            alertDiv.role = 'alert';
+            alertDiv.innerHTML = `
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <strong>¡Eliminado!</strong> ${successMessage}
+            `;
+            
+            // Agregar la alerta al principio del card-body
+            const cardBody = document.querySelector('.card-body');
+            if (cardBody) {
+                cardBody.insertBefore(alertDiv, cardBody.firstChild);
+            }
+            
+            // Eliminar el mensaje del localStorage
+            localStorage.removeItem('deleteSuccessMessage');
+            
+            // Cerrar automáticamente la alerta después de 3 segundos
+            setTimeout(() => {
+                const closeButton = alertDiv.querySelector('.btn-close');
+                if (closeButton) {
+                    closeButton.click();
+                }
+            }, 3000);
+        }
+    }, 500);
+
+    // Inicializar otros componentes aquí...
+    // ... (mantener el resto del código de inicialización)
 });
 
 // Función para actualizar el color del select según la categoría seleccionada
@@ -887,7 +905,7 @@ const updateCategoryColor = (() => {
 })();
 
 // Inicializar el select personalizado de disponibilidad
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('load', function() {
     const customAvailabilitySelect = document.querySelector('#customAvailabilitySelect');
     const customAvailabilityTrigger = customAvailabilitySelect.querySelector('.custom-select__trigger');
     const customAvailabilityOptions = customAvailabilitySelect.querySelectorAll('.custom-option');
@@ -936,7 +954,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Inicializar el select personalizado de categoría
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('load', function() {
     const customCategorySelect = document.querySelector('#customCategorySelect');
     const customCategoryTrigger = customCategorySelect.querySelector('.custom-select__trigger');
     const customCategoryOptions = customCategorySelect.querySelectorAll('.custom-option');
@@ -1125,64 +1143,7 @@ function filterProducts() {
     console.log('=== FIN DE FILTRADO ===');
 }
 
-// Agregar event listeners para todos los filtros
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('=== INICIALIZACIÓN DE FILTROS ===');
-    
-    // Limpiar los filtros al recargar la página
-    if (performance.navigation.type === 1) { // 1 indica que la página fue recargada
-        console.log('Página recargada, limpiando filtros');
-        window.location.href = 'index.php?view=inventary';
-        return;
-    }
-    
-    // Filtro de búsqueda
-    document.getElementById('search').addEventListener('input', filterProducts);
-    
-    // Filtro de categoría
-    document.getElementById('category_id').addEventListener('change', () => {
-        const categoryId = document.getElementById('category_id').value;
-        console.log('Cambio de categoría detectado:', categoryId);
-        
-        if (categoryId) {
-            console.log('Categoría seleccionada:', categoryId);
-            // Ocultar la paginación
-            const pagination = document.querySelector('.btn-group.pull-right');
-            if (pagination) {
-                pagination.style.display = 'none';
-                console.log('Paginación ocultada');
-            }
-            // Mostrar todos los productos de la categoría
-            document.getElementById('limit').value = '1000'; // Un número grande para mostrar todos
-            console.log('Límite actualizado a 1000');
-        } else {
-            console.log('No hay categoría seleccionada');
-            // Mostrar la paginación
-            const pagination = document.querySelector('.btn-group.pull-right');
-            if (pagination) {
-                pagination.style.display = '';
-                console.log('Paginación mostrada');
-            }
-            // Restaurar el límite por defecto
-            document.getElementById('limit').value = '10';
-            console.log('Límite restaurado a 10');
-        }
-        filterProducts();
-    });
-    
-    // Filtro de disponibilidad
-    document.getElementById('availability').addEventListener('change', filterProducts);
-    
-    // Filtro de fecha
-    document.getElementById('date_filter').addEventListener('change', filterProducts);
-    
-    // Filtro de límite
-    document.getElementById('limit').addEventListener('change', filterProducts);
-    
-    console.log('=== FIN DE INICIALIZACIÓN DE FILTROS ===');
-});
-
-// Script para crear productos de prueba
+// Función para crear productos de prueba
 function createTestProducts() {
     const categories = [
         { id: 1, name: 'Jerseys' },
@@ -1244,12 +1205,12 @@ function createTestProducts() {
 }
 
 // Agregar botón para crear productos de prueba
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('load', function() {
     const createTestProductsBtn = document.createElement('button');
     createTestProductsBtn.className = 'btn btn-primary';
     createTestProductsBtn.textContent = 'Crear Productos de Prueba';
     createTestProductsBtn.onclick = () => {
-        window.location.href = 'http://localhost/Sistema%20de%20inventario/create_test_products.php';
+        window.location.href = 'create_test_products.php';
     };
     
     const cardHeader = document.querySelector('.card-header');

@@ -28,7 +28,7 @@ class ProductData {
 
 	public static function delById($id){
 		$sql = "delete from ".self::$tablename." where id=$id";
-		Executor::doit($sql);
+		return Executor::doit($sql);
 	}
 	public function del(){
 		// Primero eliminar todas las operaciones asociadas

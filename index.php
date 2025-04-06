@@ -33,6 +33,14 @@ $total_pages = 1;
 
 // Añadir el controlador de eliminación múltiple
 if(isset($_GET["view"]) && $_GET["view"]=="deleteproducts"){
+    // Asegurarnos de que no haya salida previa
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
+    
+    // Asegurarnos de que el autoloader esté disponible
+    include_once "core/autoload.php";
+    
     require_once("core/app/controller/DeleteProductsController.php");
     $controller = new DeleteProductsController();
     $controller->index();

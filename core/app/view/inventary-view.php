@@ -110,8 +110,7 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
 <!-- Filtros -->
 <div class="row">
     <div class="col-md-12">
-        <form method="get" action="index.php" class="form-inline d-flex align-items-end">
-            <input type="hidden" name="view" value="inventary">
+        <div class="form-inline d-flex align-items-end">
             <div class="form-group me-2">
                 <label for="category_id" class="me-2">Categoría:</label>
                 <div class="custom-select-wrapper">
@@ -201,7 +200,7 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
             </div>
             <div class="form-group me-2">
                 <label for="date_filter" class="me-2">Fecha:</label>
-                <select name="date_filter" id="date_filter" class="form-control">
+                <select name="date_filter" id="date_filter" class="form-control" onchange="filterProducts()">
                     <option value="">Todas las fechas</option>
                     <option value="this_week" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_week"){ echo "selected"; } ?>>Esta semana</option>
                     <option value="this_month" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_month"){ echo "selected"; } ?>>Este mes</option>
@@ -212,11 +211,10 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
             </div>
             <div class="form-group me-2">
                 <label for="limit" class="me-2">Mostrar:</label>
-                <input type="number" name="limit" id="limit" class="form-control" value="<?php echo isset($_GET["limit"]) ? $_GET["limit"] : count($products); ?>" min="1" style="width: 80px;" onchange="this.form.submit()">
+                <input type="number" name="limit" id="limit" class="form-control" min="1" max="<?php echo count($products); ?>" value="<?php echo isset($_GET["limit"]) ? $_GET["limit"] : 100; ?>" onchange="updateLimit(this.value)">
             </div>
-            <button type="submit" class="btn btn-primary" style="display: none;">Aplicar</button>
-            <a href="index.php?view=inventary" class="btn btn-secondary" id="clearFiltersBtn" style="display: none;">Limpiar filtros</a>
-        </form>
+            <button type="button" class="btn btn-secondary" id="clearFiltersBtn" style="display: none;" onclick="clearFilters()">Limpiar filtros</button>
+        </div>
     </div>
 </div>
 
@@ -386,13 +384,13 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
 			if(isset($_GET["page"])){
 				$page=$_GET["page"];
 			}
-			$limit=count($products);
-			if(isset($_GET["limit"]) && $_GET["limit"]!="" && $_GET["limit"]!=$limit){
-				$limit=$_GET["limit"];
+			$limit = 100; // Valor predeterminado
+			if(isset($_GET["limit"]) && $_GET["limit"]!=""){
+				$limit = intval($_GET["limit"]);
 			}
 			// Asegurar que el límite nunca sea 0
 			if($limit <= 0) {
-				$limit = count($products);
+				$limit = 100;
 			}
 
 			// Verificar si el límite es diferente al total de productos
@@ -590,6 +588,10 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
 <script>
 // Variable global para almacenar el mensaje de la operación
 let lastOperationMessage = '';
+
+// Almacenar todos los productos en una variable global
+let allProducts = <?php echo json_encode($products); ?>;
+let currentProducts = allProducts;
 
 function showAdjustModal(productId, operationType) {
     document.getElementById('productId').value = productId;
@@ -1047,32 +1049,14 @@ function filterByAvailability(product, availability) {
     }
 }
 
-// Modificar la función de filtrado para incluir la actualización de la alerta
+// Función para filtrar productos
 function filterProducts() {
     const searchTerm = document.getElementById('search').value.toLowerCase();
     const categoryId = document.getElementById('category_id').value;
     const availability = document.getElementById('availability').value;
     const dateFilter = document.getElementById('date_filter').value;
-    const limit = document.getElementById('limit').value;
-    const totalProducts = document.querySelectorAll('tbody tr').length;
-    const products = document.querySelectorAll('tbody tr');
     const clearFiltersBtn = document.getElementById('clearFiltersBtn');
     const filterAlert = document.getElementById('filterAlert');
-    
-    // Verificar si el límite es igual al total de productos
-    const isFullList = (parseInt(limit) === totalProducts);
-    
-    // Si no es la lista completa, redirigir al servidor
-    if (!isFullList) {
-        let url = 'index.php?view=inventary';
-        if (searchTerm) url += '&search=' + encodeURIComponent(searchTerm);
-        if (categoryId) url += '&category_id=' + encodeURIComponent(categoryId);
-        if (availability) url += '&availability=' + encodeURIComponent(availability);
-        if (dateFilter) url += '&date_filter=' + encodeURIComponent(dateFilter);
-        if (limit) url += '&limit=' + encodeURIComponent(limit);
-        window.location.href = url;
-        return;
-    }
     
     // Mostrar u ocultar el botón de limpiar filtros
     if (searchTerm || categoryId || availability || dateFilter) {
@@ -1081,224 +1065,207 @@ function filterProducts() {
         clearFiltersBtn.style.display = 'none';
     }
     
-    let visibleCount = 0;
-    
-    // Primero, mostrar todos los productos para poder filtrarlos
-    products.forEach(product => {
-        product.style.display = '';
-    });
-    
-    // Luego, aplicar los filtros
-    products.forEach(product => {
-        const name = product.querySelector('td:nth-child(3)').textContent.toLowerCase();
-        const categoryCell = product.querySelector('td:nth-child(4)');
-        const badge = categoryCell.querySelector('.badge');
-        const productCategoryId = badge ? badge.getAttribute('data-category-id') : '';
-        const date = product.querySelector('td:nth-child(9)').textContent;
-        const matchesSearch = name.includes(searchTerm);
-        const matchesCategory = !categoryId || productCategoryId === categoryId;
+    // Filtrar los productos
+    let filteredProducts = allProducts.filter(product => {
+        const matchesSearch = product.name.toLowerCase().includes(searchTerm);
+        const matchesCategory = !categoryId || product.category_id === categoryId;
         const matchesAvailability = filterByAvailability(product, availability);
-        const matchesDate = !dateFilter || date === dateFilter;
+        const matchesDate = !dateFilter || product.date === dateFilter;
         
-        if (matchesSearch && matchesCategory && matchesAvailability && matchesDate) {
-            product.style.display = '';
-            visibleCount++;
-        } else {
-            product.style.display = 'none';
-        }
+        return matchesSearch && matchesCategory && matchesAvailability && matchesDate;
     });
+    
+    // Actualizar la tabla
+    updateTable(filteredProducts);
     
     // Actualizar la alerta de filtrado
     if (filterAlert) {
         filterAlert.style.display = 'block';
         if (searchTerm) {
-            filterAlert.textContent = `Mostrando ${visibleCount} productos que coinciden con la búsqueda`;
+            filterAlert.textContent = `Mostrando ${filteredProducts.length} productos que coinciden con la búsqueda`;
         } else if (categoryId) {
-            filterAlert.textContent = `Mostrando ${visibleCount} productos de la categoría seleccionada`;
+            filterAlert.textContent = `Mostrando ${filteredProducts.length} productos de la categoría seleccionada`;
         } else if (availability) {
-            filterAlert.textContent = `Mostrando ${visibleCount} productos con la disponibilidad seleccionada`;
+            filterAlert.textContent = `Mostrando ${filteredProducts.length} productos con la disponibilidad seleccionada`;
         } else if (dateFilter) {
-            filterAlert.textContent = `Mostrando ${visibleCount} productos del período seleccionado`;
+            filterAlert.textContent = `Mostrando ${filteredProducts.length} productos del período seleccionado`;
         } else {
-            filterAlert.textContent = `Mostrando todos los ${visibleCount} productos`;
+            filterAlert.textContent = `Mostrando todos los ${filteredProducts.length} productos`;
         }
     }
 }
 
-// Función para crear productos de prueba
-function createTestProducts() {
-    const categories = [
-        { id: 1, name: 'Jerseys' },
-        { id: 2, name: 'Gorras' },
-        { id: 3, name: 'Tenis' },
-        { id: 4, name: 'Balones' },
-        { id: 5, name: 'Variado' }
-    ];
-
-    const products = [];
-    
-    // Crear 10 productos por categoría
-    categories.forEach(category => {
-        for (let i = 1; i <= 10; i++) {
-            // Generar disponibilidad aleatoria entre 0 y 200
-            const availability = Math.floor(Math.random() * 201);
-            
-            products.push({
-                name: `${category.name.toLowerCase()} ${i}`,
-                category_id: category.id,
-                price_in: (Math.random() * 100 + 50).toFixed(2),
-                price_out: (Math.random() * 100 + 100).toFixed(2),
-                unit: 'pz',
-                inventary_min: Math.floor(Math.random() * 10 + 5),
-                availability: availability
-            });
-        }
-    });
-
-    // Enviar los productos al servidor
-    fetch('core/app/controller/ProductController.php?action=create_test_products', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify({ products })
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.text().then(text => {
-                throw new Error(`Error en la respuesta del servidor: ${response.status} ${response.statusText}\n${text}`);
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            location.reload();
-        } else {
-            alert('Error al crear productos: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error al crear productos: ' + error.message);
-    });
-}
-
-// Agregar botón para crear productos de prueba
-window.addEventListener('load', function() {
-    const createTestProductsBtn = document.createElement('button');
-    createTestProductsBtn.className = 'btn btn-primary';
-    createTestProductsBtn.textContent = 'Crear Productos de Prueba';
-    createTestProductsBtn.onclick = () => {
-        window.location.href = 'create_test_products.php';
-    };
-    
-    const cardHeader = document.querySelector('.card-header');
-    if (cardHeader) {
-        cardHeader.appendChild(createTestProductsBtn);
-    }
-});
-
-// Función para obtener el valor de una cookie
-function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-}
-
-// Función para obtener el artículo correcto según la categoría
-function getArticleForCategory(category) {
-    switch(category.toLowerCase()) {
-        case 'balón':
-            return 'el';
-        case 'tenis':
-            return 'los';
-        case 'variado':
-            return 'el';
-        default:
-            return 'la';
-    }
-}
-
-// Verificar si hay una alerta de producto creado
-if (getCookie('productCreated') === 'true') {
-    const productName = decodeURIComponent(getCookie('productName') || '');
-    const productCategory = getCookie('productCategory') || '';
-    const article = getArticleForCategory(productCategory);
-    
-    const alertDiv = document.createElement('div');
-    alertDiv.className = 'alert alert-success alert-dismissible fade show';
-    alertDiv.style.position = 'fixed';
-    alertDiv.style.top = '20px';
-    alertDiv.style.right = '20px';
-    alertDiv.style.zIndex = '9999';
-    alertDiv.style.minWidth = '300px';
-    alertDiv.innerHTML = `
-        <strong>¡Éxito!</strong> ${article} ${productCategory} "${productName}" se ha creado correctamente.
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    `;
-    document.body.appendChild(alertDiv);
-    
-    // Eliminar la alerta después de 3 segundos
-    setTimeout(() => {
-        alertDiv.classList.remove('show');
-        setTimeout(() => {
-            alertDiv.remove();
-        }, 150);
-    }, 3000);
-    
-    // Eliminar las cookies
-    document.cookie = "productCreated=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    document.cookie = "productName=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    document.cookie = "productCategory=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-}
-
-// Función para mostrar/ocultar el botón de limpiar filtros
-function updateClearFiltersButton() {
-    const searchInput = document.getElementById('search');
-    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-    const categorySelect = document.getElementById('category_id');
-    const availabilitySelect = document.getElementById('availability');
-    const dateFilter = document.getElementById('date_filter');
-    
-    // Mostrar el botón si hay algún filtro activo
-    if (searchInput.value.trim() !== '' || 
-        categorySelect.value !== '' || 
-        availabilitySelect.value !== '' || 
-        dateFilter.value !== '') {
-        clearFiltersBtn.style.display = '';
-    } else {
-        clearFiltersBtn.style.display = 'none';
-    }
-}
-
-// Agregar evento al campo de búsqueda
-document.getElementById('search').addEventListener('input', updateClearFiltersButton);
-
-// Agregar eventos a los otros filtros
-document.getElementById('category_id').addEventListener('change', updateClearFiltersButton);
-document.getElementById('availability').addEventListener('change', updateClearFiltersButton);
-document.getElementById('date_filter').addEventListener('change', updateClearFiltersButton);
-
-// Función para limpiar todos los filtros excepto "mostrar"
-function clearFilters() {
-    const limitValue = document.getElementById('limit').value;
-    // Redirigir a la página base con solo el parámetro de límite
-    window.location.href = `index.php?view=inventary&limit=${limitValue}`;
-}
-
-// Asignar la función al botón de limpiar filtros
-document.getElementById('clearFiltersBtn').addEventListener('click', function(e) {
-    e.preventDefault();
-    clearFilters();
-});
-
-// Verificar si hay filtros activos al cargar la página
+// Inicializar la tabla con todos los productos al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
-    updateClearFiltersButton();
+    updateTable(allProducts);
 });
+
+// Función para actualizar la tabla con los productos filtrados
+function updateTable(filteredProducts) {
+    const tbody = document.querySelector('tbody');
+    const limit = parseInt(document.getElementById('limit').value) || 100;
+    const currentPage = parseInt(new URLSearchParams(window.location.search).get('page')) || 1;
+    
+    // Calcular el número total de páginas
+    const totalPages = Math.ceil(filteredProducts.length / limit);
+    
+    // Asegurar que la página actual no exceda el número total de páginas
+    const page = Math.min(currentPage, totalPages);
+    
+    // Calcular el rango de productos a mostrar
+    const startIndex = (page - 1) * limit;
+    const endIndex = Math.min(startIndex + limit, filteredProducts.length);
+    const productsToShow = filteredProducts.slice(startIndex, endIndex);
+    
+    // Limpiar la tabla
+    tbody.innerHTML = '';
+    
+    // Agregar los productos filtrados
+    productsToShow.forEach(product => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <input type="checkbox" class="form-check-input product-checkbox" value="${product.id}">
+            </td>
+            <td>${product.id}</td>
+            <td><a href="index.php?view=producthistory&id=${product.id}" style="text-decoration: none; color: inherit;">${product.name}</a></td>
+            <td>
+                <span class="badge" style="background-color: #28a745; color: white; padding: 5px 10px; border-radius: 4px;" data-category-id="${product.category_id}">
+                    ${product.category_name}
+                </span>
+            </td>
+            <td>${product.price_in}</td>
+            <td>${product.price_out}</td>
+            <td>${product.unit}</td>
+            <td>${product.available}</td>
+            <td>${product.inventary_min}</td>
+            <td>
+                <button type="button" class="btn btn-sm btn-success" onclick="showAdjustModal(${product.id}, 'add')">
+                    <i class="bi bi-plus-circle"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-danger" onclick="showAdjustModal(${product.id}, 'subtract')">
+                    <i class="bi bi-dash-circle"></i>
+                </button>
+                <a href="index.php?view=editproduct&id=${product.id}" class="btn btn-sm btn-warning">
+                    <i class="bi bi-pencil"></i>
+                </a>
+                <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal(${product.id}, '${product.name.replace(/'/g, "\\'")}')">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+    
+    // Actualizar la paginación
+    updatePagination(filteredProducts.length, page, totalPages);
+}
+
+// Función para actualizar la paginación
+function updatePagination(totalProducts, currentPage, totalPages) {
+    const paginationContainer = document.querySelector('.btn-group.pull-right');
+    if (!paginationContainer) return;
+    
+    // Limpiar la paginación existente
+    paginationContainer.innerHTML = '';
+    
+    // Agregar botón de página anterior
+    if (currentPage > 1) {
+        const prevButton = document.createElement('a');
+        prevButton.className = 'btn btn-sm btn-default';
+        prevButton.href = '#';
+        prevButton.innerHTML = '<i class="glyphicon glyphicon-chevron-left"></i> Atras';
+        prevButton.onclick = (e) => {
+            e.preventDefault();
+            changePage(currentPage - 1);
+        };
+        paginationContainer.appendChild(prevButton);
+    }
+    
+    // Agregar números de página
+    for (let i = 1; i <= totalPages; i++) {
+        const pageButton = document.createElement('a');
+        pageButton.className = `btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-default'}`;
+        pageButton.href = '#';
+        pageButton.textContent = i;
+        pageButton.onclick = (e) => {
+            e.preventDefault();
+            changePage(i);
+        };
+        paginationContainer.appendChild(pageButton);
+    }
+    
+    // Agregar botón de página siguiente
+    if (currentPage < totalPages) {
+        const nextButton = document.createElement('a');
+        nextButton.className = 'btn btn-sm btn-default';
+        nextButton.href = '#';
+        nextButton.innerHTML = 'Adelante <i class="glyphicon glyphicon-chevron-right"></i>';
+        nextButton.onclick = (e) => {
+            e.preventDefault();
+            changePage(currentPage + 1);
+        };
+        paginationContainer.appendChild(nextButton);
+    }
+    
+    // Actualizar el texto de la página actual
+    const pageInfo = document.querySelector('h3');
+    if (pageInfo) {
+        pageInfo.textContent = `Pagina ${currentPage} de ${totalPages}`;
+    }
+}
+
+// Función para cambiar de página
+function changePage(newPage) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', newPage);
+    window.history.pushState({}, '', url);
+    filterProducts();
+}
+
+// Función para actualizar el límite de productos mostrados
+function updateLimit(newLimit) {
+    const totalProducts = <?php echo count($products); ?>;
+    const limitInput = document.getElementById('limit');
+    
+    // Asegurar que el valor esté dentro del rango
+    if (newLimit < 1) {
+        newLimit = totalProducts;
+    } else if (newLimit > totalProducts) {
+        newLimit = 1;
+    }
+    
+    // Actualizar el valor del input
+    limitInput.value = newLimit;
+    
+    // Actualizar la URL sin recargar la página
+    const url = new URL(window.location.href);
+    url.searchParams.set('limit', newLimit);
+    url.searchParams.set('page', '1');
+    window.history.pushState({}, '', url);
+    
+    // Aplicar los filtros actuales
+    filterProducts();
+}
+
+// Función para limpiar todos los filtros
+function clearFilters() {
+    // Resetear los valores de los filtros
+    document.getElementById('search').value = '';
+    document.getElementById('category_id').value = '';
+    document.getElementById('availability').value = '';
+    document.getElementById('date_filter').value = '';
+    
+    // Actualizar los selects personalizados
+    document.querySelector('#customCategorySelect .custom-select__trigger span').textContent = 'Todas las categorías';
+    document.querySelector('#customAvailabilitySelect .custom-select__trigger span').textContent = 'Todas las cantidades';
+    
+    // Ocultar el botón de limpiar filtros
+    document.getElementById('clearFiltersBtn').style.display = 'none';
+    
+    // Aplicar los filtros
+    filterProducts();
+}
 </script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">

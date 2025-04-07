@@ -50,7 +50,7 @@ if(isset($_GET["size"]) && $_GET["size"] != "") {
 if(isset($_GET["availability"]) && $_GET["availability"] != "") {
 	$filtered_products = [];
 	foreach($products as $product) {
-		$q = OperationData::getQYesF($product->id);
+		$q = $product->availability; // Usar el valor correcto del stock
 		switch($_GET["availability"]) {
 			case '0':
 				if($q == 0) $filtered_products[] = $product;

@@ -403,6 +403,7 @@ if($selected_category_name == "Jersey") {
                                 <label for="talla" class="form-label">Talla</label>
                                 <select class="form-select" id="talla" name="talla" required>
                                     <option value="">Seleccione una talla</option>
+                                    <option value="unitalla">Unitalla</option>
                                     <option value="S">S</option>
                                     <option value="M">M</option>
                                     <option value="L">L</option>
@@ -883,10 +884,28 @@ let categoriesData = <?php echo json_encode($categories); ?>;
 let filteredProducts = [...allProducts];
 
 function showAdjustModal(productId, operationType) {
+    // Obtener el producto actual
+    const product = allProducts.find(p => p.id == productId);
+    if (!product) return;
+
+    // Establecer los valores del modal
     document.getElementById('productId').value = productId;
     document.getElementById('operationType').value = operationType;
     document.getElementById('adjustModalLabel').textContent = 
         operationType === 'add' ? 'Agregar al Inventario' : 'Restar del Inventario';
+    
+    // Seleccionar automáticamente la talla del producto
+    const tallaSelect = document.getElementById('talla');
+    if (tallaSelect) {
+        // Si el producto tiene talla unitalla o no tiene talla, seleccionar "unitalla"
+        if (!product.size || product.size === 'unitalla') {
+            tallaSelect.value = 'unitalla';
+        } else {
+            tallaSelect.value = product.size;
+        }
+    }
+    
+    // Mostrar el modal
     var modal = new bootstrap.Modal(document.getElementById('adjustModal'));
     modal.show();
 }

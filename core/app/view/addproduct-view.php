@@ -60,7 +60,7 @@ if(count($_POST)>0){
   // Crear un producto para cada talla con cantidad mayor a 0
   foreach($tallas as $talla => $cantidad) {
     if($cantidad > 0) {
-      $product->name = urldecode($_POST["name"]) . " - Talla " . $talla;
+      $product->name = urldecode($_POST["name"]);
       $product->availability = $cantidad;
       $total_quantity += $cantidad;
 

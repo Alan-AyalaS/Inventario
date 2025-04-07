@@ -551,6 +551,8 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                                 <th style="width: 100px;">Precio de Salida</th>
                                 <th style="width: 80px;">Unidad</th>
                                 <th style="width: 80px;">Disponible</th>
+                                <th style="width: 80px;">Talla</th>
+                                <th style="width: 80px;">Total</th>
                                 <th style="width: 100px;">Mínima en Inventario</th>
                                 <th style="width: 150px;">Acciones</th>
                             </tr>
@@ -636,6 +638,31 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                                     ?>">
                                         <?php echo $total; ?>
                                     </span>
+                                </td>
+                                <td>
+                                    <?php 
+                                    // Obtener la talla del producto
+                                    $talla_producto = '';
+                                    foreach($operations as $op) {
+                                        if($op->talla) {
+                                            $talla_producto = $op->talla;
+                                            break;
+                                        }
+                                    }
+                                    echo $talla_producto ?: '1';
+                                    ?>
+                                </td>
+                                <td>
+                                    <?php 
+                                    // Calcular el total de todas las tallas
+                                    $total_tallas = 0;
+                                    foreach($tallas as $cantidad) {
+                                        if($cantidad > 0) {
+                                            $total_tallas += $cantidad;
+                                        }
+                                    }
+                                    echo $total_tallas;
+                                    ?>
                                 </td>
                                 <td><?php echo $product->inventary_min; ?></td>
                                 <td>
@@ -1335,7 +1362,32 @@ function updateTableWithClientData() {
                     ${q}
                 </span>
             </td>
-            <td>${minQ}</td>
+            <td>
+                <?php 
+                // Obtener la talla del producto
+                $talla_producto = '';
+                foreach($operations as $op) {
+                    if($op->talla) {
+                        $talla_producto = $op->talla;
+                        break;
+                    }
+                }
+                echo $talla_producto ?: '1';
+                ?>
+            </td>
+            <td>
+                <?php 
+                // Calcular el total de todas las tallas
+                $total_tallas = 0;
+                foreach($tallas as $cantidad) {
+                    if($cantidad > 0) {
+                        $total_tallas += $cantidad;
+                    }
+                }
+                echo $total_tallas;
+                ?>
+            </td>
+            <td><?php echo $product->inventary_min; ?></td>
             <td>
                 <button type="button" class="btn btn-sm btn-success" onclick="showAdjustModal(${product.id}, 'add')">
                     <i class="bi bi-plus-circle"></i>

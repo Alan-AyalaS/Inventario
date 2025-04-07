@@ -692,7 +692,7 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
                         // Determinar si es la primera fila del grupo
                         $is_first_in_group = $product === reset($current_group);
                     ?>
-                    <tr class="total-group-<?php echo $group_id; ?>" onmouseover="highlightTotalGroup(<?php echo $group_id; ?>)" onmouseout="unhighlightTotalGroup(<?php echo $group_id; ?>)">
+                    <tr class="total-group-<?php echo $group_id; ?>">
                         <td>
                             <input type="checkbox" class="product-checkbox" value="<?php echo $product->id; ?>">
                         </td>
@@ -771,13 +771,11 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
                                 <?php echo $total; ?>
                             </span>
                         </td>
-                        <td class="total-cell">
-                            <?php if($is_first_in_group): ?>
-                                <div class="total-value" rowspan="<?php echo $rowspan; ?>"><?php echo $product->total; ?></div>
-                            <?php else: ?>
-                                <div class="total-value hidden"><?php echo $product->total; ?></div>
-                            <?php endif; ?>
-                        </td>
+                        <?php if($is_first_in_group): ?>
+                            <td rowspan="<?php echo $rowspan; ?>" id="total-cell-<?php echo $group_id; ?>" style="vertical-align: middle; text-align: center;">
+                                <?php echo $product->total; ?>
+                            </td>
+                        <?php endif; ?>
                         <td class="actions-cell">
                             <div class="btn-group">
                                 <button type="button" class="btn btn-sm btn-success" onclick="showAdjustModal(<?php echo $product->id; ?>, 'add')">
@@ -1811,23 +1809,34 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function highlightTotalGroup(groupId) {
-    document.querySelectorAll('.total-group-' + groupId + ' .total-cell').forEach(cell => {
-        cell.classList.add('highlighted');
-        // Mostrar el valor del total en todas las celdas del grupo
-        cell.querySelector('.total-value').classList.remove('hidden');
-    });
+    const totalCell = document.getElementById('total-cell-' + groupId);
+    if (totalCell) {
+        totalCell.style.backgroundColor = '#e9ecef';
+    }
 }
 
 function unhighlightTotalGroup(groupId) {
-    document.querySelectorAll('.total-group-' + groupId + ' .total-cell').forEach(cell => {
-        cell.classList.remove('highlighted');
-        // Ocultar el valor del total en todas las celdas excepto la primera
-        const isFirstInGroup = cell.querySelector('.total-value').hasAttribute('rowspan');
-        if (!isFirstInGroup) {
-            cell.querySelector('.total-value').classList.add('hidden');
-        }
-    });
+    const totalCell = document.getElementById('total-cell-' + groupId);
+    if (totalCell) {
+        totalCell.style.backgroundColor = '';
+    }
 }
+
+// Agregar eventos de mouse a todas las filas del grupo
+document.addEventListener('DOMContentLoaded', function() {
+    const rows = document.querySelectorAll('tr[class^="total-group-"]');
+    rows.forEach(row => {
+        const groupId = row.className.match(/total-group-(\d+)/)[1];
+        
+        row.addEventListener('mouseenter', function() {
+            highlightTotalGroup(groupId);
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            unhighlightTotalGroup(groupId);
+        });
+    });
+});
 </script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
@@ -1927,11 +1936,92 @@ button[data-bs-toggle="modal"][data-bs-target^="#debugModal"] {
 
 /* Estilos para resaltar el total */
 .total-cell {
+    position: relative !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+/* Eliminar todas las líneas de la tabla para la celda total */
+table td.total-cell,
+tr td.total-cell,
+tbody tr td.total-cell,
+.table td.total-cell,
+.table tbody tr td.total-cell,
+.table-bordered td.total-cell,
+.table-bordered tbody tr td.total-cell {
+    border: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    background: none !important;
+}
+
+/* Contenedor del valor total */
+.total-value[data-rowspan] {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    border: 1px solid #dee2e6 !important;
+    border-top-width: 1px !important;
+    border-bottom-width: 1px !important;
+    background: white !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 2 !important;
+}
+
+/* Ocultar el valor cuando no es el primero del grupo */
+.total-value.hidden {
+    display: none !important;
+}
+
+/* Estilo para el resaltado */
+.total-cell.highlighted .total-value[data-rowspan] {
+    background-color: #e9ecef !important;
+}
+
+/* Resto de los estilos existentes */
+.total-cell {
     background-color: #fff;
     transition: background-color 0.3s ease;
     position: relative;
     z-index: 0;
     padding: 0 !important;
+    border: none !important;
+}
+
+/* Eliminar todas las líneas de la celda total */
+.total-cell,
+.total-cell:not(:last-child),
+.total-cell:not(:first-child),
+tr:not(:last-child) .total-cell,
+tr .total-cell {
+    border: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
+}
+
+/* Asegurar que solo los bordes externos sean visibles */
+.total-cell {
+    border-left: 1px solid #dee2e6 !important;
+    border-right: 1px solid #dee2e6 !important;
+}
+
+/* El primer elemento del grupo tiene borde superior */
+tr:first-child .total-cell,
+tr.total-group:first-child .total-cell {
+    border-top: 1px solid #dee2e6 !important;
+}
+
+/* El último elemento del grupo tiene borde inferior */
+tr:last-child .total-cell,
+tr.total-group:last-child .total-cell {
+    border-bottom: 1px solid #dee2e6 !important;
 }
 
 .total-value {
@@ -1940,6 +2030,17 @@ button[data-bs-toggle="modal"][data-bs-target^="#debugModal"] {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+}
+
+.total-value[data-rowspan] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: inherit;
+    z-index: 1;
 }
 
 .total-value.hidden {
@@ -1982,5 +2083,28 @@ tr:hover .total-cell.highlighted {
 /* Asegurar que la celda de acciones siempre esté visible */
 tr:hover .actions-cell {
     background-color: #fff;
+}
+
+/* Estilos para simular el rowspan */
+.total-group {
+    position: relative;
+}
+
+.total-group .total-cell {
+    border: none !important;
+}
+
+.total-group:last-child .total-cell {
+    border: none !important;
+}
+
+/* Asegurar que las celdas adyacentes mantengan sus bordes */
+td:not(.total-cell) {
+    border: 1px solid #dee2e6 !important;
+}
+
+/* Estilos para la transición suave del resaltado */
+[id^="total-cell-"] {
+    transition: background-color 0.3s ease;
 }
 </style>

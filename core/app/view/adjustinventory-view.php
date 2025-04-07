@@ -57,15 +57,38 @@ try {
                     $current_availability + $quantity : 
                     $current_availability - $quantity;
                 
-                // Actualizar la disponibilidad y el total
+                // Actualizar la disponibilidad
                 $product->availability = $new_availability;
-                $product->total = $new_availability;
+                $product->update();
                 
-                // Actualizar el producto
-                $update_result = $product->update();
+                // Obtener todos los productos creados en la misma operación
+                $sql = "SELECT p.* FROM product p 
+                        INNER JOIN operation o ON p.id = o.product_id 
+                        WHERE o.created_at = (
+                            SELECT MIN(created_at) 
+                            FROM operation 
+                            WHERE product_id = $product_id
+                        )";
+                $query = Executor::doit($sql);
+                $related_products = Model::many($query[0], new ProductData());
                 
-                if(!$update_result[0]) {
-                    throw new Exception("Error al actualizar el producto");
+                // Si hay más de un producto creado en la misma operación
+                if(count($related_products) > 1) {
+                    // Calcular el total sumando la disponibilidad de todos los productos del conjunto
+                    $total_availability = 0;
+                    foreach($related_products as $related_product) {
+                        $total_availability += $related_product->availability;
+                    }
+                    
+                    // Actualizar el total en todos los productos del conjunto
+                    foreach($related_products as $related_product) {
+                        $related_product->total = $total_availability;
+                        $related_product->update();
+                    }
+                } else {
+                    // Si no es parte de un conjunto, el total es igual a la disponibilidad
+                    $product->total = $new_availability;
+                    $product->update();
                 }
             }
             

@@ -658,27 +658,28 @@ if($selected_category_name == "Jersey") {
 						<th style="width: 50px;">
 							<input type="checkbox" id="selectAll" class="form-check-input">
 						</th>
-                                <th style="width: 80px;">Codigo</th>
-                                <th style="width: 150px;">Nombre</th>
-                                <th style="width: 120px;">Categoría</th>
-                                <th style="width: 100px;">Precio de Entrada</th>
-                                <th style="width: 100px;">Precio de Salida</th>
-                                <th style="width: 80px;">Unidad</th>
-                                <th style="width: 80px;">Disponible</th>
-                                <th style="width: 80px;">Talla</th>
-                                <th style="width: 80px;">Total</th>
-                                <th style="width: 100px;">Mínima en Inventario</th>
-                                <th style="width: 150px;">Acciones</th>
+						<th style="width: 80px;">Codigo</th>
+						<th style="width: 150px;">Nombre</th>
+						<th style="width: 80px;">Talla</th>
+						<th style="width: 120px;">Categoría</th>
+						<th style="width: 100px;">Precio de Entrada</th>
+						<th style="width: 100px;">Precio de Salida</th>
+						<th style="width: 80px;">Unidad</th>
+						<th style="width: 100px;">Mínima en Inventario</th>
+						<th style="width: 80px;">Disponible</th>
+						<th style="width: 80px;">Total</th>
+						<th style="width: 150px;">Acciones</th>
 					</tr>
 				</thead>
 				<tbody>
-                            <?php foreach($curr_products as $product): ?>
-                            <tr>
-                                <td>
-                                    <input type="checkbox" class="product-checkbox" value="<?php echo $product->id; ?>">
+					<?php foreach($curr_products as $product): ?>
+					<tr>
+						<td>
+							<input type="checkbox" class="product-checkbox" value="<?php echo $product->id; ?>">
 						</td>
 						<td><?php echo $product->id; ?></td>
-                                <td><?php echo $product->name; ?></td>
+						<td><?php echo $product->name; ?></td>
+						<td><?php echo $product->size; ?></td>
 						<td>
 							<?php 
 							$categoryColor = '#6c757d'; // Color por defecto
@@ -703,63 +704,58 @@ if($selected_category_name == "Jersey") {
 						<td><?php echo $product->price_in; ?></td>
 						<td><?php echo $product->price_out; ?></td>
 						<td><?php echo $product->unit; ?></td>
-                                <td class="text-center">
-							<?php 
-                                    // Obtener todas las operaciones del producto
-                                    $operations = OperationData::getAllByProductId($product->id);
-                                    $tallas = [];
-                                    $total = 0;
-                                    
-                                    // Agrupar por talla
-                                    foreach($operations as $op) {
-                                        $talla = $op->talla ?? '1';
-                                        if(!isset($tallas[$talla])) {
-                                            $tallas[$talla] = 0;
-                                        }
-                                        if($op->operation_type_id == 1) { // Entrada
-                                            $tallas[$talla] += $op->q;
-                                        } else { // Salida
-                                            $tallas[$talla] -= $op->q;
-                                        }
-                                        $total += $op->operation_type_id == 1 ? $op->q : -$op->q;
-                                    }
-                                    
-                                    // Determinar el color según el total
-                                    $min_q = $product->inventary_min;
-                                    $percentage = 0;
-                                    if($min_q > 0) {
-                                        $percentage = ($total / $min_q) * 100;
-                                    }
-                                    
-                                    if($total <= 0) {
-                                        $color = '#dc3545'; // Rojo si no hay stock
-                                    } else if($percentage <= 50) {
-                                        $color = '#dc3545'; // Rojo si está por debajo del 50% del mínimo
-                                    } else if($percentage <= 80) {
-                                        $color = '#ffc107'; // Amarillo si está entre 50% y 80% del mínimo
-                                    } else {
-                                        $color = '#28a745'; // Verde si está por encima del 80% del mínimo
-                                    }
-                                    ?>
-                                    <span class="badge" style="background-color: <?php echo $color; ?>; color: white; padding: 5px 10px; border-radius: 4px; font-size: 14px;" data-bs-toggle="tooltip" data-bs-html="true" title="<?php 
-                                        $tooltip = '';
-                                        foreach($tallas as $talla => $cantidad) {
-                                            if($cantidad > 0) {
-                                                $tooltip .= "Talla $talla: $cantidad<br>";
-                                            }
-                                        }
-                                        echo $tooltip;
-                                    ?>">
-                                        <?php echo $product->availability; ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <?php echo $product->size; ?>
-                                </td>
-                                <td>
-                                    <?php echo $product->total; ?>
-						</td>
 						<td><?php echo $product->inventary_min; ?></td>
+						<td class="text-center">
+							<?php 
+							// Obtener todas las operaciones del producto
+							$operations = OperationData::getAllByProductId($product->id);
+							$tallas = [];
+							$total = 0;
+							
+							// Agrupar por talla
+							foreach($operations as $op) {
+								$talla = $op->talla ?? '1';
+								if(!isset($tallas[$talla])) {
+									$tallas[$talla] = 0;
+								}
+								if($op->operation_type_id == 1) { // Entrada
+									$tallas[$talla] += $op->q;
+								} else { // Salida
+									$tallas[$talla] -= $op->q;
+								}
+								$total += $op->operation_type_id == 1 ? $op->q : -$op->q;
+							}
+							
+							// Determinar el color según el total
+							$min_q = $product->inventary_min;
+							$percentage = 0;
+							if($min_q > 0) {
+								$percentage = ($total / $min_q) * 100;
+							}
+							
+							if($total <= 0) {
+								$color = '#dc3545'; // Rojo si no hay stock
+							} else if($percentage <= 50) {
+								$color = '#dc3545'; // Rojo si está por debajo del 50% del mínimo
+							} else if($percentage <= 80) {
+								$color = '#ffc107'; // Amarillo si está entre 50% y 80% del mínimo
+							} else {
+								$color = '#28a745'; // Verde si está por encima del 80% del mínimo
+							}
+							?>
+							<span class="badge" style="background-color: <?php echo $color; ?>; color: white; padding: 5px 10px; border-radius: 4px; font-size: 14px;" data-bs-toggle="tooltip" data-bs-html="true" title="<?php 
+								$tooltip = '';
+								foreach($tallas as $talla => $cantidad) {
+									if($cantidad > 0) {
+										$tooltip .= "Talla $talla: $cantidad<br>";
+									}
+								}
+								echo $tooltip;
+							?>">
+								<?php echo $product->availability; ?>
+							</span>
+						</td>
+						<td><?php echo $product->total; ?></td>
 						<td>
 							<button type="button" class="btn btn-sm btn-success" onclick="showAdjustModal(<?php echo $product->id; ?>, 'add')">
 								<i class="bi bi-plus-circle"></i>
@@ -775,7 +771,7 @@ if($selected_category_name == "Jersey") {
 							</button>
 						</td>
 					</tr>
-                            <?php endforeach; ?>
+					<?php endforeach; ?>
 				</tbody>
 			</table>
 			<div class="btn-group pull-right">

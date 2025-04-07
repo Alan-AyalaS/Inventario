@@ -710,7 +710,7 @@ if($selected_category_name == "Jersey") {
 							// Obtener todas las operaciones del producto
 							$operations = OperationData::getAllByProductId($product->id);
 							$tallas = [];
-							$total = 0;
+							$total = $product->availability; // Usar el valor correcto del stock
 							
 							// Agrupar por talla
 							foreach($operations as $op) {
@@ -723,24 +723,21 @@ if($selected_category_name == "Jersey") {
 								} else { // Salida
 									$tallas[$talla] -= $op->q;
 								}
-								$total += $op->operation_type_id == 1 ? $op->q : -$op->q;
 							}
 							
 							// Determinar el color según el total
 							$min_q = $product->inventary_min;
-							$percentage = 0;
-							if($min_q > 0) {
-								$percentage = ($total / $min_q) * 100;
-							}
+							$total = $product->availability;
 							
-							if($total <= 0) {
-								$color = '#dc3545'; // Rojo si no hay stock
-							} else if($percentage <= 50) {
-								$color = '#dc3545'; // Rojo si está por debajo del 50% del mínimo
-							} else if($percentage <= 80) {
-								$color = '#ffc107'; // Amarillo si está entre 50% y 80% del mínimo
-							} else {
-								$color = '#28a745'; // Verde si está por encima del 80% del mínimo
+							$color = '#28a745'; // Verde por defecto
+							if($total <= $min_q) {
+								$color = '#dc3545'; // Rojo si está en o por debajo del mínimo
+							} else if($total <= ($min_q + 5)) {
+								$color = '#fd7e14'; // Naranja si está cerca del mínimo (5 unidades por encima)
+							} else if($total <= 20) {
+								$color = '#ffc107'; // Amarillo si está alrededor de 20
+							} else if($total < 100) {
+								$color = '#28a745'; // Verde si está por debajo de 100
 							}
 							?>
 							<span class="badge" style="background-color: <?php echo $color; ?>; color: white; padding: 5px 10px; border-radius: 4px; font-size: 14px;" data-bs-toggle="tooltip" data-bs-html="true" title="<?php 
@@ -752,7 +749,7 @@ if($selected_category_name == "Jersey") {
 								}
 								echo $tooltip;
 							?>">
-								<?php echo $product->availability; ?>
+								<?php echo $total; ?>
 							</span>
 						</td>
 						<td><?php echo $product->total; ?></td>
@@ -769,6 +766,71 @@ if($selected_category_name == "Jersey") {
 							<button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal(<?php echo $product->id; ?>, '<?php echo addslashes($product->name); ?>')">
 								<i class="bi bi-trash"></i>
 							</button>
+							<button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#debugModal<?php echo $product->id; ?>">
+								<i class="bi bi-info-circle"></i>
+							</button>
+
+							<!-- Modal de Debug -->
+							<div class="modal fade" id="debugModal<?php echo $product->id; ?>" tabindex="-1" aria-labelledby="debugModalLabel<?php echo $product->id; ?>" aria-hidden="true">
+								<div class="modal-dialog">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h5 class="modal-title" id="debugModalLabel<?php echo $product->id; ?>">Información de Debug - <?php echo $product->name; ?></h5>
+											<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+										</div>
+										<div class="modal-body">
+											<div class="table-responsive">
+												<table class="table">
+													<tr>
+														<th>ID del Producto:</th>
+														<td><?php echo $product->id; ?></td>
+													</tr>
+													<tr>
+														<th>Stock Total:</th>
+														<td><?php echo $product->availability; ?></td>
+													</tr>
+													<tr>
+														<th>Mínimo Requerido:</th>
+														<td><?php echo $product->inventary_min; ?></td>
+													</tr>
+													<tr>
+														<th>Porcentaje de Disponibilidad:</th>
+														<td>
+															<?php 
+															$min_q = $product->inventary_min;
+															$total = $product->availability;
+															$percentage = 0;
+															if($min_q > 0) {
+																$percentage = ($total / $min_q) * 100;
+															}
+															echo number_format($percentage, 2); ?>%
+														</td>
+													</tr>
+													<tr>
+														<th>Color Aplicado:</th>
+														<td>
+															<?php 
+															$color = '#28a745'; // Verde por defecto
+															if($total <= $min_q) {
+																$color = '#dc3545'; // Rojo si está igual o por debajo del mínimo
+															} else if($percentage <= 120) {
+																$color = '#ffc107'; // Amarillo si está entre el mínimo y 120% del mínimo
+															}
+															?>
+															<span style="background-color: <?php echo $color; ?>; color: white; padding: 5px 10px; border-radius: 4px;">
+																<?php echo $color; ?>
+															</span>
+														</td>
+													</tr>
+												</table>
+											</div>
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+										</div>
+									</div>
+								</div>
+							</div>
 						</td>
 					</tr>
 					<?php endforeach; ?>

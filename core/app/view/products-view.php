@@ -1,3 +1,6 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+
 <div class="row">
 	<div class="col-md-12">
 
@@ -170,7 +173,7 @@ if($px<=$npaginas):
 	foreach($curr_products as $product):
 		$q=OperationData::getQYesF($product->id);
 	?>
-	<tr class="<?php if($q<=$product->inventary_min/2){ echo "danger";}else if($q<=$product->inventary_min){ echo "warning";}?>">
+	<tr>
 		<td><input type="checkbox" class="product-checkbox" value="<?php echo $product->id; ?>"></td>
 		<td><?php echo $product->id; ?></td>
 		<td><a href="index.php?view=producthistory&id=<?php echo $product->id; ?>" style="text-decoration: none; color: inherit;"><?php echo $product->name; ?></a></td>
@@ -179,30 +182,37 @@ if($px<=$npaginas):
 		<td><?php echo $product->unit; ?></td>
 		<td>
 			<?php 
-			$available = OperationData::getQYesF($product->id);
+			$total = OperationData::getQYesF($product->id);
 			$min_q = $product->inventary_min;
-			// Calcular qué tan cerca está del mínimo (100% = en el mínimo, 0% = muy por encima)
-			$color = '#28a745'; // Verde por defecto
 			
-			if ($available <= 0) {
-				// Si no hay inventario disponible, mostrar en rojo
-				$color = '#dc3545';
-			} else {
-				$percentage = ($min_q / $available) * 100;
-				
-				// Determinar el color según el porcentaje
-				if($percentage >= 80) {
-					$color = '#dc3545'; // Rojo si está muy cerca del mínimo (80% o más)
-				} else if($percentage >= 60) {
-					$color = '#fd7e14'; // Naranja si está cerca del mínimo (60-80%)
-				} else if($percentage >= 40) {
-					$color = '#ffc107'; // Amarillo si está moderadamente cerca (40-60%)
-				}
+			// Calcular el porcentaje de disponibilidad respecto al mínimo
+			$percentage = 0;
+			if($min_q > 0) {
+				$percentage = ($total / $min_q) * 100;
 			}
 			
-			// Aplicar el estilo con el color calculado
-			echo "<span style='background-color: $color; color: white; padding: 5px 10px; border-radius: 5px;'>$available</span>";
+			// Determinar el color según el porcentaje
+			$color = '#28a745'; // Verde por defecto
+			$text_color = 'white';
+			
+			if($total <= 0) {
+				$color = '#dc3545'; // Rojo si no hay stock
+			} else if($percentage <= 25) {
+				$color = '#dc3545'; // Rojo si está por debajo del 25% del mínimo
+			} else if($percentage <= 50) {
+				$color = '#fd7e14'; // Naranja si está entre 25% y 50% del mínimo
+			} else if($percentage <= 75) {
+				$color = '#ffc107'; // Amarillo si está entre 50% y 75% del mínimo
+			} else {
+				$color = '#28a745'; // Verde si está por encima del 75% del mínimo
+			}
 			?>
+			<button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#debugModal<?php echo $product->id; ?>">
+				<i class="bi bi-info-circle"></i>
+			</button>
+			<span style="background-color: <?php echo $color; ?>; color: <?php echo $text_color; ?>; padding: 5px 10px; border-radius: 4px; display: inline-block; min-width: 50px; text-align: center;">
+				<?php echo $total; ?>
+			</span>
 		</td>
 		<td><?php echo $product->inventary_min; ?></td>
 		<td style="width:130px;">
@@ -218,6 +228,54 @@ if($px<=$npaginas):
 			<button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal(<?php echo $product->id; ?>, '<?php echo addslashes($product->name); ?>')">
 				<i class="bi bi-trash"></i>
 			</button>
+			<button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#debugModal<?php echo $product->id; ?>">
+				<i class="bi bi-info-circle"></i>
+			</button>
+
+			<!-- Modal de Debug -->
+			<div class="modal fade" id="debugModal<?php echo $product->id; ?>" tabindex="-1" aria-labelledby="debugModalLabel<?php echo $product->id; ?>" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="debugModalLabel<?php echo $product->id; ?>">Información de Debug - <?php echo $product->name; ?></h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<div class="modal-body">
+							<div class="table-responsive">
+								<table class="table">
+									<tr>
+										<th>ID del Producto:</th>
+										<td><?php echo $product->id; ?></td>
+									</tr>
+									<tr>
+										<th>Stock Total:</th>
+										<td><?php echo $total; ?></td>
+									</tr>
+									<tr>
+										<th>Mínimo Requerido:</th>
+										<td><?php echo $min_q; ?></td>
+									</tr>
+									<tr>
+										<th>Porcentaje de Disponibilidad:</th>
+										<td><?php echo number_format($percentage, 2); ?>%</td>
+									</tr>
+									<tr>
+										<th>Color Aplicado:</th>
+										<td>
+											<span style="background-color: <?php echo $color; ?>; color: white; padding: 5px 10px; border-radius: 4px;">
+												<?php echo $color; ?>
+											</span>
+										</td>
+									</tr>
+								</table>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+						</div>
+					</div>
+				</div>
+			</div>
 		</td>
 	</tr>
 	<?php endforeach; ?>
@@ -370,6 +428,14 @@ function toggleSelectAll() {
         checkbox.checked = selectAll.checked;
     }
 }
+
+// Inicializar todos los modales
+document.addEventListener('DOMContentLoaded', function() {
+    var modals = document.querySelectorAll('.modal');
+    modals.forEach(function(modal) {
+        new bootstrap.Modal(modal);
+    });
+});
 </script>
 
 <style>

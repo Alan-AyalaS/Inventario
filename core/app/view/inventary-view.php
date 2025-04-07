@@ -352,6 +352,7 @@ if($selected_category_name == "Jersey") {
                 </select>
             </div>
             <div class="col-md-1">
+                <label for="limit" class="me-2">Mostrar:</label>
                 <div class="input-group">
                     <input type="number" class="form-control" id="limit" name="limit" min="1" value="<?php echo isset($_GET['limit']) ? $_GET['limit'] : 100; ?>" style="width: 80px;">
                     <button class="btn btn-primary" type="button" onclick="applyLimitFilter()">
@@ -1363,14 +1364,24 @@ function updateClearFiltersButton() {
 
 // Función para limpiar filtros
 function clearFilters() {
-    // Ocultar el botón de limpiar filtros
-    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-    if (clearFiltersBtn) {
-        clearFiltersBtn.style.display = 'none';
+    // Obtener el valor actual del filtro "Mostrar"
+    const currentLimit = document.getElementById('limit').value;
+    
+    // Limpiar todos los filtros excepto el de "Mostrar"
+    const url = new URL(window.location.href);
+    url.searchParams.delete('category_id');
+    url.searchParams.delete('size');
+    url.searchParams.delete('availability');
+    url.searchParams.delete('date_filter');
+    url.searchParams.delete('search');
+    url.searchParams.delete('page');
+    
+    // Mantener el filtro "Mostrar"
+    if (currentLimit) {
+        url.searchParams.set('limit', currentLimit);
     }
     
-    // Recargar la página sin filtros
-    window.location.href = 'index.php?view=inventary';
+    window.location.href = url.toString();
 }
 
 // Función para filtrar productos
@@ -1844,6 +1855,11 @@ document.addEventListener('DOMContentLoaded', function() {
     background-color: white;
     cursor: pointer;
     z-index: 1000;
+}
+
+/* Ocultar el botón de debug */
+button[data-bs-toggle="modal"][data-bs-target^="#debugModal"] {
+    display: none !important;
 }
 
 .custom-select__trigger {

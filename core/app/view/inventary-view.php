@@ -93,7 +93,9 @@ if($selected_category_name == "Jersey") {
         "niño" => ["16", "18", "20", "22", "24", "26", "28"]
     ];
 } elseif($selected_category_name == "Tenis") {
-    $available_sizes = ["6", "7", "8", "9"];
+    $available_sizes = [
+        "tenis" => ["6", "7", "8", "9"]
+    ];
 } elseif($selected_category_name == "Variado") {
     // Para la categoría Variado, mostrar todas las tallas disponibles
     $available_sizes = [

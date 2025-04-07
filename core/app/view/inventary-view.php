@@ -94,7 +94,14 @@ if($selected_category_name == "Jersey") {
     ];
 } elseif($selected_category_name == "Tenis") {
     $available_sizes = ["6", "7", "8", "9"];
-} elseif(in_array($selected_category_name, ["Gorras", "Variado", "Balón"])) {
+} elseif($selected_category_name == "Variado") {
+    // Para la categoría Variado, mostrar todas las tallas disponibles
+    $available_sizes = [
+        "adulto" => ["S", "M", "L", "XL", "XXL"],
+        "niño" => ["16", "18", "20", "22", "24", "26", "28"],
+        "tenis" => ["6", "7", "8", "9"]
+    ];
+} elseif(in_array($selected_category_name, ["Gorras", "Balón"])) {
     $available_sizes = [];
 } else {
     // Cuando no hay categoría seleccionada, mostrar todas las tallas agrupadas
@@ -303,7 +310,7 @@ if($selected_category_name == "Jersey") {
             </div>
             <div class="form-group me-2">
                 <label for="size" class="me-2">Talla:</label>
-                <div class="custom-select-wrapper">
+                <div class="custom-select-wrapper" id="sizeWrapper">
                     <div class="custom-select" id="customSizeSelect">
                         <div class="custom-select__trigger">
                             <?php
@@ -1518,18 +1525,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if(categorySelect && sizeSelect) {
         categorySelect.addEventListener('change', function() {
-            const selectedCategory = this.options[this.selectedIndex].text;
-            const categoriesToHide = ["Gorras", "Variado", "Balón"];
-            
-            if(categoriesToHide.includes(selectedCategory)) {
-                sizeSelect.style.display = 'none';
-                // Resetear el valor del select de tallas
-                document.getElementById('size').value = '';
-                document.querySelector('#customSizeSelect .custom-select__trigger span').textContent = 'Todas las tallas';
-            } else {
-                sizeSelect.style.display = 'block';
-            }
-            
             // Recargar la página para actualizar las tallas disponibles
             const url = new URL(window.location.href);
             url.searchParams.set('category_id', this.value);
@@ -1931,6 +1926,6 @@ button[data-bs-toggle="modal"][data-bs-target^="#debugModal"] {
 }
 
 #customSizeSelect {
-    display: <?php echo (in_array($selected_category_name, ["Gorras", "Variado", "Balón"])) ? 'none' : 'block'; ?>;
+    display: block;
 }
 </style>

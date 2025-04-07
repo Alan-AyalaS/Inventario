@@ -7,6 +7,21 @@ $categories = CategoryData::getAll();
 // Obtener productos según los filtros
 if(isset($_GET["category_id"]) && $_GET["category_id"] != "") {
 	$products = ProductData::getAllByCategoryId($_GET["category_id"]);
+	// Si no hay productos en la categoría, mostrar todos los productos
+	if(empty($products)) {
+		$products = ProductData::getAll($order);
+		// Establecer cookie para mostrar el mensaje
+		setcookie("category_empty", "1", time()+3600);
+		// Redirigir a todas las categorías
+		$url = "index.php?view=inventary";
+		if(isset($_GET["order"])) $url .= "&order=".$_GET["order"];
+		if(isset($_GET["search"])) $url .= "&search=".$_GET["search"];
+		if(isset($_GET["availability"])) $url .= "&availability=".$_GET["availability"];
+		if(isset($_GET["date_filter"])) $url .= "&date_filter=".$_GET["date_filter"];
+		if(isset($_GET["limit"])) $url .= "&limit=".$_GET["limit"];
+		header("Location: ".$url);
+		exit;
+	}
 }
 
 if(isset($_GET["search"]) && $_GET["search"] != "") {
@@ -462,6 +477,13 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                         }
                         ?>
                     </div>
+
+                    <?php if(isset($_COOKIE["category_empty"])): ?>
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <strong>¡Atención!</strong> No hay productos en la categoría seleccionada.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        <?php setcookie("category_empty","",time()-18600); endif; ?>
 
                     <?php
                     $page = 1;

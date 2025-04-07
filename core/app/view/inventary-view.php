@@ -96,7 +96,12 @@ if($selected_category_name == "Jersey") {
 } elseif(in_array($selected_category_name, ["Gorras", "Variado", "Balón"])) {
     $available_sizes = [];
 } else {
-    $available_sizes = ["S", "M", "L", "XL", "XXL", "16", "18", "20", "22", "24", "26", "28", "6", "7", "8", "9"];
+    // Cuando no hay categoría seleccionada, mostrar todas las tallas agrupadas
+    $available_sizes = [
+        "adulto" => ["S", "M", "L", "XL", "XXL"],
+        "niño" => ["16", "18", "20", "22", "24", "26", "28"],
+        "tenis" => ["6", "7", "8", "9"]
+    ];
 }
 ?>
 <div class="row">
@@ -309,42 +314,27 @@ if($selected_category_name == "Jersey") {
                         </div>
                         <div class="custom-options">
                             <div class="custom-option" data-value="">Todas las tallas</div>
-                            <?php if($selected_category_name == "Jersey"): ?>
-                                <div class="custom-option-group">
-                                    <div class="custom-option-header">Adulto</div>
-                                    <?php foreach($available_sizes["adulto"] as $size): ?>
-                                        <div class="custom-option" data-value="<?php echo $size; ?>"><?php echo $size; ?></div>
-                                    <?php endforeach; ?>
-                                </div>
-                                <div class="custom-option-group">
-                                    <div class="custom-option-header">Niño</div>
-                                    <?php foreach($available_sizes["niño"] as $size): ?>
-                                        <div class="custom-option" data-value="<?php echo $size; ?>"><?php echo $size; ?></div>
-                                    <?php endforeach; ?>
-                                </div>
-                            <?php else: ?>
-                                <?php foreach($available_sizes as $size): ?>
-                                    <div class="custom-option" data-value="<?php echo $size; ?>"><?php echo $size; ?></div>
+                            <?php if(is_array($available_sizes) && !empty($available_sizes)): ?>
+                                <?php foreach($available_sizes as $grupo => $tallas): ?>
+                                    <div class="custom-option-group">
+                                        <div class="custom-option-header"><?php echo ucfirst($grupo); ?></div>
+                                        <?php foreach($tallas as $talla): ?>
+                                            <div class="custom-option" data-value="<?php echo $talla; ?>"><?php echo $talla; ?></div>
+                                        <?php endforeach; ?>
+                                    </div>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </div>
                     </div>
                     <select id="size" name="size" style="display: none;">
                         <option value="">Todas las tallas</option>
-                        <?php if($selected_category_name == "Jersey"): ?>
-                            <optgroup label="Adulto">
-                                <?php foreach($available_sizes["adulto"] as $size): ?>
-                                    <option value="<?php echo $size; ?>" <?php echo ($selectedSize == $size) ? 'selected' : ''; ?>><?php echo $size; ?></option>
-                                <?php endforeach; ?>
-                            </optgroup>
-                            <optgroup label="Niño">
-                                <?php foreach($available_sizes["niño"] as $size): ?>
-                                    <option value="<?php echo $size; ?>" <?php echo ($selectedSize == $size) ? 'selected' : ''; ?>><?php echo $size; ?></option>
-                                <?php endforeach; ?>
-                            </optgroup>
-                        <?php else: ?>
-                            <?php foreach($available_sizes as $size): ?>
-                                <option value="<?php echo $size; ?>" <?php echo ($selectedSize == $size) ? 'selected' : ''; ?>><?php echo $size; ?></option>
+                        <?php if(is_array($available_sizes) && !empty($available_sizes)): ?>
+                            <?php foreach($available_sizes as $grupo => $tallas): ?>
+                                <?php if(is_array($tallas)): ?>
+                                    <?php foreach($tallas as $talla): ?>
+                                        <option value="<?php echo $talla; ?>" <?php echo (isset($_GET["size"]) && $_GET["size"] == $talla) ? 'selected' : ''; ?>><?php echo $talla; ?></option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </select>
@@ -1289,7 +1279,15 @@ function updateClearFiltersButton() {
     const availability = document.getElementById('availability').value;
     const size = document.getElementById('size').value;
     const dateFilter = document.getElementById('date_filter').value;
-
+    
+    console.log('Valores actuales:', {
+        searchTerm,
+        categoryId,
+        availability,
+        size,
+        dateFilter
+    });
+    
     // Verificar si hay algún filtro activo
     const hasActiveFilters = 
         searchTerm !== '' || // Hay texto en la búsqueda
@@ -1298,8 +1296,11 @@ function updateClearFiltersButton() {
         size !== '' || // No es "Todas las tallas"
         dateFilter !== ''; // No es "Todas las fechas"
 
+    console.log('¿Hay filtros activos?', hasActiveFilters);
+    
     // Mostrar u ocultar el botón
     clearFiltersBtn.style.display = hasActiveFilters ? '' : 'none';
+    console.log('Estado del botón:', clearFiltersBtn.style.display);
 }
 
 // Función para limpiar filtros
@@ -1635,6 +1636,9 @@ function initCustomSelect(select) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM cargado');
     
+    // Inicializar el botón de limpiar filtros
+    updateClearFiltersButton();
+    
     // Inicializar los select personalizados
     const customSelects = document.querySelectorAll('.custom-select');
     console.log('Selects encontrados:', customSelects.length);
@@ -1708,6 +1712,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Actualizar los filtros
                 const url = new URL(window.location.href);
                 url.searchParams.set(originalSelect.name, value);
+                
+                // Forzar la actualización del botón de limpiar filtros
+                setTimeout(() => {
+                    updateClearFiltersButton();
+                }, 100);
+                
                 window.location.href = url.toString();
             });
         });
@@ -1733,6 +1743,29 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 // ... existing code ...
+
+// En la sección del JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar el botón de limpiar filtros
+    updateClearFiltersButton();
+    
+    // Verificar si hay una talla seleccionada en la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedSize = urlParams.get('size');
+    if (selectedSize) {
+        const sizeSelect = document.getElementById('size');
+        if (sizeSelect) {
+            sizeSelect.value = selectedSize;
+            // Actualizar el texto mostrado en el select personalizado
+            const customSizeSelect = document.querySelector('#customSizeSelect .custom-select__trigger span');
+            if (customSizeSelect) {
+                customSizeSelect.textContent = selectedSize;
+            }
+        }
+    }
+    
+    // Resto del código de inicialización...
+});
 </script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">

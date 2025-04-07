@@ -3,10 +3,9 @@
 $products = ProductData::getAll();
 $products_array = array();
 foreach($products as $product){
-	$q=OperationData::getQYesF($product->id);	
-	if($q<=$product->inventary_min){
-    $products_array[]  = $product;
-
+	$q = $product->availability;
+	if($q <= $product->inventary_min){
+		$products_array[] = $product;
 	}
 }
 
@@ -134,10 +133,9 @@ if(count($products_array)>0){?>
 		<th></th>
 	</thead>
 	<?php
-foreach($products as $product):
-	$q=OperationData::getQYesF($product->id);
+foreach($products_array as $product):
+	$q = $product->availability;
 	?>
-	<?php if($q<=$product->inventary_min):?>
 	<tr class="<?php if($q==0){ echo "danger"; }else if($q<=$product->inventary_min/2){ echo "danger"; } else if($q<=$product->inventary_min){ echo "warning"; } ?>">
 		<td><?php echo $product->id; ?></td>
 		<td><?php echo $product->name; ?></td>
@@ -146,7 +144,6 @@ foreach($products as $product):
 		<?php if($q==0){ echo "<span class='label label-danger'>No hay existencias.</span>";}else if($q<=$product->inventary_min/2){ echo "<span class='label label-danger'>Quedan muy pocas existencias.</span>";} else if($q<=$product->inventary_min){ echo "<span class='label label-warning'>Quedan pocas existencias.</span>";} ?>
 		</td>
 	</tr>
-<?php endif;?>
 <?php
 endforeach;
 ?>

@@ -19,11 +19,10 @@ try {
     require_once __DIR__ . "/../model/OperationTypeData.php";
     require_once __DIR__ . "/../model/ProductData.php";
 
-    if(isset($_POST["product_id"]) && isset($_POST["quantity"]) && isset($_POST["operation_type"]) && isset($_POST["talla"])) {
+    if(isset($_POST["product_id"]) && isset($_POST["quantity"]) && isset($_POST["operation_type"])) {
         $product_id = $_POST["product_id"];
         $quantity = floatval($_POST["quantity"]);
         $operation_type = $_POST["operation_type"];
-        $talla = $_POST["talla"];
         
         // Verificar que los tipos de operación existan
         $entrada = OperationTypeData::getByName("entrada");
@@ -45,7 +44,6 @@ try {
         $op->q = $quantity;
         $op->sell_id = null;
         $op->is_oficial = 1;
-        $op->talla = $talla;
         $op->created_at = "NOW()";
         
         $result = $op->add();
@@ -54,14 +52,31 @@ try {
             // Actualizar la disponibilidad del producto
             $product = ProductData::getById($product_id);
             if($product) {
-                $product->updateAvailability($quantity);
+                // Obtener la disponibilidad actual
+                $current_availability = $product->availability;
+                
+                // Calcular la nueva disponibilidad según el tipo de operación
+                $new_availability = $operation_type === 'add' ? 
+                    $current_availability + $quantity : 
+                    $current_availability - $quantity;
+                
+                // Actualizar la disponibilidad y el total
+                $product->availability = $new_availability;
+                $product->total = $new_availability;
+                
+                // Actualizar el producto
+                $update_result = $product->update();
+                
+                if(!$update_result[0]) {
+                    throw new Exception("Error al actualizar el producto");
+                }
             }
             
             echo json_encode([
                 'success' => true,
                 'message' => $operation_type === 'add' ? 
-                    "Se agregaron $quantity unidades de talla $talla al inventario" : 
-                    "Se restaron $quantity unidades de talla $talla del inventario"
+                    "Se agregaron $quantity unidades al inventario" : 
+                    "Se restaron $quantity unidades del inventario"
             ]);
         } else {
             throw new Exception("Error al guardar la operación");

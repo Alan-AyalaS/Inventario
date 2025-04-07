@@ -10,7 +10,6 @@ class OperationData {
 	public $operation_type_id;
 	public $is_oficial;
 	public $sell_id;
-	public $talla;
 	public $created_at;
 
 	public function OperationData(){
@@ -21,21 +20,19 @@ class OperationData {
 		$this->operation_type_id = "";
 		$this->is_oficial = 1;
 		$this->sell_id = "NULL";
-		$this->talla = "1";
 		$this->created_at = "NOW()";
 	}
 
 	public function add(){
-		$sql = "insert into ".self::$tablename." (product_id,q,operation_type_id,sell_id,is_oficial,talla,created_at) ";
-		$sql .= "value (?,?,?,?,?,?,NOW())";
+		$sql = "insert into ".self::$tablename." (product_id,q,operation_type_id,sell_id,is_oficial,created_at) ";
+		$sql .= "value (?,?,?,?,?,NOW())";
 		
 		$params = [
 			$this->product_id,
 			$this->q,
 			$this->operation_type_id,
 			$this->sell_id === "NULL" ? null : $this->sell_id,
-			$this->is_oficial,
-			$this->talla
+			$this->is_oficial
 		];
 		
 		return Executor::doit($sql, $params);

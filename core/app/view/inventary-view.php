@@ -387,51 +387,26 @@ if($selected_category_name == "Jersey") {
 </div>
 
 <!-- Modal para ajustar inventario -->
-        <div class="modal fade" id="adjustModal" tabindex="-1" aria-labelledby="adjustModalLabel" aria-hidden="true">
+<div class="modal fade" id="adjustModal" tabindex="-1" aria-labelledby="adjustModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-                        <h5 class="modal-title" id="adjustModalLabel">Ajustar Inventario</h5>
+        <h5 class="modal-title" id="adjustModalLabel">Ajustar Inventario</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-                        <form id="adjustForm" method="post" action="index.php?view=adjustinventory">
-                            <input type="hidden" name="product_id" id="productId">
-                            <input type="hidden" name="operation_type" id="operationType">
-                            
-                            <div class="mb-3">
-                                <label for="talla" class="form-label">Talla</label>
-                                <select class="form-select" id="talla" name="talla" required>
-                                    <option value="">Seleccione una talla</option>
-                                    <option value="unitalla">Unitalla</option>
-                                    <option value="S">S</option>
-                                    <option value="M">M</option>
-                                    <option value="L">L</option>
-                                    <option value="XL">XL</option>
-                                    <option value="XXL">XXL</option>
-                                    <option value="16">16</option>
-                                    <option value="18">18</option>
-                                    <option value="20">20</option>
-                                    <option value="22">22</option>
-                                    <option value="24">24</option>
-                                    <option value="26">26</option>
-                                    <option value="28">28</option>
-                                    <option value="6">6</option>
-                                    <option value="8">8</option>
-                                    <option value="9">9</option>
-                                    <option value="1">1</option>
-                                </select>
-                            </div>
-                            
+        <form id="adjustForm" method="post" action="index.php?view=adjustinventory">
+          <input type="hidden" name="product_id" id="productId">
+          <input type="hidden" name="operation_type" id="operationType">
           <div class="mb-3">
             <label for="quantity" class="form-label">Cantidad</label>
-                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+            <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
           </div>
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="button" class="btn btn-primary" onclick="submitAdjustForm()">Ajustar</button>
+        <button type="button" class="btn btn-primary" onclick="submitAdjustForm()">Ajustar</button>
       </div>
     </div>
   </div>
@@ -660,27 +635,27 @@ if($selected_category_name == "Jersey") {
 						<th style="width: 50px;">
 							<input type="checkbox" id="selectAll" class="form-check-input">
 						</th>
-						<th style="width: 80px;">Codigo</th>
-						<th style="width: 150px;">Nombre</th>
+                                <th style="width: 80px;">Codigo</th>
+                                <th style="width: 150px;">Nombre</th>
 						<th style="width: 80px;">Talla</th>
-						<th style="width: 120px;">Categoría</th>
-						<th style="width: 100px;">Precio de Entrada</th>
-						<th style="width: 100px;">Precio de Salida</th>
-						<th style="width: 80px;">Unidad</th>
+                                <th style="width: 120px;">Categoría</th>
+                                <th style="width: 100px;">Precio de Entrada</th>
+                                <th style="width: 100px;">Precio de Salida</th>
+                                <th style="width: 80px;">Unidad</th>
 						<th style="width: 100px;">Mínima en Inventario</th>
-						<th style="width: 80px;">Disponible</th>
-						<th style="width: 80px;">Total</th>
-						<th style="width: 150px;">Acciones</th>
+                                <th style="width: 80px;">Disponible</th>
+                                <th style="width: 80px;">Total</th>
+                                <th style="width: 150px;">Acciones</th>
 					</tr>
 				</thead>
 				<tbody>
-					<?php foreach($curr_products as $product): ?>
-					<tr>
-						<td>
-							<input type="checkbox" class="product-checkbox" value="<?php echo $product->id; ?>">
+                            <?php foreach($curr_products as $product): ?>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="product-checkbox" value="<?php echo $product->id; ?>">
 						</td>
 						<td><?php echo $product->id; ?></td>
-						<td><?php echo $product->name; ?></td>
+                                <td><?php echo $product->name; ?></td>
 						<td><?php echo $product->size; ?></td>
 						<td>
 							<?php 
@@ -707,28 +682,28 @@ if($selected_category_name == "Jersey") {
 						<td><?php echo $product->price_out; ?></td>
 						<td><?php echo $product->unit; ?></td>
 						<td><?php echo $product->inventary_min; ?></td>
-						<td class="text-center">
+                                <td class="text-center">
 							<?php 
-							// Obtener todas las operaciones del producto
-							$operations = OperationData::getAllByProductId($product->id);
-							$tallas = [];
+                                    // Obtener todas las operaciones del producto
+                                    $operations = OperationData::getAllByProductId($product->id);
+                                    $tallas = [];
 							$total = $product->availability; // Usar el valor correcto del stock
-							
-							// Agrupar por talla
-							foreach($operations as $op) {
+                                    
+                                    // Agrupar por talla
+                                    foreach($operations as $op) {
 								$talla = $op->talla ?? 'unitalla';
-								if(!isset($tallas[$talla])) {
-									$tallas[$talla] = 0;
-								}
-								if($op->operation_type_id == 1) { // Entrada
-									$tallas[$talla] += $op->q;
-								} else { // Salida
-									$tallas[$talla] -= $op->q;
-								}
-							}
-							
-							// Determinar el color según el total
-							$min_q = $product->inventary_min;
+                                        if(!isset($tallas[$talla])) {
+                                            $tallas[$talla] = 0;
+                                        }
+                                        if($op->operation_type_id == 1) { // Entrada
+                                            $tallas[$talla] += $op->q;
+                                        } else { // Salida
+                                            $tallas[$talla] -= $op->q;
+                                        }
+                                    }
+                                    
+                                    // Determinar el color según el total
+                                    $min_q = $product->inventary_min;
 							$total = $product->availability;
 							
 							$color = '#28a745'; // Verde por defecto
@@ -740,20 +715,20 @@ if($selected_category_name == "Jersey") {
 								$color = '#ffc107'; // Amarillo si está alrededor de 20
 							} else if($total < 100) {
 								$color = '#28a745'; // Verde si está por debajo de 100
-							}
-							?>
-							<span class="badge" style="background-color: <?php echo $color; ?>; color: white; padding: 5px 10px; border-radius: 4px; font-size: 14px;" data-bs-toggle="tooltip" data-bs-html="true" title="<?php 
-								$tooltip = '';
-								foreach($tallas as $talla => $cantidad) {
-									if($cantidad > 0) {
-										$tooltip .= "Talla $talla: $cantidad<br>";
-									}
-								}
-								echo $tooltip;
-							?>">
+                                    }
+                                    ?>
+                                    <span class="badge" style="background-color: <?php echo $color; ?>; color: white; padding: 5px 10px; border-radius: 4px; font-size: 14px;" data-bs-toggle="tooltip" data-bs-html="true" title="<?php 
+                                        $tooltip = '';
+                                        foreach($tallas as $talla => $cantidad) {
+                                            if($cantidad > 0) {
+                                                $tooltip .= "Talla $talla: $cantidad<br>";
+                                            }
+                                        }
+                                        echo $tooltip;
+                                    ?>">
 								<?php echo $total; ?>
-							</span>
-						</td>
+                                    </span>
+                                </td>
 						<td><?php echo $product->total; ?></td>
 						<td>
 							<button type="button" class="btn btn-sm btn-success" onclick="showAdjustModal(<?php echo $product->id; ?>, 'add')">
@@ -835,7 +810,7 @@ if($selected_category_name == "Jersey") {
 							</div>
 						</td>
 					</tr>
-					<?php endforeach; ?>
+                            <?php endforeach; ?>
 				</tbody>
 			</table>
 			<div class="btn-group pull-right">
@@ -912,11 +887,17 @@ function showAdjustModal(productId, operationType) {
 
 function submitAdjustForm() {
     const form = document.getElementById('adjustForm');
-    const talla = document.getElementById('talla').value;
+    const productId = document.getElementById('productId').value;
+    const operationType = document.getElementById('operationType').value;
     const quantity = document.getElementById('quantity').value;
     
-    if(!talla) {
-        alert('Por favor seleccione una talla');
+    if(!productId) {
+        alert('Error: ID del producto no encontrado');
+        return;
+    }
+    
+    if(!operationType) {
+        alert('Error: Tipo de operación no especificado');
         return;
     }
     
@@ -925,6 +906,7 @@ function submitAdjustForm() {
         return;
     }
     
+    // Enviar el formulario normalmente
     form.submit();
 }
 
@@ -1353,11 +1335,11 @@ function updateClearFiltersButton() {
 
     // Obtener valores actuales
     const searchTerm = document.getElementById('search').value.trim();
-    const categoryId = document.getElementById('category_id').value;
-    const availability = document.getElementById('availability').value;
+        const categoryId = document.getElementById('category_id').value;
+        const availability = document.getElementById('availability').value;
     const size = document.getElementById('size').value;
-    const dateFilter = document.getElementById('date_filter').value;
-    
+        const dateFilter = document.getElementById('date_filter').value;
+        
     console.log('Valores actuales:', {
         searchTerm,
         categoryId,

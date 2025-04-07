@@ -659,168 +659,143 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
 					</tr>
 				</thead>
 				<tbody>
-                            <?php foreach($curr_products as $product): ?>
-                            <tr>
-                                <td>
-                                    <input type="checkbox" class="product-checkbox" value="<?php echo $product->id; ?>">
-						</td>
-						<td><?php echo $product->id; ?></td>
-                                <td><?php echo $product->name; ?></td>
-						<td><?php echo $product->size; ?></td>
-						<td>
-							<?php 
-							$categoryColor = '#6c757d'; // Color por defecto
-							$categoryName = 'Sin categoría';
-							
-							if (!empty($product->category_id)) {
-								// Obtener el color de la categoría
-								$category = CategoryData::getById($product->category_id);
-								if ($category) {
-									$categoryName = $category->name;
-									// Intentar obtener el color de la cookie primero
-									$categoryColor = isset($_COOKIE['category_color_' . $product->category_id]) 
-										? $_COOKIE['category_color_' . $product->category_id] 
-										: '#28a745'; // Color por defecto si no hay cookie
-								}
-							}
-							?>
-							<span class="badge" style="background-color: <?php echo $categoryColor; ?>; color: white; padding: 5px 10px; border-radius: 4px;" data-category-id="<?php echo $product->category_id; ?>">
-								<?php echo htmlspecialchars($categoryName); ?>
-							</span>
-						</td>
-						<td><?php echo $product->price_in; ?></td>
-						<td><?php echo $product->price_out; ?></td>
-						<td><?php echo $product->unit; ?></td>
-						<td><?php echo $product->inventary_min; ?></td>
-                                <td class="text-center">
-							<?php 
-                                    // Obtener todas las operaciones del producto
-                                    $operations = OperationData::getAllByProductId($product->id);
-                                    $tallas = [];
-							$total = $product->availability; // Usar el valor correcto del stock
-                                    
-                                    // Agrupar por talla
-                                    foreach($operations as $op) {
-								$talla = $op->talla ?? 'unitalla';
-                                        if(!isset($tallas[$talla])) {
-                                            $tallas[$talla] = 0;
-                                        }
-                                        if($op->operation_type_id == 1) { // Entrada
-                                            $tallas[$talla] += $op->q;
-                                        } else { // Salida
-                                            $tallas[$talla] -= $op->q;
-                                        }
+                    <?php
+                    $current_total = null;
+                    $rowspan = 1;
+                    $products_count = count($curr_products);
+                    $group_id = 0;
+                    $total_groups = [];
+                    
+                    // Primero, agrupar los productos por total
+                    foreach($curr_products as $index => $product) {
+                        if($current_total !== $product->total) {
+                            $current_total = $product->total;
+                            $group_id++;
+                        }
+                        $total_groups[$group_id][] = $product;
+                    }
+                    
+                    // Luego, mostrar los productos
+                    foreach($curr_products as $index => $product):
+                        // Encontrar el grupo actual
+                        $current_group = null;
+                        foreach($total_groups as $group_id => $group) {
+                            if(in_array($product, $group)) {
+                                $current_group = $group;
+                                break;
+                            }
+                        }
+                        
+                        // Calcular el rowspan para el grupo actual
+                        $rowspan = count($current_group);
+                        
+                        // Determinar si es la primera fila del grupo
+                        $is_first_in_group = $product === reset($current_group);
+                    ?>
+                    <tr class="total-group-<?php echo $group_id; ?>" onmouseover="highlightTotalGroup(<?php echo $group_id; ?>)" onmouseout="unhighlightTotalGroup(<?php echo $group_id; ?>)">
+                        <td>
+                            <input type="checkbox" class="product-checkbox" value="<?php echo $product->id; ?>">
+                        </td>
+                        <td><?php echo $product->id; ?></td>
+                        <td><?php echo $product->name; ?></td>
+                        <td><?php echo $product->size; ?></td>
+                        <td>
+                            <?php
+                            $categoryColor = '#6c757d'; // Color por defecto
+                            $categoryName = 'Sin categoría';
+                            
+                            if (!empty($product->category_id)) {
+                                // Obtener el color de la categoría
+                                $category = CategoryData::getById($product->category_id);
+                                if ($category) {
+                                    $categoryName = $category->name;
+                                    // Intentar obtener el color de la cookie primero
+                                    $categoryColor = isset($_COOKIE['category_color_' . $product->category_id]) 
+                                        ? $_COOKIE['category_color_' . $product->category_id] 
+                                        : '#28a745'; // Color por defecto si no hay cookie
+                                }
+                            }
+                            ?>
+                            <span class="badge" style="background-color: <?php echo $categoryColor; ?>; color: white; padding: 5px 10px; border-radius: 4px;" data-category-id="<?php echo $product->category_id; ?>">
+                                <?php echo htmlspecialchars($categoryName); ?>
+                            </span>
+                        </td>
+                        <td><?php echo $product->price_in; ?></td>
+                        <td><?php echo $product->price_out; ?></td>
+                        <td><?php echo $product->unit; ?></td>
+                        <td><?php echo $product->inventary_min; ?></td>
+                        <td class="text-center">
+                            <?php 
+                            // Obtener todas las operaciones del producto
+                            $operations = OperationData::getAllByProductId($product->id);
+                            $tallas = [];
+                            $total = $product->availability; // Usar el valor correcto del stock
+                            
+                            // Agrupar por talla
+                            foreach($operations as $op) {
+                                $talla = $op->talla ?? 'unitalla';
+                                if(!isset($tallas[$talla])) {
+                                    $tallas[$talla] = 0;
+                                }
+                                if($op->operation_type_id == 1) { // Entrada
+                                    $tallas[$talla] += $op->q;
+                                } else { // Salida
+                                    $tallas[$talla] -= $op->q;
+                                }
+                            }
+                            
+                            // Determinar el color según el total
+                            $min_q = $product->inventary_min;
+                            $total = $product->availability;
+                            
+                            $color = '#28a745'; // Verde por defecto
+                            if($total <= $min_q) {
+                                $color = '#dc3545'; // Rojo si está en o por debajo del mínimo
+                            } else if($total <= ($min_q + 5)) {
+                                $color = '#fd7e14'; // Naranja si está cerca del mínimo (5 unidades por encima)
+                            } else if($total <= 20) {
+                                $color = '#ffc107'; // Amarillo si está alrededor de 20
+                            } else if($total < 100) {
+                                $color = '#28a745'; // Verde si está por debajo de 100
+                            }
+                            ?>
+                            <span class="badge" style="background-color: <?php echo $color; ?>; color: white; padding: 5px 10px; border-radius: 4px; font-size: 14px;" data-bs-toggle="tooltip" data-bs-html="true" title="<?php 
+                                $tooltip = '';
+                                foreach($tallas as $talla => $cantidad) {
+                                    if($cantidad > 0) {
+                                        $tooltip .= "Talla $talla: $cantidad<br>";
                                     }
-                                    
-                                    // Determinar el color según el total
-                                    $min_q = $product->inventary_min;
-							$total = $product->availability;
-							
-							$color = '#28a745'; // Verde por defecto
-							if($total <= $min_q) {
-								$color = '#dc3545'; // Rojo si está en o por debajo del mínimo
-							} else if($total <= ($min_q + 5)) {
-								$color = '#fd7e14'; // Naranja si está cerca del mínimo (5 unidades por encima)
-							} else if($total <= 20) {
-								$color = '#ffc107'; // Amarillo si está alrededor de 20
-							} else if($total < 100) {
-								$color = '#28a745'; // Verde si está por debajo de 100
-                                    }
-                                    ?>
-                                    <span class="badge" style="background-color: <?php echo $color; ?>; color: white; padding: 5px 10px; border-radius: 4px; font-size: 14px;" data-bs-toggle="tooltip" data-bs-html="true" title="<?php 
-                                        $tooltip = '';
-                                        foreach($tallas as $talla => $cantidad) {
-                                            if($cantidad > 0) {
-                                                $tooltip .= "Talla $talla: $cantidad<br>";
-                                            }
-                                        }
-                                        echo $tooltip;
-                                    ?>">
-								<?php echo $total; ?>
-                                    </span>
-                                </td>
-						<td><?php echo $product->total; ?></td>
-						<td>
-							<button type="button" class="btn btn-sm btn-success" onclick="showAdjustModal(<?php echo $product->id; ?>, 'add')">
-								<i class="bi bi-plus-circle"></i>
-							</button>
-							<button type="button" class="btn btn-sm btn-danger" onclick="showAdjustModal(<?php echo $product->id; ?>, 'subtract')">
-								<i class="bi bi-dash-circle"></i>
-							</button>
-							<a href="index.php?view=editproduct&id=<?php echo $product->id; ?>" class="btn btn-sm btn-warning">
-								<i class="bi bi-pencil"></i>
-							</a>
-							<button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal(<?php echo $product->id; ?>, '<?php echo addslashes($product->name); ?>')">
-								<i class="bi bi-trash"></i>
-							</button>
-							<button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#debugModal<?php echo $product->id; ?>">
-								<i class="bi bi-info-circle"></i>
-							</button>
-
-							<!-- Modal de Debug -->
-							<div class="modal fade" id="debugModal<?php echo $product->id; ?>" tabindex="-1" aria-labelledby="debugModalLabel<?php echo $product->id; ?>" aria-hidden="true">
-								<div class="modal-dialog">
-									<div class="modal-content">
-										<div class="modal-header">
-											<h5 class="modal-title" id="debugModalLabel<?php echo $product->id; ?>">Información de Debug - <?php echo $product->name; ?></h5>
-											<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-										</div>
-										<div class="modal-body">
-											<div class="table-responsive">
-												<table class="table">
-													<tr>
-														<th>ID del Producto:</th>
-														<td><?php echo $product->id; ?></td>
-													</tr>
-													<tr>
-														<th>Stock Total:</th>
-														<td><?php echo $product->availability; ?></td>
-													</tr>
-													<tr>
-														<th>Mínimo Requerido:</th>
-														<td><?php echo $product->inventary_min; ?></td>
-													</tr>
-													<tr>
-														<th>Porcentaje de Disponibilidad:</th>
-														<td>
-															<?php 
-															$min_q = $product->inventary_min;
-															$total = $product->availability;
-															$percentage = 0;
-															if($min_q > 0) {
-																$percentage = ($total / $min_q) * 100;
-															}
-															echo number_format($percentage, 2); ?>%
-														</td>
-													</tr>
-													<tr>
-														<th>Color Aplicado:</th>
-														<td>
-															<?php 
-															$color = '#28a745'; // Verde por defecto
-															if($total <= $min_q) {
-																$color = '#dc3545'; // Rojo si está igual o por debajo del mínimo
-															} else if($percentage <= 120) {
-																$color = '#ffc107'; // Amarillo si está entre el mínimo y 120% del mínimo
-															}
-															?>
-															<span style="background-color: <?php echo $color; ?>; color: white; padding: 5px 10px; border-radius: 4px;">
-																<?php echo $color; ?>
-															</span>
-														</td>
-													</tr>
-												</table>
-											</div>
-										</div>
-										<div class="modal-footer">
-											<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-										</div>
-									</div>
-								</div>
-							</div>
-						</td>
-					</tr>
-                            <?php endforeach; ?>
+                                }
+                                echo $tooltip;
+                            ?>">
+                                <?php echo $total; ?>
+                            </span>
+                        </td>
+                        <td class="total-cell">
+                            <?php if($is_first_in_group): ?>
+                                <div class="total-value" rowspan="<?php echo $rowspan; ?>"><?php echo $product->total; ?></div>
+                            <?php else: ?>
+                                <div class="total-value hidden"><?php echo $product->total; ?></div>
+                            <?php endif; ?>
+                        </td>
+                        <td class="actions-cell">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-success" onclick="showAdjustModal(<?php echo $product->id; ?>, 'add')">
+                                    <i class="bi bi-plus-circle"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="showAdjustModal(<?php echo $product->id; ?>, 'subtract')">
+                                    <i class="bi bi-dash-circle"></i>
+                                </button>
+                                <a href="index.php?view=editproduct&id=<?php echo $product->id; ?>" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal(<?php echo $product->id; ?>, '<?php echo addslashes($product->name); ?>')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
 				</tbody>
 			</table>
 			<div class="btn-group pull-right">
@@ -1834,6 +1809,25 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Resto del código de inicialización...
 });
+
+function highlightTotalGroup(groupId) {
+    document.querySelectorAll('.total-group-' + groupId + ' .total-cell').forEach(cell => {
+        cell.classList.add('highlighted');
+        // Mostrar el valor del total en todas las celdas del grupo
+        cell.querySelector('.total-value').classList.remove('hidden');
+    });
+}
+
+function unhighlightTotalGroup(groupId) {
+    document.querySelectorAll('.total-group-' + groupId + ' .total-cell').forEach(cell => {
+        cell.classList.remove('highlighted');
+        // Ocultar el valor del total en todas las celdas excepto la primera
+        const isFirstInGroup = cell.querySelector('.total-value').hasAttribute('rowspan');
+        if (!isFirstInGroup) {
+            cell.querySelector('.total-value').classList.add('hidden');
+        }
+    });
+}
 </script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
@@ -1929,5 +1923,64 @@ button[data-bs-toggle="modal"][data-bs-target^="#debugModal"] {
 
 #customSizeSelect {
     display: block;
+}
+
+/* Estilos para resaltar el total */
+.total-cell {
+    background-color: #fff;
+    transition: background-color 0.3s ease;
+    position: relative;
+    z-index: 0;
+    padding: 0 !important;
+}
+
+.total-value {
+    padding: 8px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.total-value.hidden {
+    display: none;
+}
+
+.total-cell.highlighted {
+    background-color: #e9ecef !important;
+}
+
+/* Asegurar que el resaltado tenga prioridad sobre otros estilos */
+tr:hover .total-cell.highlighted {
+    background-color: #e9ecef !important;
+}
+
+/* Estilos para la celda de acciones */
+.actions-cell {
+    white-space: nowrap;
+    width: 1%;
+    padding: 8px !important;
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    background-color: #fff;
+}
+
+.actions-cell .btn-group {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.actions-cell .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+    margin: 0;
+}
+
+/* Asegurar que la celda de acciones siempre esté visible */
+tr:hover .actions-cell {
+    background-color: #fff;
 }
 </style>

@@ -61,8 +61,10 @@ if(count($_POST)>0){
   foreach($tallas as $talla => $cantidad) {
     if($cantidad > 0) {
       $product->name = urldecode($_POST["name"]);
-      $product->availability = $cantidad;
-      $total_quantity += $cantidad;
+      $product->availability = floatval($cantidad);
+      $product->size = $talla;
+      $product->total = floatval($total_quantity);
+      $total_quantity += floatval($cantidad);
 
       if(isset($_FILES["image"])){
         $image = new Upload($_FILES["image"]);
@@ -94,11 +96,12 @@ if(count($_POST)>0){
     }
   }
 
-  // Actualizar la disponibilidad total en todos los productos creados
+  // Actualizar el total en todos los productos creados
   foreach($created_products as $product_id) {
     $product = ProductData::getById($product_id);
     if($product) {
-      $product->updateAvailability($total_quantity);
+      $product->total = floatval($total_quantity);
+      $product->update();
     }
   }
 

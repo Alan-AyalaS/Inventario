@@ -636,33 +636,14 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                                         }
                                         echo $tooltip;
                                     ?>">
-                                        <?php echo $total; ?>
+                                        <?php echo $product->availability; ?>
                                     </span>
                                 </td>
                                 <td>
-                                    <?php 
-                                    // Obtener la talla del producto
-                                    $talla_producto = '';
-                                    foreach($operations as $op) {
-                                        if($op->talla) {
-                                            $talla_producto = $op->talla;
-                                            break;
-                                        }
-                                    }
-                                    echo $talla_producto ?: '1';
-                                    ?>
+                                    <?php echo $product->size; ?>
                                 </td>
                                 <td>
-                                    <?php 
-                                    // Calcular el total de todas las tallas
-                                    $total_tallas = 0;
-                                    foreach($tallas as $cantidad) {
-                                        if($cantidad > 0) {
-                                            $total_tallas += $cantidad;
-                                        }
-                                    }
-                                    echo $total_tallas;
-                                    ?>
+                                    <?php echo $product->total; ?>
                                 </td>
                                 <td><?php echo $product->inventary_min; ?></td>
                                 <td>
@@ -1363,29 +1344,10 @@ function updateTableWithClientData() {
                 </span>
             </td>
             <td>
-                <?php 
-                // Obtener la talla del producto
-                $talla_producto = '';
-                foreach($operations as $op) {
-                    if($op->talla) {
-                        $talla_producto = $op->talla;
-                        break;
-                    }
-                }
-                echo $talla_producto ?: '1';
-                ?>
+                <?php echo $product->size; ?>
             </td>
             <td>
-                <?php 
-                // Calcular el total de todas las tallas
-                $total_tallas = 0;
-                foreach($tallas as $cantidad) {
-                    if($cantidad > 0) {
-                        $total_tallas += $cantidad;
-                    }
-                }
-                echo $total_tallas;
-                ?>
+                <?php echo $product->total; ?>
             </td>
             <td><?php echo $product->inventary_min; ?></td>
             <td>

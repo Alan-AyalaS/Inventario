@@ -145,9 +145,9 @@ $categories = CategoryData::getAll();
 
     <!-- Talla única para Gorras y Variado -->
     <div id="tallaUnica" class="form-group" style="display: none;">
-      <label class="col-lg-2 control-label">Cantidad</label>
+      <label class="col-lg-2 control-label">Talla única</label>
       <div class="col-md-6">
-        <input type="number" name="cantidad_unica" class="form-control" min="0" value="1">
+        <input type="number" name="talla_unica" class="form-control" min="0" value="1">
       </div>
     </div>
   </div>
@@ -190,10 +190,11 @@ $categories = CategoryData::getAll();
     </div>
   </div>
 
-  <div class="form-group" id="initialInventoryGroup">
-    <label for="inputEmail1" class="col-lg-2 control-label">Inventario inicial:</label>
+  <!-- Campo de inventario inicial para Gorras, Variado y Balón -->
+  <div id="inventarioInicialContainer" class="form-group" style="display: none;">
+    <label for="inventario_inicial" class="col-lg-2 control-label">Inventario Inicial*</label>
     <div class="col-md-6">
-      <input type="text" name="q" class="form-control" id="initialInventory" placeholder="Inventario inicial">
+      <input type="number" name="inventario_inicial" class="form-control" id="inventario_inicial" placeholder="Cantidad inicial de unidades" min="1" value="1" required>
     </div>
   </div>
 
@@ -213,27 +214,29 @@ $categories = CategoryData::getAll();
 $(document).ready(function(){
     // Función para manejar el cambio de categoría
     $('#categorySelect').change(function(){
-        var categoria = $(this).find('option:selected').text().toLowerCase();
-        $('#tallasContainer').show();
-        
-        // Ocultar todos los contenedores de tallas primero
-        $('#tallasAdulto, #tallasNino, #tallasTenis, #tallaUnica').hide();
+        var categoria = $(this).find('option:selected').text().trim().toLowerCase();
+        console.log('Categoría seleccionada:', categoria); // Para depuración
         
         if(categoria === 'jersey') {
+            $('#tallasContainer').show();
             $('#tipoJersey').show();
             $('#tallasAdulto').show();
-            $('#initialInventoryGroup').hide();
+            $('#tallasNino, #tallasTenis, #tallaUnica').hide();
+            $('#inventarioInicialContainer').hide();
         } else if(categoria === 'tenis') {
+            $('#tallasContainer').show();
             $('#tipoJersey').hide();
             $('#tallasTenis').show();
-            $('#initialInventoryGroup').hide();
-        } else if(categoria === 'gorras' || categoria === 'variado') {
-            $('#tipoJersey').hide();
-            $('#tallaUnica').show();
-            $('#initialInventoryGroup').show();
+            $('#tallasAdulto, #tallasNino, #tallaUnica').hide();
+            $('#inventarioInicialContainer').hide();
+        } else if(categoria === 'gorra' || categoria === 'gorras' || categoria === 'variado' || categoria === 'balón' || categoria === 'balon') {
+            $('#tallasContainer').hide();
+            $('#tipoJersey, #tallasAdulto, #tallasNino, #tallasTenis, #tallaUnica').hide();
+            $('#inventarioInicialContainer').show();
         } else {
             $('#tallasContainer').hide();
-            $('#initialInventoryGroup').show();
+            $('#tipoJersey, #tallasAdulto, #tallasNino, #tallasTenis, #tallaUnica').hide();
+            $('#inventarioInicialContainer').hide();
         }
     });
 

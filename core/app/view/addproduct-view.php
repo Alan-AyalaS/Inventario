@@ -20,7 +20,7 @@ if(count($_POST)>0){
 
   // Obtener la categoría seleccionada
   $category = CategoryData::getById($category_id);
-  $categoryName = $category ? strtolower($category->name) : '';
+  $categoryName = $category ? strtolower(trim($category->name)) : '';
 
   // Manejar las tallas según la categoría
   $total_quantity = 0;
@@ -53,8 +53,10 @@ if(count($_POST)>0){
       '8' => $_POST["talla_8"],
       '9' => $_POST["talla_9"]
     ];
+  } elseif(in_array($categoryName, ['gorras', 'gorra', 'variado', 'balón', 'balon'])) {
+    $tallas = ['unitalla' => $_POST["inventario_inicial"]];
   } else {
-    $tallas = ['1' => $_POST["cantidad_unica"]];
+    $tallas = ['unitalla' => $_POST["q"]];
   }
 
   // Crear un producto para cada talla con cantidad mayor a 0

@@ -686,14 +686,14 @@ if($selected_category_name == "Jersey") {
 							$categoryName = 'Sin categoría';
 							
 							if (!empty($product->category_id)) {
-								$categoryColor = isset($_COOKIE['category_color_' . $product->category_id]) 
-									? $_COOKIE['category_color_' . $product->category_id] 
-									: '#6c757d';
-								
-								// Obtener el nombre de la categoría
+								// Obtener el color de la categoría
 								$category = CategoryData::getById($product->category_id);
 								if ($category) {
 									$categoryName = $category->name;
+									// Intentar obtener el color de la cookie primero
+									$categoryColor = isset($_COOKIE['category_color_' . $product->category_id]) 
+										? $_COOKIE['category_color_' . $product->category_id] 
+										: '#28a745'; // Color por defecto si no hay cookie
 								}
 							}
 							?>
@@ -714,7 +714,7 @@ if($selected_category_name == "Jersey") {
 							
 							// Agrupar por talla
 							foreach($operations as $op) {
-								$talla = $op->talla ?? '1';
+								$talla = $op->talla ?? 'unitalla';
 								if(!isset($tallas[$talla])) {
 									$tallas[$talla] = 0;
 								}

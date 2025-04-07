@@ -6,7 +6,7 @@ $categories = CategoryData::getAll();
 
 // Obtener productos según los filtros
 if(isset($_GET["category_id"]) && $_GET["category_id"] != "") {
-	$products = ProductData::getAllByCategoryId($_GET["category_id"]);
+	$products = ProductData::getAllByCategoryId($_GET["category_id"], $order);
 	// Si no hay productos en la categoría, mostrar todos los productos
 	if(empty($products)) {
 		$products = ProductData::getAll($order);

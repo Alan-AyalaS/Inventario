@@ -12,13 +12,14 @@ if(isset($_GET["category_id"]) && $_GET["category_id"] != "") {
 		$products = ProductData::getAll($order);
 		// Establecer cookie para mostrar el mensaje
 		setcookie("category_empty", "1", time()+3600);
-		// Redirigir a todas las categorías
+		// Redirigir a todas las categorías manteniendo los filtros
 		$url = "index.php?view=inventary";
 		if(isset($_GET["order"])) $url .= "&order=".$_GET["order"];
 		if(isset($_GET["search"])) $url .= "&search=".$_GET["search"];
 		if(isset($_GET["availability"])) $url .= "&availability=".$_GET["availability"];
 		if(isset($_GET["date_filter"])) $url .= "&date_filter=".$_GET["date_filter"];
 		if(isset($_GET["limit"])) $url .= "&limit=".$_GET["limit"];
+		if(isset($_GET["size"])) $url .= "&size=".$_GET["size"];
 		header("Location: ".$url);
 		exit;
 	}
@@ -362,17 +363,17 @@ if($selected_category_name == "Jersey") {
             </div>
             <button type="button" class="btn btn-secondary" id="clearFiltersBtn" onclick="clearFilters()">Limpiar filtros</button>
             <div class="ms-auto">
-                <a href="index.php?view=inventary&order=<?php echo $order == 'desc' ? 'asc' : 'desc'; ?><?php 
-                    if(isset($_GET['category_id'])) echo '&category_id='.$_GET['category_id'];
-                    if(isset($_GET['availability'])) echo '&availability='.$_GET['availability'];
-                    if(isset($_GET['search'])) echo '&search='.$_GET['search'];
-                    if(isset($_GET['date_filter'])) echo '&date_filter='.$_GET['date_filter'];
-                    if(isset($_GET['limit'])) echo '&limit='.$_GET['limit'];
-                    if(isset($_GET['page'])) echo '&page='.$_GET['page'];
-                ?>" class="btn btn-secondary">
-                    <i class="bi bi-sort-<?php echo $order == 'desc' ? 'down' : 'up'; ?>"></i> 
-                    <?php echo $order == 'desc' ? 'Más recientes primero' : 'Más antiguos primero'; ?>
-                </a>
+                <a href="index.php?view=inventary&order=<?php echo $order == 'desc' ? 'asc' : 'desc'; ?><?php
+if(isset($_GET["category_id"])) echo "&category_id=".$_GET["category_id"];
+if(isset($_GET["search"])) echo "&search=".$_GET["search"];
+if(isset($_GET["availability"])) echo "&availability=".$_GET["availability"];
+if(isset($_GET["date_filter"])) echo "&date_filter=".$_GET["date_filter"];
+if(isset($_GET["limit"])) echo "&limit=".$_GET["limit"];
+if(isset($_GET["size"])) echo "&size=".$_GET["size"];
+?>" class="btn btn-secondary">
+    <i class="bi bi-sort-<?php echo $order == 'desc' ? 'down' : 'up'; ?>"></i> 
+    <?php echo $order == 'desc' ? 'Ascendente' : 'Descendente'; ?>
+</a>
         </div>
     </div>
         <!-- ===== FIN DE SECCIÓN PROTEGIDA ===== -->

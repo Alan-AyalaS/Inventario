@@ -6,9 +6,6 @@ ini_set('display_errors', 0);
 // Limpiar cualquier salida previa
 ob_clean();
 
-// Establecer el tipo de contenido como JSON
-header('Content-Type: application/json');
-
 try {
     // Incluir los archivos necesarios con las rutas corregidas
     require_once __DIR__ . "/../../controller/Core.php";
@@ -72,12 +69,9 @@ try {
                 }
             }
             
-            echo json_encode([
-                'success' => true,
-                'message' => $operation_type === 'add' ? 
-                    "Se agregaron $quantity unidades al inventario" : 
-                    "Se restaron $quantity unidades del inventario"
-            ]);
+            // Redirigir a la página de inventario
+            header("Location: index.php?view=inventary");
+            exit;
         } else {
             throw new Exception("Error al guardar la operación");
         }
@@ -85,9 +79,8 @@ try {
         throw new Exception("Faltan parámetros requeridos");
     }
 } catch(Exception $e) {
-    echo json_encode([
-        'success' => false,
-        'message' => $e->getMessage()
-    ]);
+    // Redirigir a la página de inventario con un mensaje de error
+    header("Location: index.php?view=inventary&error=" . urlencode($e->getMessage()));
+    exit;
 }
 ?> 

@@ -40,10 +40,10 @@ foreach($configs as $conf) {
                             </div>
                             <div>
                               <div class="fs-6 fw-semibold text-primary"><?php echo count(ProductData::getAll());?></div>
-                              <div class="text-medium-emphasis text-uppercase fw-semibold small">PRODUCTOS</div>
+                              <div class="text-medium-emphasis text-uppercase fw-semibold small">INVENTARIO</div>
                             </div>
                           </div>
-                          <div class="card-footer px-3 py-2"><a class="btn-block text-medium-emphasis d-flex justify-content-between align-items-center" href="./?view=products"><span class="small fw-semibold">IR A PRODUCTOS</span>
+                          <div class="card-footer px-3 py-2"><a class="btn-block text-medium-emphasis d-flex justify-content-between align-items-center" href="./?view=inventary"><span class="small fw-semibold">IR A INVENTARIO</span>
                               <svg class="icon">
                                 <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-chevron-right"></use>
                               </svg></a></div>

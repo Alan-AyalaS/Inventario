@@ -184,7 +184,6 @@ foreach($configs as $conf) {
               <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-folder-open"></use>
             </svg> CATALOGOS</a>
           <ul class="nav-group-items">
-            <li class="nav-item"><a class="nav-link" href="./?view=products"><span class="nav-icon"></span> PRODUCTOS</a></li>
             <li class="nav-item"><a class="nav-link" href="./?view=categories"><span class="nav-icon"></span> CATEGORIAS  </a></li>
             <?php
             require_once 'core/app/model/ConfigurationData.php';

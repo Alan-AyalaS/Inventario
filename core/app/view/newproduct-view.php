@@ -35,13 +35,123 @@ $categories = CategoryData::getAll();
   <div class="form-group">
     <label for="inputEmail1" class="col-lg-2 control-label">Categoria</label>
     <div class="col-md-6">
-    <select name="category_id" class="form-control">
+    <select name="category_id" class="form-control" id="categorySelect">
     <option value="">-- NINGUNA --</option>
     <?php foreach($categories as $category):?>
       <option value="<?php echo $category->id;?>"><?php echo $category->name;?></option>
     <?php endforeach;?>
-      </select>    </div>
+      </select>    
+    </div>
   </div>
+
+  <!-- Campos dinámicos para tallas -->
+  <div id="tallasContainer" style="display: none;">
+    <div class="form-group">
+      <label for="tipoJersey" class="col-lg-2 control-label">Tipo de Jersey</label>
+      <div class="col-md-6">
+        <select name="tipo_jersey" class="form-control" id="tipoJersey">
+          <option value="adulto">Adulto</option>
+          <option value="nino">Niño</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Tallas para Jersey Adulto -->
+    <div id="tallasAdulto" class="form-group">
+      <label class="col-lg-2 control-label">Tallas Adulto</label>
+      <div class="col-md-6">
+        <div class="row">
+          <div class="col-md-2">
+            <label>S</label>
+            <input type="number" name="talla_s" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>M</label>
+            <input type="number" name="talla_m" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>L</label>
+            <input type="number" name="talla_l" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>XL</label>
+            <input type="number" name="talla_xl" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>XXL</label>
+            <input type="number" name="talla_xxl" class="form-control" min="0" value="0">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tallas para Jersey Niño -->
+    <div id="tallasNino" class="form-group" style="display: none;">
+      <label class="col-lg-2 control-label">Tallas Niño</label>
+      <div class="col-md-6">
+        <div class="row">
+          <div class="col-md-2">
+            <label>16</label>
+            <input type="number" name="talla_16" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>18</label>
+            <input type="number" name="talla_18" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>20</label>
+            <input type="number" name="talla_20" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>22</label>
+            <input type="number" name="talla_22" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>24</label>
+            <input type="number" name="talla_24" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>26</label>
+            <input type="number" name="talla_26" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>28</label>
+            <input type="number" name="talla_28" class="form-control" min="0" value="0">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tallas para Tenis -->
+    <div id="tallasTenis" class="form-group" style="display: none;">
+      <label class="col-lg-2 control-label">Tallas Tenis</label>
+      <div class="col-md-6">
+        <div class="row">
+          <div class="col-md-2">
+            <label>6</label>
+            <input type="number" name="talla_6" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>8</label>
+            <input type="number" name="talla_8" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>9</label>
+            <input type="number" name="talla_9" class="form-control" min="0" value="0">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Talla única para Gorras y Variado -->
+    <div id="tallaUnica" class="form-group" style="display: none;">
+      <label class="col-lg-2 control-label">Cantidad</label>
+      <div class="col-md-6">
+        <input type="number" name="cantidad_unica" class="form-control" min="0" value="1">
+      </div>
+    </div>
+  </div>
+
   <div class="form-group">
     <label for="inputEmail1" class="col-lg-2 control-label">Descripcion</label>
     <div class="col-md-6">
@@ -80,10 +190,10 @@ $categories = CategoryData::getAll();
     </div>
   </div>
 
-  <div class="form-group">
+  <div class="form-group" id="initialInventoryGroup">
     <label for="inputEmail1" class="col-lg-2 control-label">Inventario inicial:</label>
     <div class="col-md-6">
-      <input type="text" name="q" class="form-control" id="inputEmail1" placeholder="Inventario inicial">
+      <input type="text" name="q" class="form-control" id="initialInventory" placeholder="Inventario inicial">
     </div>
   </div>
 
@@ -100,14 +210,52 @@ $categories = CategoryData::getAll();
 </div>
 
 <script>
-  $(document).ready(function(){
+$(document).ready(function(){
+    // Función para manejar el cambio de categoría
+    $('#categorySelect').change(function(){
+        var categoria = $(this).find('option:selected').text().toLowerCase();
+        $('#tallasContainer').show();
+        
+        // Ocultar todos los contenedores de tallas primero
+        $('#tallasAdulto, #tallasNino, #tallasTenis, #tallaUnica').hide();
+        
+        if(categoria === 'jersey') {
+            $('#tipoJersey').show();
+            $('#tallasAdulto').show();
+            $('#initialInventoryGroup').hide();
+        } else if(categoria === 'tenis') {
+            $('#tipoJersey').hide();
+            $('#tallasTenis').show();
+            $('#initialInventoryGroup').hide();
+        } else if(categoria === 'gorras' || categoria === 'variado') {
+            $('#tipoJersey').hide();
+            $('#tallaUnica').show();
+            $('#initialInventoryGroup').show();
+        } else {
+            $('#tallasContainer').hide();
+            $('#initialInventoryGroup').show();
+        }
+    });
+
+    // Función para manejar el cambio de tipo de jersey
+    $('#tipoJersey').change(function(){
+        var tipo = $(this).val();
+        if(tipo === 'adulto') {
+            $('#tallasAdulto').show();
+            $('#tallasNino').hide();
+        } else {
+            $('#tallasAdulto').hide();
+            $('#tallasNino').show();
+        }
+    });
+
+    // Prevenir el uso de Ctrl+J
     $("#product_code").keydown(function(e){
         if(e.which==17 || e.which==74 ){
             e.preventDefault();
         }else{
             console.log(e.which);
         }
-    })
+    });
 });
-
 </script>

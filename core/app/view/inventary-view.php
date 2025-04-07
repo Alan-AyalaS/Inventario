@@ -142,6 +142,8 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
 		<?php endif; ?>
 <div class="row">
     <div class="col-md-12">
+        <!-- ===== INICIO DE SECCIÓN PROTEGIDA - NO MODIFICAR ===== -->
+        <!-- Esta sección maneja los botones principales de la vista -->
         <div class="d-flex justify-content-between align-items-center mb-3">
             <a href="index.php?view=newproduct" class="btn btn-primary">
                 <i class="bi bi-plus-circle"></i> Agregar Producto
@@ -154,145 +156,142 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                 <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-pdf" style="background-color: transparent !important; transition: color 0.3s ease;">PDF (.pdf)</a></li>
             </ul>
         </div>
-        <div class="clearfix"></div>
-        <br>
+        <!-- ===== FIN DE SECCIÓN PROTEGIDA ===== -->
 
-        <!-- Filtros -->
-        <div class="row">
-            <div class="col-md-12">
-                <div class="form-inline d-flex align-items-end">
-                    <div class="form-group me-2">
-                        <label for="category_id" class="me-2">Categoría:</label>
-                        <div class="custom-select-wrapper">
-                            <div class="custom-select" id="customCategorySelect">
-                                <div class="custom-select__trigger">
-                                    <?php
-                                    $selectedCategoryName = 'Todas las categorías';
-                                    if (isset($_GET["category_id"]) && $_GET["category_id"] != "") {
-                                        foreach ($categories as $category) {
-                                            if ($category->id == $_GET["category_id"]) {
-                                                $selectedCategoryName = htmlspecialchars($category->name);
-                                                break;
-                                            }
-                                        }
+        <!-- ===== INICIO DE SECCIÓN PROTEGIDA - NO MODIFICAR ===== -->
+        <!-- Esta sección maneja los filtros principales -->
+        <div class="form-inline d-flex align-items-end">
+            <div class="form-group me-2">
+                <label for="category_id" class="me-2">Categoría:</label>
+                <div class="custom-select-wrapper">
+                    <div class="custom-select" id="customCategorySelect">
+                        <div class="custom-select__trigger">
+                            <?php
+                            $selectedCategoryName = 'Todas las categorías';
+                            if (isset($_GET["category_id"]) && $_GET["category_id"] != "") {
+                                foreach ($categories as $category) {
+                                    if ($category->id == $_GET["category_id"]) {
+                                        $selectedCategoryName = htmlspecialchars($category->name);
+                                        break;
                                     }
-                                    ?>
-                                    <span><?php echo $selectedCategoryName; ?></span>
-                                    <div class="arrow"></div>
+                                }
+                            }
+                            ?>
+                            <span><?php echo $selectedCategoryName; ?></span>
+                            <div class="arrow"></div>
+                        </div>
+                        <div class="custom-options">
+                            <div class="custom-option" data-value="" data-color="#6c757d">Todas las categorías</div>
+                            <?php foreach($categories as $category): 
+                                $categoryColor = isset($_COOKIE['category_color_' . $category->id]) 
+                                    ? $_COOKIE['category_color_' . $category->id] 
+                                    : '#28a745';
+                            ?>
+                                <div class="custom-option" data-value="<?php echo $category->id; ?>" data-color="<?php echo $categoryColor; ?>">
+                                    <?php echo htmlspecialchars($category->name); ?>
                                 </div>
-                                <div class="custom-options">
-                                    <div class="custom-option" data-value="" data-color="#6c757d">Todas las categorías</div>
-                                    <?php foreach($categories as $category): 
-                                        $categoryColor = isset($_COOKIE['category_color_' . $category->id]) 
-                                            ? $_COOKIE['category_color_' . $category->id] 
-                                            : '#28a745';
-                                    ?>
-                                        <div class="custom-option" data-value="<?php echo $category->id; ?>" data-color="<?php echo $categoryColor; ?>">
-                                            <?php echo htmlspecialchars($category->name); ?>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                            <select id="category_id" name="category_id" style="display: none;">
-                                <option value="">Todas las categorías</option>
-                                <?php foreach($categories as $category): ?>
-                                    <option value="<?php echo $category->id; ?>" <?php echo (isset($_GET["category_id"]) && $_GET["category_id"] == $category->id) ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($category->name); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
+                            <?php endforeach; ?>
                         </div>
                     </div>
-                    <div class="form-group me-2">
-                        <label for="availability" class="me-2">Disponibilidad:</label>
-                        <div class="custom-select-wrapper">
-                            <div class="custom-select" id="customAvailabilitySelect">
-                                <div class="custom-select__trigger">
-                                    <?php
-                                    $availabilityOptions = [
-                                        ['value' => '', 'text' => 'Todas las cantidades'],
-                                        ['value' => '0', 'text' => 'Sin stock (0)'],
-                                        ['value' => '1-10', 'text' => 'Stock bajo (1-10)'],
-                                        ['value' => '11-50', 'text' => 'Stock medio (11-50)'],
-                                        ['value' => '51-100', 'text' => 'Stock alto (51-100)'],
-                                        ['value' => '100+', 'text' => 'Stock muy alto (100+)']
-                                    ];
-                                    
-                                    $selectedText = 'Todas las cantidades';
-                                    if (isset($_GET["availability"])) {
-                                        foreach ($availabilityOptions as $option) {
-                                            if ($option['value'] === $_GET["availability"]) {
-                                                $selectedText = $option['text'];
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    ?>
-                                    <span><?php echo htmlspecialchars($selectedText); ?></span>
-                                    <div class="arrow"></div>
-                                </div>
-                                <div class="custom-options">
-                                    <?php foreach($availabilityOptions as $option): ?>
-                                        <div class="custom-option" data-value="<?php echo $option['value']; ?>">
-                                            <?php echo htmlspecialchars($option['text']); ?>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                            <select id="availability" name="availability" style="display: none;">
-                                <?php foreach($availabilityOptions as $option): ?>
-                                    <option value="<?php echo $option['value']; ?>" <?php echo (isset($_GET["availability"]) && $_GET["availability"] === $option['value']) ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($option['text']); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group me-2">
-                        <label for="search" class="me-2">Buscar:</label>
-                        <div class="input-group">
-                            <input type="text" name="search" id="search" class="form-control" value="<?php echo isset($_GET["search"]) ? $_GET["search"] : ''; ?>" placeholder="Buscar productos...">
-                            <button class="btn btn-primary" type="button" id="searchBtn">
-                                <i class="bi bi-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="form-group me-2">
-                        <label for="date_filter" class="me-2">Fecha:</label>
-                        <select name="date_filter" id="date_filter" class="form-control" onchange="filterProducts()">
-                            <option value="">Todas las fechas</option>
-                            <option value="this_week" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_week"){ echo "selected"; } ?>>Esta semana</option>
-                            <option value="this_month" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_month"){ echo "selected"; } ?>>Este mes</option>
-                            <option value="last_3_months" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="last_3_months"){ echo "selected"; } ?>>Últimos 3 meses</option>
-                            <option value="last_6_months" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="last_6_months"){ echo "selected"; } ?>>Últimos 6 meses</option>
-                            <option value="this_year" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_year"){ echo "selected"; } ?>>Este año</option>
-                        </select>
-                    </div>
-                    <div class="col-md-1">
-                        <div class="input-group">
-                            <input type="number" class="form-control" id="limit" name="limit" min="1" value="<?php echo isset($_GET['limit']) ? $_GET['limit'] : 100; ?>" style="width: 80px;">
-                            <button class="btn btn-primary" type="button" onclick="applyLimitFilter()">
-                                <i class="bi bi-filter"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-secondary" id="clearFiltersBtn" style="display: none;" onclick="clearFilters()">Limpiar filtros</button>
-                    <div class="ms-auto">
-                        <a href="index.php?view=inventary&order=<?php echo $order == 'desc' ? 'asc' : 'desc'; ?><?php 
-                            if(isset($_GET['category_id'])) echo '&category_id='.$_GET['category_id'];
-                            if(isset($_GET['availability'])) echo '&availability='.$_GET['availability'];
-                            if(isset($_GET['search'])) echo '&search='.$_GET['search'];
-                            if(isset($_GET['date_filter'])) echo '&date_filter='.$_GET['date_filter'];
-                            if(isset($_GET['limit'])) echo '&limit='.$_GET['limit'];
-                            if(isset($_GET['page'])) echo '&page='.$_GET['page'];
-                        ?>" class="btn btn-secondary">
-                            <i class="bi bi-sort-<?php echo $order == 'desc' ? 'down' : 'up'; ?>"></i> 
-                            <?php echo $order == 'desc' ? 'Más recientes primero' : 'Más antiguos primero'; ?>
-                        </a>
-                    </div>
+                    <select id="category_id" name="category_id" style="display: none;">
+                        <option value="">Todas las categorías</option>
+                        <?php foreach($categories as $category): ?>
+                            <option value="<?php echo $category->id; ?>" <?php echo (isset($_GET["category_id"]) && $_GET["category_id"] == $category->id) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($category->name); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
             </div>
+            <div class="form-group me-2">
+                <label for="availability" class="me-2">Disponibilidad:</label>
+                <div class="custom-select-wrapper">
+                    <div class="custom-select" id="customAvailabilitySelect">
+                        <div class="custom-select__trigger">
+                            <?php
+                            $availabilityOptions = [
+                                ['value' => '', 'text' => 'Todas las cantidades'],
+                                ['value' => '0', 'text' => 'Sin stock (0)'],
+                                ['value' => '1-10', 'text' => 'Stock bajo (1-10)'],
+                                ['value' => '11-50', 'text' => 'Stock medio (11-50)'],
+                                ['value' => '51-100', 'text' => 'Stock alto (51-100)'],
+                                ['value' => '100+', 'text' => 'Stock muy alto (100+)']
+                            ];
+                            
+                            $selectedText = 'Todas las cantidades';
+                            if (isset($_GET["availability"])) {
+                                foreach ($availabilityOptions as $option) {
+                                    if ($option['value'] === $_GET["availability"]) {
+                                        $selectedText = $option['text'];
+                                        break;
+                                    }
+                                }
+                            }
+                            ?>
+                            <span><?php echo htmlspecialchars($selectedText); ?></span>
+                            <div class="arrow"></div>
+                        </div>
+                        <div class="custom-options">
+                            <?php foreach($availabilityOptions as $option): ?>
+                                <div class="custom-option" data-value="<?php echo $option['value']; ?>">
+                                    <?php echo htmlspecialchars($option['text']); ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <select id="availability" name="availability" style="display: none;">
+                        <?php foreach($availabilityOptions as $option): ?>
+                            <option value="<?php echo $option['value']; ?>" <?php echo (isset($_GET["availability"]) && $_GET["availability"] === $option['value']) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($option['text']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group me-2">
+                <label for="search" class="me-2">Buscar:</label>
+                <div class="input-group">
+                    <input type="text" name="search" id="search" class="form-control" value="<?php echo isset($_GET["search"]) ? $_GET["search"] : ''; ?>" placeholder="Buscar productos...">
+                    <button class="btn btn-primary" type="button" id="searchBtn">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group me-2">
+                <label for="date_filter" class="me-2">Fecha:</label>
+                <select name="date_filter" id="date_filter" class="form-control" onchange="filterProducts()">
+                    <option value="">Todas las fechas</option>
+                    <option value="this_week" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_week"){ echo "selected"; } ?>>Esta semana</option>
+                    <option value="this_month" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_month"){ echo "selected"; } ?>>Este mes</option>
+                    <option value="last_3_months" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="last_3_months"){ echo "selected"; } ?>>Últimos 3 meses</option>
+                    <option value="last_6_months" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="last_6_months"){ echo "selected"; } ?>>Últimos 6 meses</option>
+                    <option value="this_year" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_year"){ echo "selected"; } ?>>Este año</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <div class="input-group">
+                    <input type="number" class="form-control" id="limit" name="limit" min="1" value="<?php echo isset($_GET['limit']) ? $_GET['limit'] : 100; ?>" style="width: 80px;">
+                    <button class="btn btn-primary" type="button" onclick="applyLimitFilter()">
+                        <i class="bi bi-filter"></i>
+                    </button>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary" id="clearFiltersBtn" style="display: none;" onclick="clearFilters()">Limpiar filtros</button>
+            <div class="ms-auto">
+                <a href="index.php?view=inventary&order=<?php echo $order == 'desc' ? 'asc' : 'desc'; ?><?php 
+                    if(isset($_GET['category_id'])) echo '&category_id='.$_GET['category_id'];
+                    if(isset($_GET['availability'])) echo '&availability='.$_GET['availability'];
+                    if(isset($_GET['search'])) echo '&search='.$_GET['search'];
+                    if(isset($_GET['date_filter'])) echo '&date_filter='.$_GET['date_filter'];
+                    if(isset($_GET['limit'])) echo '&limit='.$_GET['limit'];
+                    if(isset($_GET['page'])) echo '&page='.$_GET['page'];
+                ?>" class="btn btn-secondary">
+                    <i class="bi bi-sort-<?php echo $order == 'desc' ? 'down' : 'up'; ?>"></i> 
+                    <?php echo $order == 'desc' ? 'Más recientes primero' : 'Más antiguos primero'; ?>
+                </a>
+            </div>
         </div>
+        <!-- ===== FIN DE SECCIÓN PROTEGIDA ===== -->
 
         <!-- Botón para eliminar seleccionados -->
         <div class="row mt-3">
@@ -479,11 +478,14 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                     </div>
 
                     <?php if(isset($_COOKIE["category_empty"])): ?>
-                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <!-- ===== INICIO DE SECCIÓN PROTEGIDA - NO MODIFICAR ===== -->
+                        <!-- Esta sección maneja el mensaje de alerta para categorías vacías -->
+                        <div id="categoryEmptyAlert" class="alert alert-warning alert-dismissible fade show" role="alert">
                             <strong>¡Atención!</strong> No hay productos en la categoría seleccionada.
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                         <?php setcookie("category_empty","",time()-18600); endif; ?>
+                        <!-- ===== FIN DE SECCIÓN PROTEGIDA ===== -->
 
                     <?php
                     $page = 1;
@@ -1476,6 +1478,20 @@ document.addEventListener('DOMContentLoaded', function() {
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
+});
+
+// Agregar al final del script
+document.addEventListener('DOMContentLoaded', function() {
+    // Ocultar automáticamente el mensaje de categoría vacía después de 5 segundos
+    const categoryEmptyAlert = document.getElementById('categoryEmptyAlert');
+    if (categoryEmptyAlert) {
+        setTimeout(() => {
+            categoryEmptyAlert.classList.remove('show');
+            setTimeout(() => {
+                categoryEmptyAlert.remove();
+            }, 150); // Tiempo para la animación de fade
+        }, 5000); // 5 segundos
+    }
 });
 </script>
 

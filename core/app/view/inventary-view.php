@@ -1811,7 +1811,8 @@ document.addEventListener('DOMContentLoaded', function() {
 function highlightTotalGroup(groupId) {
     const totalCell = document.getElementById('total-cell-' + groupId);
     if (totalCell) {
-        totalCell.style.backgroundColor = '#e9ecef';
+        // Usar el mismo color de hover que tiene la tabla por defecto
+        totalCell.style.backgroundColor = 'rgba(0,0,0,.075)';
     }
 }
 
@@ -1822,19 +1823,32 @@ function unhighlightTotalGroup(groupId) {
     }
 }
 
-// Agregar eventos de mouse a todas las filas del grupo
+// Agregar eventos de mouse a todas las filas del grupo excepto la primera
 document.addEventListener('DOMContentLoaded', function() {
-    const rows = document.querySelectorAll('tr[class^="total-group-"]');
-    rows.forEach(row => {
+    const groups = {};
+    
+    // Primero, agrupar las filas por su groupId
+    document.querySelectorAll('tr[class^="total-group-"]').forEach(row => {
         const groupId = row.className.match(/total-group-(\d+)/)[1];
-        
-        row.addEventListener('mouseenter', function() {
-            highlightTotalGroup(groupId);
-        });
-        
-        row.addEventListener('mouseleave', function() {
-            unhighlightTotalGroup(groupId);
-        });
+        if (!groups[groupId]) {
+            groups[groupId] = [];
+        }
+        groups[groupId].push(row);
+    });
+
+    // Luego, agregar eventos solo a las filas que no son la primera de su grupo
+    Object.keys(groups).forEach(groupId => {
+        const rows = groups[groupId];
+        // Saltamos el primer elemento (índice 0) y agregamos eventos al resto
+        for (let i = 1; i < rows.length; i++) {
+            rows[i].addEventListener('mouseenter', function() {
+                highlightTotalGroup(groupId);
+            });
+            
+            rows[i].addEventListener('mouseleave', function() {
+                unhighlightTotalGroup(groupId);
+            });
+        }
     });
 });
 </script>

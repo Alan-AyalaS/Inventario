@@ -35,6 +35,17 @@ if(isset($_GET["search"]) && $_GET["search"] != "") {
 	$products = $search_products;
 }
 
+// Filtrar por talla si está seleccionado
+if(isset($_GET["size"]) && $_GET["size"] != "") {
+    $filtered_products = [];
+    foreach($products as $product) {
+        if($product->size == $_GET["size"]) {
+            $filtered_products[] = $product;
+        }
+    }
+    $products = $filtered_products;
+}
+
 // Filtrar por disponibilidad si está seleccionado
 if(isset($_GET["availability"]) && $_GET["availability"] != "") {
 	$filtered_products = [];
@@ -59,6 +70,33 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
 		}
 	}
 	$products = $filtered_products;
+}
+
+// Obtener la categoría seleccionada
+$selected_category = isset($_GET["category_id"]) ? $_GET["category_id"] : "";
+$selected_category_name = "";
+if($selected_category != "") {
+    foreach($categories as $category) {
+        if($category->id == $selected_category) {
+            $selected_category_name = $category->name;
+            break;
+        }
+    }
+}
+
+// Definir las tallas disponibles según la categoría
+$available_sizes = [];
+if($selected_category_name == "Jersey") {
+    $available_sizes = [
+        "adulto" => ["S", "M", "L", "XL", "XXL"],
+        "niño" => ["16", "18", "20", "22", "24", "26", "28"]
+    ];
+} elseif($selected_category_name == "Tenis") {
+    $available_sizes = ["6", "7", "8", "9"];
+} elseif(in_array($selected_category_name, ["Gorras", "Variado", "Balón"])) {
+    $available_sizes = [];
+} else {
+    $available_sizes = ["S", "M", "L", "XL", "XXL", "16", "18", "20", "22", "24", "26", "28", "6", "7", "8", "9"];
 }
 ?>
 <div class="row">
@@ -148,14 +186,14 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
             <a href="index.php?view=newproduct" class="btn btn-primary">
                 <i class="bi bi-plus-circle"></i> Agregar Producto
             </a>
-            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow: none !important;">
-                <i class="fa fa-download"></i> Descargar <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end" style="background-color: #28a745; border: none;">
-                <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-excel" style="background-color: transparent !important; transition: color 0.3s ease;">Excel (.xlsx)</a></li>
-                <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-pdf" style="background-color: transparent !important; transition: color 0.3s ease;">PDF (.pdf)</a></li>
-            </ul>
-        </div>
+                <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow: none !important;">
+                    <i class="fa fa-download"></i> Descargar <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" style="background-color: #28a745; border: none;">
+                    <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-excel" style="background-color: transparent !important; transition: color 0.3s ease;">Excel (.xlsx)</a></li>
+                    <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-pdf" style="background-color: transparent !important; transition: color 0.3s ease;">PDF (.pdf)</a></li>
+                </ul>
+            </div>
         <!-- ===== FIN DE SECCIÓN PROTEGIDA ===== -->
 
         <!-- ===== INICIO DE SECCIÓN PROTEGIDA - NO MODIFICAR ===== -->
@@ -258,6 +296,61 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                 </div>
             </div>
             <div class="form-group me-2">
+                <label for="size" class="me-2">Talla:</label>
+                <div class="custom-select-wrapper">
+                    <div class="custom-select" id="customSizeSelect">
+                        <div class="custom-select__trigger">
+                            <?php
+                            $selectedSize = isset($_GET["size"]) ? $_GET["size"] : "";
+                            $selectedSizeText = $selectedSize ? $selectedSize : "Todas las tallas";
+                            ?>
+                            <span><?php echo $selectedSizeText; ?></span>
+                            <div class="arrow"></div>
+                        </div>
+                        <div class="custom-options">
+                            <div class="custom-option" data-value="">Todas las tallas</div>
+                            <?php if($selected_category_name == "Jersey"): ?>
+                                <div class="custom-option-group">
+                                    <div class="custom-option-header">Adulto</div>
+                                    <?php foreach($available_sizes["adulto"] as $size): ?>
+                                        <div class="custom-option" data-value="<?php echo $size; ?>"><?php echo $size; ?></div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <div class="custom-option-group">
+                                    <div class="custom-option-header">Niño</div>
+                                    <?php foreach($available_sizes["niño"] as $size): ?>
+                                        <div class="custom-option" data-value="<?php echo $size; ?>"><?php echo $size; ?></div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php else: ?>
+                                <?php foreach($available_sizes as $size): ?>
+                                    <div class="custom-option" data-value="<?php echo $size; ?>"><?php echo $size; ?></div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <select id="size" name="size" style="display: none;">
+                        <option value="">Todas las tallas</option>
+                        <?php if($selected_category_name == "Jersey"): ?>
+                            <optgroup label="Adulto">
+                                <?php foreach($available_sizes["adulto"] as $size): ?>
+                                    <option value="<?php echo $size; ?>" <?php echo ($selectedSize == $size) ? 'selected' : ''; ?>><?php echo $size; ?></option>
+                                <?php endforeach; ?>
+                            </optgroup>
+                            <optgroup label="Niño">
+                                <?php foreach($available_sizes["niño"] as $size): ?>
+                                    <option value="<?php echo $size; ?>" <?php echo ($selectedSize == $size) ? 'selected' : ''; ?>><?php echo $size; ?></option>
+                                <?php endforeach; ?>
+                            </optgroup>
+                        <?php else: ?>
+                            <?php foreach($available_sizes as $size): ?>
+                                <option value="<?php echo $size; ?>" <?php echo ($selectedSize == $size) ? 'selected' : ''; ?>><?php echo $size; ?></option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group me-2">
                 <label for="date_filter" class="me-2">Fecha:</label>
                 <select name="date_filter" id="date_filter" class="form-control" onchange="filterProducts()">
                     <option value="">Todas las fechas</option>
@@ -276,7 +369,7 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                     </button>
                 </div>
             </div>
-            <button type="button" class="btn btn-secondary" id="clearFiltersBtn" style="display: none;" onclick="clearFilters()">Limpiar filtros</button>
+            <button type="button" class="btn btn-secondary" id="clearFiltersBtn" onclick="clearFilters()">Limpiar filtros</button>
             <div class="ms-auto">
                 <a href="index.php?view=inventary&order=<?php echo $order == 'desc' ? 'asc' : 'desc'; ?><?php 
                     if(isset($_GET['category_id'])) echo '&category_id='.$_GET['category_id'];
@@ -289,28 +382,28 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                     <i class="bi bi-sort-<?php echo $order == 'desc' ? 'down' : 'up'; ?>"></i> 
                     <?php echo $order == 'desc' ? 'Más recientes primero' : 'Más antiguos primero'; ?>
                 </a>
-            </div>
         </div>
+    </div>
         <!-- ===== FIN DE SECCIÓN PROTEGIDA ===== -->
 
-        <!-- Botón para eliminar seleccionados -->
-        <div class="row mt-3">
-            <div class="col-md-12">
-                <button type="button" class="btn btn-danger" id="deleteSelected" disabled>
-                    <i class="fas fa-trash"></i> Eliminar seleccionados
-                </button>
-            </div>
-        </div>
+<!-- Botón para eliminar seleccionados -->
+<div class="row mt-3">
+    <div class="col-md-12">
+        <button type="button" class="btn btn-danger" id="deleteSelected" disabled>
+            <i class="fas fa-trash"></i> Eliminar seleccionados
+        </button>
+    </div>
+</div>
 
-        <!-- Modal para ajustar inventario -->
+<!-- Modal para ajustar inventario -->
         <div class="modal fade" id="adjustModal" tabindex="-1" aria-labelledby="adjustModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
                         <h5 class="modal-title" id="adjustModalLabel">Ajustar Inventario</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
                         <form id="adjustForm" method="post" action="index.php?view=adjustinventory">
                             <input type="hidden" name="product_id" id="productId">
                             <input type="hidden" name="operation_type" id="operationType">
@@ -338,144 +431,151 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                                 </select>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="quantity" class="form-label">Cantidad</label>
+          <div class="mb-3">
+            <label for="quantity" class="form-label">Cantidad</label>
                                 <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <button type="button" class="btn btn-primary" onclick="submitAdjustForm()">Ajustar</button>
-                    </div>
-                </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Alerta dinámica -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+  <div id="inventoryAlert" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span id="alertMessage"></span>
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmación para eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="deleteModalLabel">Confirmar eliminación</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">¿Está seguro que desea eliminar el producto <strong id="productNameToDelete"></strong>?</p>
+        <p class="text-danger mt-3 mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Esta acción no se puede deshacer. Se eliminarán también todas las operaciones de inventario asociadas a este producto.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <a href="#" id="confirmDeleteBtn" class="btn btn-danger">Eliminar producto</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para eliminar productos seleccionados -->
+<div class="modal fade" id="deleteSelectedModal" tabindex="-1" role="dialog" aria-labelledby="deleteSelectedModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteSelectedModalLabel">Eliminar productos seleccionados</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas eliminar los productos seleccionados? Esta acción no se puede deshacer.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteSelected">Eliminar</button>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Alerta dinámica -->
-        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-          <div id="inventoryAlert" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-              <div class="toast-body">
-                <i class="bi bi-check-circle-fill me-2"></i>
-                <span id="alertMessage"></span>
-              </div>
-              <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-          </div>
+<!-- Modal de confirmación para eliminar todos los productos -->
+<div id="deleteAllModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h2>Confirmar Eliminación</h2>
+        <p>¿Estás seguro de que deseas eliminar todos los productos? Esta acción no se puede deshacer.</p>
+        <div class="modal-buttons">
+            <button onclick="document.getElementById('deleteAllModal').style.display='none'">Cancelar</button>
+            <button onclick="confirmDeleteAll()">Confirmar</button>
         </div>
+    </div>
+</div>
 
-        <!-- Modal de confirmación para eliminación -->
-        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="deleteModalLabel">Confirmar eliminación</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <p class="mb-0">¿Está seguro que desea eliminar el producto <strong id="productNameToDelete"></strong>?</p>
-                <p class="text-danger mt-3 mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Esta acción no se puede deshacer. Se eliminarán también todas las operaciones de inventario asociadas a este producto.</p>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <a href="#" id="confirmDeleteBtn" class="btn btn-danger">Eliminar producto</a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Modal para eliminar productos seleccionados -->
-        <div class="modal fade" id="deleteSelectedModal" tabindex="-1" role="dialog" aria-labelledby="deleteSelectedModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteSelectedModalLabel">Eliminar productos seleccionados</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        ¿Estás seguro de que deseas eliminar los productos seleccionados? Esta acción no se puede deshacer.
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <button type="button" class="btn btn-danger" id="confirmDeleteSelected">Eliminar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal de confirmación para eliminar todos los productos -->
-        <div id="deleteAllModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <h2>Confirmar Eliminación</h2>
-                <p>¿Estás seguro de que deseas eliminar todos los productos? Esta acción no se puede deshacer.</p>
-                <div class="modal-buttons">
-                    <button onclick="document.getElementById('deleteAllModal').style.display='none'">Cancelar</button>
-                    <button onclick="confirmDeleteAll()">Confirmar</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">INVENTARIO
-            </div>
-                <div class="card-body">
-                    <?php
-                    // Verificar si hay filtros activos (excluyendo el campo "Mostrar")
-                    $has_filters = false;
-                    
-                    // Verificar búsqueda
-                    if(isset($_GET["search"]) && $_GET["search"] != "") {
-                        $has_filters = true;
-                    }
-                    
-                    // Verificar categoría (solo si no es "Todas las categorías")
-                    if(isset($_GET["category_id"]) && $_GET["category_id"] != "") {
-                        $has_filters = true;
-                    }
-                    
-                    // Verificar disponibilidad
-                    if(isset($_GET["availability"]) && $_GET["availability"] != "") {
-                        $has_filters = true;
-                    }
-                    
-                    // Verificar fecha
-                    if(isset($_GET["date_filter"]) && $_GET["date_filter"] != "") {
-                        $has_filters = true;
-                    }
-                    
-                    // Verificar si el único parámetro es el campo "Mostrar"
-                    $only_limit = count($_GET) == 2 && isset($_GET["view"]) && isset($_GET["limit"]);
-                    
-                    // Verificar si se seleccionó "Todas las categorías"
-                    $all_categories = isset($_GET["category_id"]) && $_GET["category_id"] == "";
-                    
-                    // Determinar si se debe mostrar la alerta
-                    $show_alert = $has_filters && !$only_limit && !$all_categories;
-                    
-                    // Si se seleccionó "Todas las categorías", no mostrar la alerta
-                    if ($all_categories) {
-                        $show_alert = false;
-                    }
-                    ?>
-                    <div id="filterAlert" class="alert alert-info" <?php echo $show_alert ? '' : 'style="display: none;"'; ?>>
-                        <?php
-                        $total_products = count($products);
-                        if(isset($_GET["search"]) && $_GET["search"] != "") {
-                            echo "Mostrando $total_products productos que coinciden con la búsqueda";
-                        } else if(isset($_GET["category_id"]) && $_GET["category_id"] != "") {
-                            echo "Mostrando $total_products productos de la categoría seleccionada";
-                        } else if(isset($_GET["availability"]) && $_GET["availability"] != "") {
-                            echo "Mostrando $total_products productos con la disponibilidad seleccionada";
-                        } else if(isset($_GET["date_filter"]) && $_GET["date_filter"] != "") {
-                            echo "Mostrando $total_products productos del período seleccionado";
-                        } else {
-                            echo "Mostrando todos los $total_products productos";
-                        }
-                        ?>
-                    </div>
+<div class="card">
+	<div class="card-header">INVENTARIO
+	</div>
+		<div class="card-body">
+			<?php
+			// Verificar si hay filtros activos (excluyendo el campo "Mostrar")
+			$has_filters = false;
+			
+			// Verificar búsqueda
+			if(isset($_GET["search"]) && $_GET["search"] != "") {
+				$has_filters = true;
+			}
+			
+			// Verificar categoría (solo si no es "Todas las categorías")
+			if(isset($_GET["category_id"]) && $_GET["category_id"] != "") {
+				$has_filters = true;
+			}
+			
+			// Verificar talla
+			if(isset($_GET["size"]) && $_GET["size"] != "") {
+				$has_filters = true;
+			}
+			
+			// Verificar disponibilidad
+			if(isset($_GET["availability"]) && $_GET["availability"] != "") {
+				$has_filters = true;
+			}
+			
+			// Verificar fecha
+			if(isset($_GET["date_filter"]) && $_GET["date_filter"] != "") {
+				$has_filters = true;
+			}
+			
+			// Verificar si el único parámetro es el campo "Mostrar"
+			$only_limit = count($_GET) == 2 && isset($_GET["view"]) && isset($_GET["limit"]);
+			
+			// Verificar si se seleccionó "Todas las categorías"
+			$all_categories = isset($_GET["category_id"]) && $_GET["category_id"] == "";
+			
+			// Determinar si se debe mostrar la alerta
+			$show_alert = $has_filters && !$only_limit && !$all_categories;
+			
+			// Si se seleccionó "Todas las categorías", no mostrar la alerta
+			if ($all_categories) {
+				$show_alert = false;
+			}
+			?>
+			<div id="filterAlert" class="alert alert-info" <?php echo $show_alert ? '' : 'style="display: none;"'; ?>>
+				<?php
+				$total_products = count($products);
+				if(isset($_GET["search"]) && $_GET["search"] != "") {
+					echo "Mostrando $total_products productos que coinciden con la búsqueda";
+				} else if(isset($_GET["category_id"]) && $_GET["category_id"] != "") {
+					echo "Mostrando $total_products productos de la categoría seleccionada";
+				} else if(isset($_GET["size"]) && $_GET["size"] != "") {
+					echo "Mostrando $total_products productos con la talla seleccionada";
+				} else if(isset($_GET["availability"]) && $_GET["availability"] != "") {
+					echo "Mostrando $total_products productos con la disponibilidad seleccionada";
+				} else if(isset($_GET["date_filter"]) && $_GET["date_filter"] != "") {
+					echo "Mostrando $total_products productos del período seleccionado";
+				} else {
+					echo "Mostrando todos los $total_products productos";
+				}
+				?>
+			</div>
 
                     <?php if(isset($_COOKIE["category_empty"])): ?>
                         <!-- ===== INICIO DE SECCIÓN PROTEGIDA - NO MODIFICAR ===== -->
@@ -487,87 +587,87 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                         <?php setcookie("category_empty","",time()-18600); endif; ?>
                         <!-- ===== FIN DE SECCIÓN PROTEGIDA ===== -->
 
-                    <?php
-                    $page = 1;
-                    if(isset($_GET["page"])){
-                        $page=$_GET["page"];
-                    }
-                    $limit = 100; // Valor predeterminado
-                    if(isset($_GET["limit"]) && $_GET["limit"]!=""){
-                        $limit = intval($_GET["limit"]);
-                    }
-                    // Asegurar que el límite nunca sea 0
-                    if($limit <= 0) {
-                        $limit = 100;
-                    }
+			<?php
+			$page = 1;
+			if(isset($_GET["page"])){
+				$page=$_GET["page"];
+			}
+			$limit = 100; // Valor predeterminado
+			if(isset($_GET["limit"]) && $_GET["limit"]!=""){
+				$limit = intval($_GET["limit"]);
+			}
+			// Asegurar que el límite nunca sea 0
+			if($limit <= 0) {
+				$limit = 100;
+			}
 
-                    // Verificar si el límite es diferente al total de productos
-                    $total_products = count($products);
-                    $is_full_list = ($limit == $total_products);
+			// Verificar si el límite es diferente al total de productos
+			$total_products = count($products);
+			$is_full_list = ($limit == $total_products);
 
-                    // Si el límite es diferente al total y hay filtros, aplicar filtros en el servidor
-                    if (!$is_full_list && (isset($_GET['category_id']) || isset($_GET['search']) || isset($_GET['availability']) || isset($_GET['date_filter']))) {
-                        $curr_products = $products;
-                        $npaginas = 1;
-                        $page = 1;
-                    } else {
-                        // Obtener los productos para la página actual
-                        $start_index = ($page - 1) * $limit;
-                        $curr_products = array_slice($products, $start_index, $limit);
-                    }
+			// Si el límite es diferente al total y hay filtros, aplicar filtros en el servidor
+			if (!$is_full_list && (isset($_GET['category_id']) || isset($_GET['search']) || isset($_GET['size']) || isset($_GET['availability']) || isset($_GET['date_filter']))) {
+				$curr_products = $products;
+				$npaginas = 1;
+				$page = 1;
+			} else {
+				// Obtener los productos para la página actual
+				$start_index = ($page - 1) * $limit;
+				$curr_products = array_slice($products, $start_index, $limit);
+			}
 
-                    if(count($products)>0){
-                        // Calcular el número total de páginas
-                        $total_records = count($products);
-                        $npaginas = ceil($total_records / $limit);
+			if(count($products)>0){
+				// Calcular el número total de páginas
+				$total_records = count($products);
+				$npaginas = ceil($total_records / $limit);
 
-                        // Asegurarse de que la página actual no exceda el número total de páginas
-                        if ($page > $npaginas) {
-                            $page = $npaginas;
-                        }
+				// Asegurarse de que la página actual no exceda el número total de páginas
+				if ($page > $npaginas) {
+					$page = $npaginas;
+				}
 
-                        ?>
+				?>
 
-                        <h3>Pagina <?php echo $page." de ".$npaginas; ?></h3>
-                    <div class="btn-group pull-right">
-                    <?php
-                    $px=$page-1;
-                    if($px>0):
-                        // Construir la URL con los parámetros de filtro actuales
-                        $url = "index.php?view=inventary&limit=$limit&page=".($px);
-                        if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-                            $url .= "&category_id=".$_GET['category_id'];
-                        }
-                        if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-                            $url .= "&date_filter=".$_GET['date_filter'];
-                        }
-                    ?>
-                    <a class="btn btn-sm btn-default" href="<?php echo $url; ?>"><i class="glyphicon glyphicon-chevron-left"></i> Atras </a>
-                    <?php endif; ?>
+				<h3>Pagina <?php echo $page." de ".$npaginas; ?></h3>
+			<div class="btn-group pull-right">
+			<?php
+			$px=$page-1;
+			if($px>0):
+			    // Construir la URL con los parámetros de filtro actuales
+			    $url = "index.php?view=inventary&limit=$limit&page=".($px);
+			    if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
+			        $url .= "&category_id=".$_GET['category_id'];
+			    }
+			    if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
+			        $url .= "&date_filter=".$_GET['date_filter'];
+			    }
+			?>
+			<a class="btn btn-sm btn-default" href="<?php echo $url; ?>"><i class="glyphicon glyphicon-chevron-left"></i> Atras </a>
+			<?php endif; ?>
 
-                    <?php 
+			<?php 
                     for($i=0;$i<$npaginas;$i++) {
-                        // Construir la URL con los parámetros de filtro actuales
+			    // Construir la URL con los parámetros de filtro actuales
                         $url = "index.php?view=inventary&limit=$limit&page=".($i+1);
-                        if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-                            $url .= "&category_id=".$_GET['category_id'];
-                        }
-                        if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-                            $url .= "&date_filter=".$_GET['date_filter'];
+			    if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
+			        $url .= "&category_id=".$_GET['category_id'];
+			    }
+			    if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
+			        $url .= "&date_filter=".$_GET['date_filter'];
                         }
                         
                         $active_class = ($page == ($i+1)) ? 'btn-primary' : 'btn-default';
                         echo "<a href='$url' class='btn $active_class btn-sm'>".($i+1)."</a> ";
-                    }
-                    ?>
-                    </div>
-                    <div class="clearfix"></div>
-                    <br><table class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th style="width: 50px;">
-                                    <input type="checkbox" id="selectAll" class="form-check-input">
-                                </th>
+			    }
+			?>
+			</div>
+			<div class="clearfix"></div>
+			<br><table class="table table-bordered table-hover">
+				<thead>
+					<tr>
+						<th style="width: 50px;">
+							<input type="checkbox" id="selectAll" class="form-check-input">
+						</th>
                                 <th style="width: 80px;">Codigo</th>
                                 <th style="width: 150px;">Nombre</th>
                                 <th style="width: 120px;">Categoría</th>
@@ -579,42 +679,42 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                                 <th style="width: 80px;">Total</th>
                                 <th style="width: 100px;">Mínima en Inventario</th>
                                 <th style="width: 150px;">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+					</tr>
+				</thead>
+				<tbody>
                             <?php foreach($curr_products as $product): ?>
                             <tr>
                                 <td>
                                     <input type="checkbox" class="product-checkbox" value="<?php echo $product->id; ?>">
-                                </td>
-                                <td><?php echo $product->id; ?></td>
+						</td>
+						<td><?php echo $product->id; ?></td>
                                 <td><?php echo $product->name; ?></td>
-                                <td>
-                                    <?php 
-                                    $categoryColor = '#6c757d'; // Color por defecto
-                                    $categoryName = 'Sin categoría';
-                                    
-                                    if (!empty($product->category_id)) {
-                                        $categoryColor = isset($_COOKIE['category_color_' . $product->category_id]) 
-                                            ? $_COOKIE['category_color_' . $product->category_id] 
-                                            : '#6c757d';
-                                        
-                                        // Obtener el nombre de la categoría
-                                        $category = CategoryData::getById($product->category_id);
-                                        if ($category) {
-                                            $categoryName = $category->name;
-                                        }
-                                    }
-                                    ?>
-                                    <span class="badge" style="background-color: <?php echo $categoryColor; ?>; color: white; padding: 5px 10px; border-radius: 4px;" data-category-id="<?php echo $product->category_id; ?>">
-                                        <?php echo htmlspecialchars($categoryName); ?>
-                                    </span>
-                                </td>
-                                <td><?php echo $product->price_in; ?></td>
-                                <td><?php echo $product->price_out; ?></td>
-                                <td><?php echo $product->unit; ?></td>
+						<td>
+							<?php 
+							$categoryColor = '#6c757d'; // Color por defecto
+							$categoryName = 'Sin categoría';
+							
+							if (!empty($product->category_id)) {
+								$categoryColor = isset($_COOKIE['category_color_' . $product->category_id]) 
+									? $_COOKIE['category_color_' . $product->category_id] 
+									: '#6c757d';
+								
+								// Obtener el nombre de la categoría
+								$category = CategoryData::getById($product->category_id);
+								if ($category) {
+									$categoryName = $category->name;
+								}
+							}
+							?>
+							<span class="badge" style="background-color: <?php echo $categoryColor; ?>; color: white; padding: 5px 10px; border-radius: 4px;" data-category-id="<?php echo $product->category_id; ?>">
+								<?php echo htmlspecialchars($categoryName); ?>
+							</span>
+						</td>
+						<td><?php echo $product->price_in; ?></td>
+						<td><?php echo $product->price_out; ?></td>
+						<td><?php echo $product->unit; ?></td>
                                 <td class="text-center">
-                                    <?php 
+							<?php 
                                     // Obtener todas las operaciones del producto
                                     $operations = OperationData::getAllByProductId($product->id);
                                     $tallas = [];
@@ -668,59 +768,59 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
                                 </td>
                                 <td>
                                     <?php echo $product->total; ?>
-                                </td>
-                                <td><?php echo $product->inventary_min; ?></td>
-                                <td>
-                                    <button type="button" class="btn btn-sm btn-success" onclick="showAdjustModal(<?php echo $product->id; ?>, 'add')">
-                                        <i class="bi bi-plus-circle"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-danger" onclick="showAdjustModal(<?php echo $product->id; ?>, 'subtract')">
-                                        <i class="bi bi-dash-circle"></i>
-                                    </button>
-                                    <a href="index.php?view=editproduct&id=<?php echo $product->id; ?>" class="btn btn-sm btn-warning">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal(<?php echo $product->id; ?>, '<?php echo addslashes($product->name); ?>')">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
+						</td>
+						<td><?php echo $product->inventary_min; ?></td>
+						<td>
+							<button type="button" class="btn btn-sm btn-success" onclick="showAdjustModal(<?php echo $product->id; ?>, 'add')">
+								<i class="bi bi-plus-circle"></i>
+							</button>
+							<button type="button" class="btn btn-sm btn-danger" onclick="showAdjustModal(<?php echo $product->id; ?>, 'subtract')">
+								<i class="bi bi-dash-circle"></i>
+							</button>
+							<a href="index.php?view=editproduct&id=<?php echo $product->id; ?>" class="btn btn-sm btn-warning">
+								<i class="bi bi-pencil"></i>
+							</a>
+							<button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal(<?php echo $product->id; ?>, '<?php echo addslashes($product->name); ?>')">
+								<i class="bi bi-trash"></i>
+							</button>
+						</td>
+					</tr>
                             <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                    <div class="btn-group pull-right">
-                    <?php
-                    for($i=0;$i<$npaginas;$i++){
-                        // Construir la URL con los parámetros de filtro actuales
-                        $url = "index.php?view=inventary&limit=$limit&page=".($i+1);
-                        if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-                            $url .= "&category_id=".$_GET['category_id'];
-                        }
-                        if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-                            $url .= "&date_filter=".$_GET['date_filter'];
-                        }
-                        
-                        $active_class = ($page == ($i+1)) ? 'btn-primary' : 'btn-default';
-                        echo "<a href='$url' class='btn $active_class btn-sm'>".($i+1)."</a> ";
-                    }
-                    ?>
-                    </div>
+				</tbody>
+			</table>
+			<div class="btn-group pull-right">
+			<?php
+			for($i=0;$i<$npaginas;$i++){
+			    // Construir la URL con los parámetros de filtro actuales
+			    $url = "index.php?view=inventary&limit=$limit&page=".($i+1);
+			    if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
+			        $url .= "&category_id=".$_GET['category_id'];
+			    }
+			    if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
+			        $url .= "&date_filter=".$_GET['date_filter'];
+			    }
+			    
+			    $active_class = ($page == ($i+1)) ? 'btn-primary' : 'btn-default';
+			    echo "<a href='$url' class='btn $active_class btn-sm'>".($i+1)."</a> ";
+			}
+			?>
+			</div>
 
-                        <?php
-                    }else{
-                        ?>
-                        <div class="jumbotron">
-                            <h2>No hay productos</h2>
-                            <p>No se han agregado productos a la base de datos, puedes agregar uno dando click en el boton <b>"Agregar Producto"</b>.</p>
-                        </div>
-                        <?php
-                    }
+				<?php
+			}else{
+				?>
+				<div class="jumbotron">
+					<h2>No hay productos</h2>
+					<p>No se han agregado productos a la base de datos, puedes agregar uno dando click en el boton <b>"Agregar Producto"</b>.</p>
+				</div>
+				<?php
+			}
 
-                    ?>
+			?>
                 </div>
-        </div>
-        </div>
-    </div>
+		</div>
+</div>
+	</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -1181,15 +1281,25 @@ document.getElementById('search').addEventListener('input', function() {
 // Función para actualizar la visibilidad del botón de limpiar filtros
 function updateClearFiltersButton() {
     const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-    if (clearFiltersBtn) {
-        const searchTerm = document.getElementById('search').value;
-        const categoryId = document.getElementById('category_id').value;
-        const availability = document.getElementById('availability').value;
-        const dateFilter = document.getElementById('date_filter').value;
-        
-        // Mostrar el botón si hay algún filtro activo
-        clearFiltersBtn.style.display = (searchTerm || categoryId || availability || dateFilter) ? '' : 'none';
-    }
+    if (!clearFiltersBtn) return;
+
+    // Obtener valores actuales
+    const searchTerm = document.getElementById('search').value.trim();
+    const categoryId = document.getElementById('category_id').value;
+    const availability = document.getElementById('availability').value;
+    const size = document.getElementById('size').value;
+    const dateFilter = document.getElementById('date_filter').value;
+
+    // Verificar si hay algún filtro activo
+    const hasActiveFilters = 
+        searchTerm !== '' || // Hay texto en la búsqueda
+        categoryId !== '' || // No es "Todas las categorías"
+        availability !== '' || // No es "Todas las cantidades"
+        size !== '' || // No es "Todas las tallas"
+        dateFilter !== ''; // No es "Todas las fechas"
+
+    // Mostrar u ocultar el botón
+    clearFiltersBtn.style.display = hasActiveFilters ? '' : 'none';
 }
 
 // Función para limpiar filtros
@@ -1201,13 +1311,7 @@ function clearFilters() {
     }
     
     // Recargar la página sin filtros
-    const url = new URL(window.location.href);
-    url.searchParams.delete('search');
-    url.searchParams.delete('category_id');
-    url.searchParams.delete('availability');
-    url.searchParams.delete('date_filter');
-    url.searchParams.delete('limit');
-    window.location.href = url.toString();
+    window.location.href = 'index.php?view=inventary';
 }
 
 // Función para filtrar productos
@@ -1216,218 +1320,60 @@ function filterProducts() {
     const searchTerm = document.getElementById('search').value.toLowerCase();
     const categoryId = document.getElementById('category_id').value;
     const availability = document.getElementById('availability').value;
+    const size = document.getElementById('size').value;
+    const dateFilter = document.getElementById('date_filter').value;
     
-    // Resetear productos filtrados
-    filteredProducts = [...allProducts];
+    // Construir la URL con los filtros
+    let url = 'index.php?view=inventary';
     
-    // Aplicar filtros secuencialmente
-    if (searchTerm) {
-        filteredProducts = filteredProducts.filter(product => 
-            product.name.toLowerCase().includes(searchTerm) || 
-            product.id.toString().includes(searchTerm)
-        );
+    if (searchTerm) url += '&search=' + encodeURIComponent(searchTerm);
+    if (categoryId) url += '&category_id=' + encodeURIComponent(categoryId);
+    if (availability) url += '&availability=' + encodeURIComponent(availability);
+    if (size) url += '&size=' + encodeURIComponent(size);
+    if (dateFilter) url += '&date_filter=' + encodeURIComponent(dateFilter);
+    
+    // Redirigir a la URL con los filtros
+    window.location.href = url;
+}
+
+// Inicializar todos los select personalizados cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing code ...
+
+    // Evento para el botón de búsqueda
+    const searchBtn = document.getElementById('searchBtn');
+    if (searchBtn) {
+        searchBtn.addEventListener('click', filterProducts);
     }
-    
-    if (categoryId) {
-        filteredProducts = filteredProducts.filter(product => 
-            product.category_id == categoryId
-        );
-    }
-    
-    if (availability) {
-        filteredProducts = filteredProducts.filter(product => {
-            const q = parseFloat(product.availability) || 0;
-            switch(availability) {
-                case '0': return q === 0;
-                case '1-10': return q >= 1 && q <= 10;
-                case '11-50': return q >= 11 && q <= 50;
-                case '51-100': return q >= 51 && q <= 100;
-                case '100+': return q > 100;
-                default: return true;
+
+    // Evento para el input de búsqueda al presionar Enter
+    const searchInput = document.getElementById('search');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                filterProducts();
             }
         });
-    }
-    
-    // Actualizar la tabla inmediatamente
-    updateTableWithClientData();
-    
-    // Mostrar u ocultar el botón de limpiar filtros
-    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-    if (clearFiltersBtn) {
-        clearFiltersBtn.style.display = (searchTerm || categoryId || availability) ? '' : 'none';
-    }
-}
 
-// Función para actualizar la tabla con los datos del cliente
-function updateTableWithClientData() {
-    const tbody = document.querySelector('#inventoryTable tbody');
-    if (!tbody) return;
-    
-    tbody.innerHTML = '';
-
-    // Obtener parámetros de paginación
-    const urlParams = new URLSearchParams(window.location.search);
-    const limit = parseInt(urlParams.get('limit')) || 100;
-    const currentPage = parseInt(urlParams.get('page')) || 1;
-
-    // Calcular índices para la paginación
-    const startIndex = (currentPage - 1) * limit;
-    const endIndex = startIndex + limit;
-    const currentProducts = filteredProducts.slice(startIndex, endIndex);
-
-    // Actualizar paginación
-    const totalPages = Math.ceil(filteredProducts.length / limit);
-    const paginationContainer = document.querySelector('.btn-group.pull-right');
-    if (paginationContainer) {
-        let paginationHTML = '';
-        
-        // Botón Atrás
-        if (currentPage > 1) {
-            const prevPage = currentPage - 1;
-            paginationHTML += `<a class="btn btn-sm btn-default" href="index.php?view=inventary&limit=$limit&page=${prevPage}"><i class="glyphicon glyphicon-chevron-left"></i> Atras </a>`;
-        }
-
-        // Números de página
-        for (let i = 1; i <= totalPages; i++) {
-            const activeClass = i === currentPage ? 'btn-primary' : 'btn-default';
-            paginationHTML += `<a class="btn ${activeClass} btn-sm" href="index.php?view=inventary&limit=$limit&page=${i}">${i}</a>`;
-        }
-
-        // Botón Adelante
-        if (currentPage < totalPages) {
-            const nextPage = currentPage + 1;
-            paginationHTML += `<a class="btn btn-sm btn-default" href="index.php?view=inventary&limit=$limit&page=${nextPage}">Adelante <i class="glyphicon glyphicon-chevron-right"></i></a>`;
-        }
-
-        paginationContainer.innerHTML = paginationHTML;
+        // Evento para actualizar el botón de limpiar filtros mientras se escribe
+        searchInput.addEventListener('input', function() {
+            updateClearFiltersButton();
+        });
     }
 
-    // Actualizar texto de página actual
-    const pageInfo = document.querySelector('h3');
-    if (pageInfo) {
-        pageInfo.textContent = `Pagina ${currentPage} de ${totalPages}`;
-    }
-
-    // Actualizar tabla con productos
-    currentProducts.forEach(product => {
-        const tr = document.createElement('tr');
-        const q = parseFloat(product.availability) || 0;
-        const minQ = parseFloat(product.inventary_min) || 0;
-        
-        // Determinar clase de la fila según disponibilidad
-        if(q <= minQ/2) {
-            tr.className = 'danger';
-        } else if(q <= minQ) {
-            tr.className = 'warning';
-        }
-
-        // Obtener nombre y color de la categoría
-        let categoryName = 'Sin categoría';
-        let categoryColor = '#6c757d';
-        
-        if (product.category_id) {
-            const category = categoriesData.find(c => c.id == product.category_id);
-            if (category) {
-                categoryName = category.name;
-                categoryColor = localStorage.getItem('category_color_' + category.id) || '#28a745';
-            }
-        }
-
-        // Determinar color de disponibilidad
-        let availabilityColor = '#28a745';
-        if (q <= 0) {
-            availabilityColor = '#dc3545';
-        } else {
-            const percentage = (minQ / q) * 100;
-            if(percentage <= 50) {
-                availabilityColor = '#dc3545';
-            } else if(percentage <= 80) {
-                availabilityColor = '#ffc107';
-            } else {
-                availabilityColor = '#28a745';
-            }
-        }
-
-        tr.innerHTML = `
-            <td>
-                <input type="checkbox" class="form-check-input product-checkbox" value="${product.id}">
-            </td>
-            <td>${product.id}</td>
-            <td><a href="index.php?view=producthistory&id=${product.id}" style="text-decoration: none; color: inherit;">${product.name}</a></td>
-            <td>
-                <span class="badge" style="background-color: ${categoryColor}; color: white; padding: 5px 10px; border-radius: 4px;" data-category-id="${product.category_id || ''}">
-                    ${categoryName}
-                </span>
-            </td>
-            <td>${product.price_in}</td>
-            <td>${product.price_out}</td>
-            <td>${product.unit}</td>
-            <td>
-                <span style="background-color: ${availabilityColor}; color: white; padding: 5px 10px; border-radius: 5px;">
-                    ${q}
-                </span>
-            </td>
-            <td>
-                <?php echo $product->size; ?>
-            </td>
-            <td>
-                <?php echo $product->total; ?>
-            </td>
-            <td><?php echo $product->inventary_min; ?></td>
-            <td>
-                <button type="button" class="btn btn-sm btn-success" onclick="showAdjustModal(${product.id}, 'add')">
-                    <i class="bi bi-plus-circle"></i>
-                </button>
-                <button type="button" class="btn btn-sm btn-danger" onclick="showAdjustModal(${product.id}, 'subtract')">
-                    <i class="bi bi-dash-circle"></i>
-                </button>
-                <a href="index.php?view=editproduct&id=${product.id}" class="btn btn-sm btn-warning">
-                    <i class="bi bi-pencil"></i>
-                </a>
-                <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteModal(${product.id}, '${product.name.replace(/'/g, "\\'")}')">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </td>
-        `;
-        tbody.appendChild(tr);
+    // Evento para los select de filtros
+    const filterSelects = document.querySelectorAll('select[id="category_id"], select[id="availability"], select[id="size"], select[id="date_filter"]');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            filterProducts();
+            updateClearFiltersButton();
+        });
     });
 
-    // Actualizar alerta de filtrado
-    const filterAlert = document.getElementById('filterAlert');
-    if (filterAlert) {
-        const totalFiltered = filteredProducts.length;
-        let filterMessage = '';
-        
-        if (document.getElementById('search').value) {
-            filterMessage = `Mostrando ${totalFiltered} productos que coinciden con la búsqueda`;
-        } else if (document.getElementById('category_id').value) {
-            const categoryId = document.getElementById('category_id').value;
-            const category = categoriesData.find(c => c.id == categoryId);
-            const categoryName = category ? category.name : 'Todas las categorías';
-            filterMessage = `Mostrando ${totalFiltered} productos de la categoría "${categoryName}"`;
-        } else if (document.getElementById('availability').value) {
-            let availabilityText = '';
-            switch(document.getElementById('availability').value) {
-                case '0': availabilityText = 'Sin stock (0)'; break;
-                case '1-10': availabilityText = 'Stock bajo (1-10)'; break;
-                case '11-50': availabilityText = 'Stock medio (11-50)'; break;
-                case '51-100': availabilityText = 'Stock alto (51-100)'; break;
-                case '100+': availabilityText = 'Stock muy alto (100+)'; break;
-            }
-            filterMessage = `Mostrando ${totalFiltered} productos con ${availabilityText}`;
-        } else {
-            filterMessage = `Mostrando todos los ${totalFiltered} productos`;
-        }
-        
-        filterAlert.style.display = 'block';
-        filterAlert.textContent = filterMessage;
-    }
-}
-
-// Inicializar la tabla al cargar la página
-document.addEventListener('DOMContentLoaded', function() {
-    updateTableWithClientData();
+    // Inicializar el botón de limpiar filtros
     updateClearFiltersButton();
+
+    // ... rest of existing code ...
 });
 
 // Función para aplicar el filtro de límite
@@ -1493,12 +1439,306 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000); // 5 segundos
     }
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('category_id');
+    const sizeSelect = document.getElementById('customSizeSelect');
+    
+    if(categorySelect && sizeSelect) {
+        categorySelect.addEventListener('change', function() {
+            const selectedCategory = this.options[this.selectedIndex].text;
+            const categoriesToHide = ["Gorras", "Variado", "Balón"];
+            
+            if(categoriesToHide.includes(selectedCategory)) {
+                sizeSelect.style.display = 'none';
+                // Resetear el valor del select de tallas
+                document.getElementById('size').value = '';
+                document.querySelector('#customSizeSelect .custom-select__trigger span').textContent = 'Todas las tallas';
+            } else {
+                sizeSelect.style.display = 'block';
+            }
+            
+            // Recargar la página para actualizar las tallas disponibles
+            const url = new URL(window.location.href);
+            url.searchParams.set('category_id', this.value);
+            url.searchParams.delete('size'); // Resetear el filtro de tallas
+            window.location.href = url.toString();
+        });
+    }
+});
+
+// Función para aplicar la búsqueda
+function applySearch() {
+    const searchTerm = document.getElementById('search').value;
+    const url = new URL(window.location.href);
+    
+    // Mantener los filtros existentes
+    const categoryId = document.getElementById('category_id').value;
+    const availability = document.getElementById('availability').value;
+    const size = document.getElementById('size').value;
+    const dateFilter = document.getElementById('date_filter').value;
+    const limit = document.getElementById('limit').value;
+    
+    // Actualizar la URL manteniendo los filtros
+    if (searchTerm) {
+        url.searchParams.set('search', searchTerm);
+    } else {
+        url.searchParams.delete('search');
+    }
+    
+    // Mantener los otros filtros
+    if (categoryId) url.searchParams.set('category_id', categoryId);
+    if (availability) url.searchParams.set('availability', availability);
+    if (size) url.searchParams.set('size', size);
+    if (dateFilter) url.searchParams.set('date_filter', dateFilter);
+    if (limit) url.searchParams.set('limit', limit);
+    
+    window.location.href = url.toString();
+}
+
+// Inicializar todos los select personalizados cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing code ...
+
+    // Evento para el botón de búsqueda
+    const searchBtn = document.getElementById('searchBtn');
+    if (searchBtn) {
+        searchBtn.addEventListener('click', applySearch);
+    }
+
+    // Evento para el input de búsqueda al presionar Enter
+    const searchInput = document.getElementById('search');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                applySearch();
+            }
+        });
+
+        // Evento para actualizar el botón de limpiar filtros mientras se escribe
+        searchInput.addEventListener('input', function() {
+            updateClearFiltersButton();
+        });
+    }
+
+    // Evento para los select de filtros
+    const filterSelects = document.querySelectorAll('select[id="category_id"], select[id="availability"], select[id="size"], select[id="date_filter"]');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            updateClearFiltersButton();
+        });
+    });
+
+    // Inicializar el botón de limpiar filtros
+    updateClearFiltersButton();
+
+    // ... rest of existing code ...
+});
+
+// ... existing code ...
+function initCustomSelect(select) {
+    const trigger = select.querySelector('.custom-select__trigger');
+    const options = select.querySelector('.custom-options');
+    const originalSelect = select.nextElementSibling;
+    
+    if (!trigger || !options || !originalSelect) return;
+    
+    // Función para actualizar el estado visual del select
+    function updateSelectState(value, text) {
+        // Actualizar el select original
+        originalSelect.value = value;
+        
+        // Actualizar el texto mostrado
+        trigger.querySelector('span').textContent = text;
+        
+        // Actualizar las clases selected
+        options.querySelectorAll('.custom-option').forEach(opt => {
+            opt.classList.remove('selected');
+            if (opt.dataset.value === value) {
+                opt.classList.add('selected');
+            }
+        });
+    }
+    
+    // Inicializar el estado del select
+    const initialValue = originalSelect.value;
+    const initialOption = options.querySelector(`.custom-option[data-value="${initialValue}"]`);
+    if (initialOption) {
+        updateSelectState(initialValue, initialOption.textContent);
+    }
+    
+    // Abrir/cerrar al hacer clic en el trigger
+    trigger.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Cerrar todos los demás select
+        document.querySelectorAll('.custom-select').forEach(s => {
+            if (s !== select) {
+                s.classList.remove('open');
+                s.querySelector('.custom-options').style.display = 'none';
+            }
+        });
+        
+        // Abrir/cerrar el select actual
+        const isOpen = select.classList.contains('open');
+        select.classList.toggle('open');
+        
+        // Asegurar que las opciones sean visibles
+        if (!isOpen) {
+            options.style.display = 'block';
+            options.style.opacity = '1';
+            options.style.visibility = 'visible';
+            options.style.zIndex = '1000';
+        } else {
+            options.style.display = 'none';
+            options.style.opacity = '0';
+            options.style.visibility = 'hidden';
+        }
+    });
+    
+    // Cerrar al hacer clic fuera
+    document.addEventListener('click', function(e) {
+        if (!select.contains(e.target)) {
+            select.classList.remove('open');
+            options.style.display = 'none';
+            options.style.opacity = '0';
+            options.style.visibility = 'hidden';
+        }
+    });
+    
+    // Manejar la selección de opciones
+    const optionItems = options.querySelectorAll('.custom-option');
+    optionItems.forEach(option => {
+        option.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const value = option.dataset.value;
+            const text = option.textContent;
+            
+            updateSelectState(value, text);
+            select.classList.remove('open');
+            options.style.display = 'none';
+            options.style.opacity = '0';
+            options.style.visibility = 'hidden';
+            
+            // Actualizar los filtros
+            const url = new URL(window.location.href);
+            url.searchParams.set(originalSelect.name, value);
+            window.location.href = url.toString();
+        });
+    });
+}
+
+// Inicializar todos los select personalizados cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM cargado');
+    
+    // Inicializar los select personalizados
+    const customSelects = document.querySelectorAll('.custom-select');
+    console.log('Selects encontrados:', customSelects.length);
+    
+    customSelects.forEach((select, index) => {
+        console.log(`Inicializando select ${index + 1}`);
+        
+        const trigger = select.querySelector('.custom-select__trigger');
+        const options = select.querySelector('.custom-options');
+        const originalSelect = select.nextElementSibling;
+        
+        if (!trigger || !options || !originalSelect) {
+            console.log(`Select ${index + 1} no tiene todos los elementos necesarios`);
+            return;
+        }
+        
+        // Evento para abrir/cerrar el select
+        trigger.addEventListener('click', function(e) {
+            console.log('Click en trigger');
+            e.stopPropagation();
+            
+            // Cerrar todos los demás select
+            customSelects.forEach(s => {
+                if (s !== select) {
+                    s.classList.remove('open');
+                    s.querySelector('.custom-options').style.display = 'none';
+                }
+            });
+            
+            // Abrir el select actual
+            select.classList.add('open');
+            options.style.display = 'block';
+            options.style.zIndex = '1000';
+        });
+        
+        // Evento para cerrar al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!select.contains(e.target)) {
+                console.log('Click fuera del select');
+                select.classList.remove('open');
+                options.style.display = 'none';
+            }
+        });
+        
+        // Eventos para las opciones
+        const optionItems = options.querySelectorAll('.custom-option');
+        optionItems.forEach(option => {
+            option.addEventListener('click', function(e) {
+                console.log('Click en opción');
+                e.stopPropagation();
+                
+                const value = option.dataset.value;
+                const text = option.textContent;
+                
+                // Actualizar el select original
+                originalSelect.value = value;
+                
+                // Actualizar el texto mostrado
+                trigger.querySelector('span').textContent = text;
+                
+                // Actualizar las clases selected
+                optionItems.forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                option.classList.add('selected');
+                
+                // Cerrar el select
+                select.classList.remove('open');
+                options.style.display = 'none';
+                
+                // Actualizar los filtros
+                const url = new URL(window.location.href);
+                url.searchParams.set(originalSelect.name, value);
+                window.location.href = url.toString();
+            });
+        });
+    });
+    
+    // Manejar el cambio de categoría para el filtro de tallas
+    const categorySelect = document.getElementById('category_id');
+    const sizeSelect = document.getElementById('customSizeSelect');
+    
+    if(categorySelect && sizeSelect) {
+        categorySelect.addEventListener('change', function() {
+            const selectedCategory = this.options[this.selectedIndex].text;
+            const categoriesToHide = ["Gorras", "Variado", "Balón"];
+            
+            if(categoriesToHide.includes(selectedCategory)) {
+                sizeSelect.style.display = 'none';
+                document.getElementById('size').value = '';
+                document.querySelector('#customSizeSelect .custom-select__trigger span').textContent = 'Todas las tallas';
+            } else {
+                sizeSelect.style.display = 'block';
+            }
+        });
+    }
+});
+// ... existing code ...
 </script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
 
 <style>
-/* Estilos para el select personalizado */
+/* Estilos para los select personalizados */
 .custom-select-wrapper {
     position: relative;
     width: 200px;
@@ -1512,6 +1752,7 @@ document.addEventListener('DOMContentLoaded', function() {
     border-radius: 4px;
     background-color: white;
     cursor: pointer;
+    z-index: 1000;
 }
 
 .custom-select__trigger {
@@ -1527,115 +1768,60 @@ document.addEventListener('DOMContentLoaded', function() {
     cursor: pointer;
 }
 
-.arrow {
-    position: relative;
-    height: 10px;
-    width: 10px;
-}
-
-.arrow::before, .arrow::after {
-    content: "";
-    position: absolute;
-    bottom: 0px;
-    width: 0.15rem;
-    height: 100%;
-    transition: all 0.3s;
-}
-
-.arrow::before {
-    left: -5px;
-    transform: rotate(45deg);
-    background-color: #6c757d;
-}
-
-.arrow::after {
-    left: 5px;
-    transform: rotate(-45deg);
-    background-color: #6c757d;
-}
-
-.custom-select.open .arrow::before {
-    left: -5px;
-    transform: rotate(-45deg);
-}
-
-.custom-select.open .arrow::after {
-    left: 5px;
-    transform: rotate(45deg);
-}
-
 .custom-options {
     position: absolute;
-    display: block;
     top: 100%;
     left: 0;
     right: 0;
-    border: 2px solid #6c757d;
-    border-top: 0;
-    background: #fff;
-    transition: all 0.3s;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    z-index: 2;
-    height: auto;
-    max-height: none;
-    overflow: visible;
+    display: none;
+    background-color: white;
+    border: 1px solid #6c757d;
+    border-radius: 4px;
+    margin-top: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1001;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .custom-select.open .custom-options {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: all;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .custom-option {
-    position: relative;
-    display: block;
     padding: 8px 12px;
     font-size: 14px;
-    font-weight: 400;
-    color: #000;
-    background-color: white;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: background-color 0.2s;
 }
 
-/* Estilo para todas las opciones excepto "Todas las categorías" */
-.custom-option[data-value]:not([data-value=""]) {
-    color: #000;
+.custom-option:hover {
+    background-color: #f8f9fa;
 }
 
-.custom-option[data-value]:not([data-value=""]):hover {
-    color: white !important;
-    background-color: var(--hover-color) !important;
+.custom-option.selected {
+    background-color: #e9ecef;
 }
 
-.custom-option[data-value]:not([data-value=""]).selected {
-    color: white !important;
-    background-color: var(--hover-color) !important;
+.custom-option-group {
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 5px;
 }
 
-.custom-option[data-value]:not([data-value=""]) {
-    --hover-color: attr(data-color);
+.custom-option-header {
+    padding: 8px 12px;
+    font-weight: bold;
+    background-color: #f8f9fa;
+    color: #6c757d;
 }
 
-/* Estilo específico para "Todas las categorías" */
-.custom-option[data-value=""] {
-    color: #6c757d !important;
+.custom-option-group .custom-option {
+    padding-left: 24px;
 }
 
-.custom-option[data-value=""]:hover {
-    background-color: #f8f9fa !important;
-    color: #6c757d !important;
-}
-
-.custom-option[data-value=""].selected {
-    background-color: #f8f9fa !important;
-    color: #6c757d !important;
-}
-
-.custom-option[data-value=""].selected::after {
-    color: #6c757d !important;
+#customSizeSelect {
+    display: <?php echo (in_array($selected_category_name, ["Gorras", "Variado", "Balón"])) ? 'none' : 'block'; ?>;
 }
 </style>

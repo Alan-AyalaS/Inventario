@@ -293,16 +293,21 @@ if(isset($_SESSION["user_id"])) {
           <ul class="header-nav ms-3">
             <li class="nav-item dropdown">
               <div class="d-flex align-items-center">
-                <span class="me-2 text-dark"><?php echo isset($_SESSION["user_name"]) ? $_SESSION["user_name"] : "Usuario"; ?></span>
+                <span class="me-2 text-dark"><?php echo isset($current_user) ? $current_user->username : "Usuario"; ?></span>
                 <button class="btn btn-link nav-link py-0 dropdown-toggle" data-coreui-toggle="dropdown" aria-expanded="false">
                   <div class="avatar avatar-md">
-                    <!-- DEBUG INFO -->
-                    <!-- User image in session: <?php echo isset($_SESSION['user_image']) ? $_SESSION['user_image'] : 'not set'; ?> -->
-                    <!-- User image path: <?php echo isset($_SESSION['user_image']) && !empty($_SESSION['user_image']) ? 'assets/img/avatars/' . $_SESSION['user_image'] : 'default'; ?> -->
-                    <!-- Image exists: <?php echo file_exists('assets/img/avatars/' . (isset($_SESSION['user_image']) ? $_SESSION['user_image'] : 'default-avatar-icon.jpg')) ? 'true' : 'false'; ?> -->
-                    <!-- Image path: <?php echo 'assets/img/avatars/' . (isset($_SESSION['user_image']) ? $_SESSION['user_image'] : 'default-avatar-icon.jpg'); ?> -->
-                    <!-- Session dump: <?php print_r($_SESSION); ?> -->
-                    <img class="avatar-img" src="<?php echo isset($_SESSION['user_image']) && !empty($_SESSION['user_image']) ? 'assets/img/avatars/' . $_SESSION['user_image'] : 'assets/img/avatars/default-avatar-icon.jpg'; ?>" alt="<?php echo isset($_SESSION["user_name"]) ? $_SESSION["user_name"] : "Usuario"; ?>">
+                    <?php 
+                    // Determinar la ruta de la imagen
+                    $avatar_path = 'assets/img/avatars/default-avatar-icon.jpg'; // Imagen por defecto
+                    if (isset($current_user) && !empty($current_user->image)) {
+                        $user_image_path = 'assets/img/avatars/' . $current_user->image;
+                        // Opcional: Verificar si el archivo existe físicamente
+                        // if (file_exists($user_image_path)) { 
+                           $avatar_path = $user_image_path;
+                        // } 
+                    }
+                    ?>
+                    <img class="avatar-img" src="<?php echo $avatar_path; ?>" alt="<?php echo isset($current_user) ? $current_user->name : 'Usuario'; ?>" style="width: 36px; height: 36px; object-fit: cover; border-radius: 50%;">
                   </div>
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
@@ -367,60 +372,16 @@ if(isset($_SESSION["user_id"])) {
     <script src="vendors/@coreui/utils/js/coreui-utils.js"></script>
     <script src="assets/js/main.js"></script>
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        // Inicializar todos los dropdowns
-        var dropdownElementList = [].slice.call(document.querySelectorAll('[data-coreui-toggle="dropdown"]'))
-        var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
-          return new coreui.Dropdown(dropdownToggleEl)
-        });
-
-        // Manejar el estado del sidebar
-        const sidebar = document.querySelector('#sidebar');
-        const sidebarInstance = coreui.Sidebar.getInstance(sidebar);
-        const wrapper = document.querySelector('.wrapper');
-        
-        // Función para ocultar el sidebar
-        function hideSidebar() {
-          sidebar.classList.add('hide');
-          sidebar.classList.remove('show');
-          wrapper.style.marginLeft = '0';
-          localStorage.setItem('sidebarState', 'hidden');
-        }
-
-        // Función para mostrar el sidebar
-        function showSidebar() {
-          sidebar.classList.remove('hide');
-          sidebar.classList.add('show');
-          wrapper.style.marginLeft = '';
-          localStorage.setItem('sidebarState', 'shown');
-        }
-
-        // Restaurar el estado del sidebar inmediatamente
-        const sidebarState = localStorage.getItem('sidebarState');
-        if (sidebarState === 'hidden') {
-          hideSidebar();
-        } else {
-          showSidebar();
-        }
-
-        // Guardar el estado cuando cambie
-        sidebar.addEventListener('hidden.coreui.sidebar', hideSidebar);
-        sidebar.addEventListener('shown.coreui.sidebar', showSidebar);
-
-        // Manejar el botón del header
-        const headerToggler = document.querySelector('.header-toggler');
-        if (headerToggler) {
-          headerToggler.addEventListener('click', function() {
-            const currentState = localStorage.getItem('sidebarState');
-            if (currentState === 'hidden') {
-              showSidebar();
-            } else {
-              hideSidebar();
-            }
-          });
-        }
-      });
     </script>
+
+    <!-- Comentando temporalmente el script del sidebar para depuración -->
+    <!--
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ... (todo el código del script del sidebar que añadimos) ...
+});
+</script>
+    -->
 
     <!-- Modal de depuración -->
     <div class="modal fade" id="debugModal" tabindex="-1" role="dialog" aria-labelledby="debugModalLabel" aria-hidden="true">

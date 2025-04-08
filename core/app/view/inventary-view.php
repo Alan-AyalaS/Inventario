@@ -372,21 +372,21 @@ if($selected_category_name == "Jersey") {
             </div>
             <div class="d-flex gap-2">
                 <button type="button" class="btn btn-secondary" id="clearFiltersBtn" onclick="clearFilters()">Limpiar filtros</button>
-                <div class="ms-auto">
-                    <a href="index.php?view=inventary&order=<?php echo $order == 'desc' ? 'asc' : 'desc'; ?><?php 
+            <div class="ms-auto">
+                <a href="index.php?view=inventary&order=<?php echo $order == 'desc' ? 'asc' : 'desc'; ?><?php 
 if(isset($_GET["category_id"])) echo "&category_id=".$_GET["category_id"];
 if(isset($_GET["search"])) echo "&search=".$_GET["search"];
 if(isset($_GET["availability"])) echo "&availability=".$_GET["availability"];
 if(isset($_GET["date_filter"])) echo "&date_filter=".$_GET["date_filter"];
 if(isset($_GET["limit"])) echo "&limit=".$_GET["limit"];
 if(isset($_GET["size"])) echo "&size=".$_GET["size"];
-                    ?>" class="btn btn-secondary">
-                        <i class="bi bi-sort-<?php echo $order == 'desc' ? 'down' : 'up'; ?>"></i> 
+                ?>" class="btn btn-secondary">
+                    <i class="bi bi-sort-<?php echo $order == 'desc' ? 'down' : 'up'; ?>"></i> 
         <?php echo $order == 'desc' ? 'Ascendente' : 'Descendente'; ?>
-                    </a>
+                </a>
                 </div>
-            </div>
         </div>
+    </div>
         <!-- ===== FIN DE SECCIÓN PROTEGIDA ===== -->
 
 <!-- Botón para eliminar seleccionados -->
@@ -399,17 +399,17 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
 </div>
 
 <!-- Modal para ajustar inventario -->
-<div class="modal fade" id="adjustModal" tabindex="-1" aria-labelledby="adjustModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="adjustModalLabel">Ajustar Inventario</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
+        <div class="modal fade" id="adjustModal" tabindex="-1" aria-labelledby="adjustModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+                        <h5 class="modal-title" id="adjustModalLabel">Ajustar Inventario</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
                 <form id="adjustForm" method="post" action="index.php?view=adjustinventory" onsubmit="return submitAdjustForm(event)">
-                    <input type="hidden" name="product_id" id="productId">
-                    <input type="hidden" name="operation_type" id="operationType">
+                            <input type="hidden" name="product_id" id="productId">
+                            <input type="hidden" name="operation_type" id="operationType">
                     <!-- Campos ocultos para mantener los filtros -->
                     <input type="hidden" name="category_id" id="category_id">
                     <input type="hidden" name="search" id="search">
@@ -418,18 +418,18 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
                     <input type="hidden" name="limit" id="limit">
                     <input type="hidden" name="size" id="size">
                     <input type="hidden" name="page" id="page">
-                    <div class="mb-3">
-                        <label for="quantity" class="form-label">Cantidad</label>
-                        <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
-                    </div>
+          <div class="mb-3">
+            <label for="quantity" class="form-label">Cantidad</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+          </div>
                     <div class="d-flex justify-content-end gap-2">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-primary">Ajustar</button>
                     </div>
                 </form>
-            </div>
-        </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Alerta dinámica -->
@@ -660,7 +660,7 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
                                 <th style="width: 100px;">Precio de Entrada</th>
                                 <th style="width: 100px;">Precio de Salida</th>
                                 <th style="width: 80px;">Unidad</th>
-						<th style="width: 100px;">Mínima en Inventario</th>
+                                <th style="width: 100px;">Mínima en Inventario</th>
                                 <th style="width: 50px;">Disponible</th>
                                 <th style="width: 60px;">Total</th>
                                 <th style="width: 180px;">Acciones</th>
@@ -873,7 +873,7 @@ function showAdjustModal(productId, operationType) {
     const modalElement = document.getElementById('adjustModal');
     if (modalElement) {
         const modal = new bootstrap.Modal(modalElement);
-        modal.show();
+    modal.show();
         
         // Enfocar el input de cantidad cuando el modal se muestre completamente
         modalElement.addEventListener('shown.bs.modal', function () {

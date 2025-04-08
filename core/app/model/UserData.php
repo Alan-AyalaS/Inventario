@@ -47,15 +47,71 @@ class UserData {
 	public static function getById($id){
 		$sql = "select * from ".self::$tablename." where id=$id";
 		$query = Executor::doit($sql);
-		return Model::one($query[0],new UserData());
-
+		
+		// Debug info
+		echo "<!-- SQL query (getById): " . $sql . " -->";
+		echo "<!-- Raw query result (getById): ";
+		$row = $query[0]->fetch_array();
+		print_r($row);
+		echo " -->";
+		
+		$found = null;
+		if($row) {
+			$data = new UserData();
+			$data->id = $row['id'];
+			$data->name = $row['name'];
+			$data->lastname = $row['lastname'];
+			$data->username = $row['username'];
+			$data->email = $row['email'];
+			$data->password = $row['password'];
+			$data->is_active = $row['is_active'];
+			$data->is_admin = $row['is_admin'];
+			$data->image = $row['image'];
+			$data->created_at = $row['created_at'];
+			$found = $data;
+			
+			echo "<!-- Found user data (getById): ";
+			print_r($found);
+			echo " -->";
+			echo "<!-- Image from DB (getById): " . $found->image . " -->";
+		}
+		
+		return $found;
 	}
 
 	public static function getByMail($mail){
 		$sql = "select * from ".self::$tablename." where email=\"$mail\"";
 		$query = Executor::doit($sql);
-		return Model::one($query[0],new UserData());
-
+		
+		// Debug info
+		echo "<!-- SQL query (getByMail): " . $sql . " -->";
+		echo "<!-- Raw query result (getByMail): ";
+		$row = $query[0]->fetch_array();
+		print_r($row);
+		echo " -->";
+		
+		$found = null;
+		if($row) {
+			$data = new UserData();
+			$data->id = $row['id'];
+			$data->name = $row['name'];
+			$data->lastname = $row['lastname'];
+			$data->username = $row['username'];
+			$data->email = $row['email'];
+			$data->password = $row['password'];
+			$data->is_active = $row['is_active'];
+			$data->is_admin = $row['is_admin'];
+			$data->image = $row['image'];
+			$data->created_at = $row['created_at'];
+			$found = $data;
+			
+			echo "<!-- Found user data (getByMail): ";
+			print_r($found);
+			echo " -->";
+			echo "<!-- Image from DB (getByMail): " . $found->image . " -->";
+		}
+		
+		return $found;
 	}
 
 
@@ -76,13 +132,36 @@ class UserData {
 	public static function getByUsername($username){
 		$sql = "select * from ".self::$tablename." where username=\"$username\"";
 		$query = Executor::doit($sql);
-		$user = Model::one($query[0],new UserData());
-		// Debug
-		error_log("SQL Query: " . $sql);
-		error_log("Query result: " . json_encode($query[0]));
-		error_log("User image from DB: " . ($user ? $user->image : 'null'));
-		error_log("User object from DB: " . json_encode($user));
-		return $user;
+		
+		// Debug info
+		echo "<!-- SQL query: " . $sql . " -->";
+		echo "<!-- Raw query result: ";
+		$row = $query[0]->fetch_array();
+		print_r($row);
+		echo " -->";
+		
+		$found = null;
+		if($row) {
+			$data = new UserData();
+			$data->id = $row['id'];
+			$data->name = $row['name'];
+			$data->lastname = $row['lastname'];
+			$data->username = $row['username'];
+			$data->email = $row['email'];
+			$data->password = $row['password'];
+			$data->is_active = $row['is_active'];
+			$data->is_admin = $row['is_admin'];
+			$data->image = $row['image'];
+			$data->created_at = $row['created_at'];
+			$found = $data;
+			
+			echo "<!-- Found user data: ";
+			print_r($found);
+			echo " -->";
+			echo "<!-- Image from DB: " . $found->image . " -->";
+		}
+		
+		return $found;
 	}
 
 

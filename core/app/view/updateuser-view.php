@@ -28,8 +28,8 @@ if(count($_POST)>0){
 		$check = getimagesize($_FILES["image"]["tmp_name"]);
 		if($check !== false) {
 			if(move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-				// Eliminar la imagen anterior si existe y no es la imagen por defecto
-				if($user->image != "" && $user->image != "default-avatar-icon.jpg" && file_exists($target_dir . $user->image)) {
+				// Eliminar la imagen anterior si existe
+				if($user->image != "" && file_exists($target_dir . $user->image)) {
 					unlink($target_dir . $user->image);
 				}
 				$user->image = $filename;
@@ -42,9 +42,18 @@ if(count($_POST)>0){
 	// Actualizar la imagen en la sesión si es el usuario actual
 	if($user->id == $_SESSION["user_id"]) {
 		$_SESSION["user_image"] = $user->image;
-		// Debug info
-		echo "<!-- Updated session image: " . $_SESSION["user_image"] . " -->";
-		echo "<!-- User image: " . $user->image . " -->";
+		
+		// Guardar información de depuración en la sesión
+		$_SESSION["debug_info"] = array(
+			"update_info" => array(
+				"user_id" => $user->id,
+				"session_id" => $_SESSION["user_id"],
+				"user_image" => $user->image,
+				"session_image" => $_SESSION["user_image"],
+				"image_path" => $target_dir . $user->image,
+				"image_exists" => file_exists($target_dir . $user->image) ? 'true' : 'false'
+			)
+		);
 	}
 
 	if($_POST["password"]!=""){

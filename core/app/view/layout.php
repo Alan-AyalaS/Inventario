@@ -73,3 +73,16 @@ echo "<!-- is_admin check result: " . ($is_admin ? 'true' : 'false') . " -->\n";
                             </a>
                         </div>
                     </li> 
+
+                    <?php 
+                    // Definir $is_admin antes de usarla
+                    $is_admin = false;
+                    if(isset($current_user)) {
+                        $is_admin = ($current_user->is_admin == "1");
+                    }
+                    ?>
+                    <?php if($is_admin): ?>
+<!--
+                    <li class="nav-title">Components</li>
+-->
+                    <?php endif; ?> 

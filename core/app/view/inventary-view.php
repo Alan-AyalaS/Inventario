@@ -1809,10 +1809,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function highlightTotalGroup(groupId) {
+    // Resaltar todas las filas del grupo
     const rows = document.querySelectorAll(`tr.total-group-${groupId}`);
     rows.forEach(row => {
         row.classList.add('highlighted');
     });
+    
+    // Resaltar la celda total
     const totalCell = document.getElementById(`total-cell-${groupId}`);
     if (totalCell) {
         totalCell.classList.add('highlighted');
@@ -1820,10 +1823,13 @@ function highlightTotalGroup(groupId) {
 }
 
 function unhighlightTotalGroup(groupId) {
+    // Quitar el resaltado de todas las filas del grupo
     const rows = document.querySelectorAll(`tr.total-group-${groupId}`);
     rows.forEach(row => {
         row.classList.remove('highlighted');
     });
+    
+    // Quitar el resaltado de la celda total
     const totalCell = document.getElementById(`total-cell-${groupId}`);
     if (totalCell) {
         totalCell.classList.remove('highlighted');
@@ -1831,9 +1837,8 @@ function unhighlightTotalGroup(groupId) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    const groups = {};
-    
     // Agrupar las filas por su groupId
+    const groups = {};
     document.querySelectorAll('tr[class^="total-group-"]').forEach(row => {
         const groupId = row.className.match(/total-group-(\d+)/)[1];
         if (!groups[groupId]) {
@@ -1842,10 +1847,10 @@ document.addEventListener('DOMContentLoaded', function() {
         groups[groupId].push(row);
     });
 
-    // Agregar eventos a todas las filas del grupo
+    // Agregar eventos a todas las filas y celdas totales
     Object.keys(groups).forEach(groupId => {
-        const rows = groups[groupId];
-        rows.forEach(row => {
+        // Agregar eventos a las filas del grupo
+        groups[groupId].forEach(row => {
             row.addEventListener('mouseenter', function() {
                 highlightTotalGroup(groupId);
             });
@@ -2307,4 +2312,155 @@ tr:hover td {
 [id^="total-cell-"].highlighted {
     background-color: rgba(0,0,0,.075) !important;
 }
+
+/* Estilos para el resaltado */
+tr.highlighted {
+    background-color: rgba(0,0,0,.025) !important;
+}
+
+tr.highlighted td {
+    background-color: rgba(0,0,0,.025) !important;
+}
+
+/* La fila activa (sobre la que está el mouse) */
+tr:hover {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+tr:hover td {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Transición suave */
+tr, tr td {
+    transition: background-color 0.15s ease;
+}
+
+/* Estilos para la celda total */
+[id^="total-cell-"] {
+    transition: background-color 0.15s ease;
+    background-color: transparent !important;
+}
+
+[id^="total-cell-"]:hover {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Resaltar todo el grupo cuando se pasa el mouse sobre la celda total */
+[id^="total-cell-"]:hover ~ tr.total-group-* {
+    background-color: rgba(0,0,0,.025) !important;
+}
+
+[id^="total-cell-"]:hover ~ tr.total-group-* td {
+    background-color: rgba(0,0,0,.025) !important;
+}
+
+/* ... existing code ... */
+<style>
+/* Estilos base para el resaltado */
+tr.highlighted {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+tr.highlighted td {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Estilo para la fila activa */
+tr:hover {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+tr:hover td {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Estilos para la celda total */
+[id^="total-cell-"] {
+    transition: background-color 0.15s ease;
+    background-color: transparent !important;
+}
+
+[id^="total-cell-"]:hover {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Transición suave para todos los elementos */
+tr, tr td, [id^="total-cell-"] {
+    transition: background-color 0.15s ease;
+}
 </style>
+
+<script>
+function highlightTotalGroup(groupId) {
+    // Resaltar todas las filas del grupo
+    const rows = document.querySelectorAll(`tr.total-group-${groupId}`);
+    rows.forEach(row => {
+        row.classList.add('highlighted');
+    });
+    
+    // Resaltar la celda total
+    const totalCell = document.getElementById(`total-cell-${groupId}`);
+    if (totalCell) {
+        totalCell.classList.add('highlighted');
+    }
+}
+
+function unhighlightTotalGroup(groupId) {
+    // Quitar el resaltado de todas las filas del grupo
+    const rows = document.querySelectorAll(`tr.total-group-${groupId}`);
+    rows.forEach(row => {
+        row.classList.remove('highlighted');
+    });
+    
+    // Quitar el resaltado de la celda total
+    const totalCell = document.getElementById(`total-cell-${groupId}`);
+    if (totalCell) {
+        totalCell.classList.remove('highlighted');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Agrupar las filas por su groupId
+    const groups = {};
+    document.querySelectorAll('tr[class^="total-group-"]').forEach(row => {
+        const groupId = row.className.match(/total-group-(\d+)/)[1];
+        if (!groups[groupId]) {
+            groups[groupId] = [];
+        }
+        groups[groupId].push(row);
+    });
+
+    // Agregar eventos a todas las filas y celdas totales
+    Object.keys(groups).forEach(groupId => {
+        // Agregar eventos a las filas del grupo
+        groups[groupId].forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                highlightTotalGroup(groupId);
+            });
+            
+            row.addEventListener('mouseleave', function(e) {
+                const relatedTarget = e.relatedTarget;
+                if (!relatedTarget || !relatedTarget.closest(`tr.total-group-${groupId}`)) {
+                    unhighlightTotalGroup(groupId);
+                }
+            });
+        });
+
+        // Agregar eventos a la celda total
+        const totalCell = document.getElementById(`total-cell-${groupId}`);
+        if (totalCell) {
+            totalCell.addEventListener('mouseenter', function() {
+                highlightTotalGroup(groupId);
+            });
+            
+            totalCell.addEventListener('mouseleave', function(e) {
+                const relatedTarget = e.relatedTarget;
+                if (!relatedTarget || !relatedTarget.closest(`tr.total-group-${groupId}`)) {
+                    unhighlightTotalGroup(groupId);
+                }
+            });
+        }
+    });
+});
+</script>

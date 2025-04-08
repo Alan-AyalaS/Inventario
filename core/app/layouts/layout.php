@@ -269,7 +269,7 @@ if(isset($_SESSION["user_id"])) {
         <div class="container-fluid">
           <button class="header-toggler px-md-0 me-md-3" type="button" onclick="coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()">
             <svg class="icon icon-lg">
-              <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-menu"></use>
+              <use href="vendors/@coreui/icons/svg/free.svg#cil-menu"></use>
             </svg>
           </button><a class="header-brand d-md-none" href="#">
             <svg width="118" height="46" alt="CoreUI Logo">
@@ -373,6 +373,52 @@ if(isset($_SESSION["user_id"])) {
         var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
           return new coreui.Dropdown(dropdownToggleEl)
         });
+
+        // Manejar el estado del sidebar
+        const sidebar = document.querySelector('#sidebar');
+        const sidebarInstance = coreui.Sidebar.getInstance(sidebar);
+        const wrapper = document.querySelector('.wrapper');
+        
+        // Función para ocultar el sidebar
+        function hideSidebar() {
+          sidebar.classList.add('hide');
+          sidebar.classList.remove('show');
+          wrapper.style.marginLeft = '0';
+          localStorage.setItem('sidebarState', 'hidden');
+        }
+
+        // Función para mostrar el sidebar
+        function showSidebar() {
+          sidebar.classList.remove('hide');
+          sidebar.classList.add('show');
+          wrapper.style.marginLeft = '';
+          localStorage.setItem('sidebarState', 'shown');
+        }
+
+        // Restaurar el estado del sidebar inmediatamente
+        const sidebarState = localStorage.getItem('sidebarState');
+        if (sidebarState === 'hidden') {
+          hideSidebar();
+        } else {
+          showSidebar();
+        }
+
+        // Guardar el estado cuando cambie
+        sidebar.addEventListener('hidden.coreui.sidebar', hideSidebar);
+        sidebar.addEventListener('shown.coreui.sidebar', showSidebar);
+
+        // Manejar el botón del header
+        const headerToggler = document.querySelector('.header-toggler');
+        if (headerToggler) {
+          headerToggler.addEventListener('click', function() {
+            const currentState = localStorage.getItem('sidebarState');
+            if (currentState === 'hidden') {
+              showSidebar();
+            } else {
+              hideSidebar();
+            }
+          });
+        }
       });
     </script>
 

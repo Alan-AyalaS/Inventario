@@ -14,8 +14,8 @@ class UserData {
 	}
 
 	public function add(){
-		$sql = "insert into user (name,lastname,username,email,is_admin,password,created_at) ";
-		$sql .= "value (\"$this->name\",\"$this->lastname\",\"$this->username\",\"$this->email\",\"$this->is_admin\",\"$this->password\",NOW())";
+		$sql = "insert into user (name,lastname,username,email,is_admin,password,image,created_at) ";
+		$sql .= "value (\"$this->name\",\"$this->lastname\",\"$this->username\",\"$this->email\",\"$this->is_admin\",\"$this->password\",\"$this->image\",NOW())";
 		return Executor::doit($sql);
 	}
 
@@ -30,7 +30,7 @@ class UserData {
 
 // partiendo de que ya tenemos creado un objecto UserData previamente utilizamos el contexto
 	public function update(){
-		$sql = "update ".self::$tablename." set name=\"$this->name\",email=\"$this->email\",username=\"$this->username\",lastname=\"$this->lastname\",is_active=\"$this->is_active\",is_admin=\"$this->is_admin\" where id=$this->id";
+		$sql = "update ".self::$tablename." set name=\"$this->name\",email=\"$this->email\",username=\"$this->username\",lastname=\"$this->lastname\",is_active=\"$this->is_active\",is_admin=\"$this->is_admin\",image=\"$this->image\" where id=$this->id";
 		Executor::doit($sql);
 	}
 

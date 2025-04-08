@@ -275,21 +275,18 @@ foreach($configs as $conf) {
                 <span class="me-2 text-dark"><?php echo isset($_SESSION["user_name"]) ? $_SESSION["user_name"] : "Usuario"; ?></span>
                 <button class="btn btn-link nav-link py-0 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                   <div class="avatar avatar-md">
-                    <img class="avatar-img" src="assets/img/avatars/default-avatar-icon.jpg" alt="user@email.com">
+                    <img class="avatar-img" src="<?php echo isset($_SESSION['user_image']) && $_SESSION['user_image'] != '' ? 'assets/img/avatars/' . $_SESSION['user_image'] : 'assets/img/avatars/default-avatar-icon.jpg'; ?>" alt="<?php echo isset($_SESSION["user_name"]) ? $_SESSION["user_name"] : "Usuario"; ?>">
                   </div>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                  <li><div class="dropdown-header">Cuenta</div></li>
-                  <li><a class="dropdown-item" href="#">
-                    <svg class="icon me-2">
-                      <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-settings"></use>
-                    </svg> Configuración</a></li>
-                  <li><hr class="dropdown-divider"></li>
-                  <li><a class="dropdown-item" href="./logout.php">
-                    <svg class="icon me-2">
-                      <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-account-logout"></use>
-                    </svg> Cerrar Sesión</a></li>
-                </ul>
+                <div class="dropdown-menu dropdown-menu-end">
+                  <a class="dropdown-item" href="index.php?view=profile">
+                    <i class="align-middle me-1" data-feather="user"></i> Perfil
+                  </a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="logout.php">
+                    <i class="align-middle me-1" data-feather="log-out"></i> Cerrar sesión
+                  </a>
+                </div>
               </div>
             </li>
           </ul>

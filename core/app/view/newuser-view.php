@@ -8,7 +8,7 @@
     <div class="card-body">
 
 
-		<form class="form-horizontal" method="post" id="addproduct" action="index.php?view=adduser" role="form">
+		<form class="form-horizontal" method="post" id="addproduct" action="index.php?view=adduser" role="form" enctype="multipart/form-data">
 
 
   <div class="form-group">
@@ -40,6 +40,13 @@
     <label for="inputEmail1" class="col-lg-2 control-label">Contrase&ntilde;a</label>
     <div class="col-md-6">
       <input type="password" name="password" class="form-control" id="inputEmail1" placeholder="Contrase&ntilde;a">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="inputEmail1" class="col-lg-2 control-label">Foto de perfil</label>
+    <div class="col-md-6">
+      <input type="file" name="image" class="form-control" accept="image/*">
     </div>
   </div>
 

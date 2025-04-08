@@ -10,7 +10,7 @@
 
 
 
-		<form class="form-horizontal" method="post" id="addproduct" action="index.php?view=updateuser" role="form">
+		<form class="form-horizontal" method="post" id="addproduct" action="index.php?view=updateuser" role="form" enctype="multipart/form-data">
 
 
   <div class="form-group">
@@ -43,6 +43,17 @@
     <div class="col-md-6">
       <input type="password" name="password" class="form-control" id="inputEmail1" placeholder="Contrase&ntilde;a">
 <p class="help-block">La contrase&ntilde;a solo se modificara si escribes algo, en caso contrario no se modifica.</p>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="inputEmail1" class="col-lg-2 control-label">Foto de perfil</label>
+    <div class="col-md-6">
+      <?php if($user->image!=""):?>
+        <img src="assets/img/avatars/<?php echo $user->image;?>" class="img-thumbnail" style="width:100px;">
+        <p class="text-muted">Imagen actual: <?php echo $user->image; ?></p>
+      <?php endif;?>
+      <input type="file" name="image" class="form-control" accept="image/*">
     </div>
   </div>
 

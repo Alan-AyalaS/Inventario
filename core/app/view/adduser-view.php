@@ -12,6 +12,25 @@ if(count($_POST)>0){
 	$user->is_admin=$is_admin;
 	$user->password = sha1(md5($_POST["password"]));
 	
+	// Procesar la imagen
+	if(isset($_FILES["image"]) && $_FILES["image"]["error"] == 0) {
+		$target_dir = "assets/img/avatars/";
+		if(!file_exists($target_dir)) {
+			mkdir($target_dir, 0777, true);
+		}
+		$imageFileType = strtolower(pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION));
+		$filename = uniqid() . "." . $imageFileType;
+		$target_file = $target_dir . $filename;
+		
+		// Verificar si es una imagen real
+		$check = getimagesize($_FILES["image"]["tmp_name"]);
+		if($check !== false) {
+			if(move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
+				$user->image = $filename;
+			}
+		}
+	}
+	
 	try {
 		$user->add();
 		print "<script>window.location='index.php?view=users';</script>";

@@ -273,18 +273,25 @@ foreach($configs as $conf) {
             <li class="nav-item dropdown">
               <div class="d-flex align-items-center">
                 <span class="me-2 text-dark"><?php echo isset($_SESSION["user_name"]) ? $_SESSION["user_name"] : "Usuario"; ?></span>
-                <button class="btn btn-link nav-link py-0 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <button class="btn btn-link nav-link py-0 dropdown-toggle" data-coreui-toggle="dropdown" aria-expanded="false">
                   <div class="avatar avatar-md">
-                    <img class="avatar-img" src="<?php echo isset($_SESSION['user_image']) && $_SESSION['user_image'] != '' ? 'assets/img/avatars/' . $_SESSION['user_image'] : 'assets/img/avatars/default-avatar-icon.jpg'; ?>" alt="<?php echo isset($_SESSION["user_name"]) ? $_SESSION["user_name"] : "Usuario"; ?>">
+                    <!-- DEBUG INFO -->
+                    <!-- User image in session: <?php echo isset($_SESSION['user_image']) ? $_SESSION['user_image'] : 'not set'; ?> -->
+                    <!-- User image path: <?php echo isset($_SESSION['user_image']) && !empty($_SESSION['user_image']) ? 'assets/img/avatars/' . $_SESSION['user_image'] : 'default'; ?> -->
+                    <!-- Session dump: <?php print_r($_SESSION); ?> -->
+                    <img class="avatar-img" src="<?php echo isset($_SESSION['user_image']) && !empty($_SESSION['user_image']) ? 'assets/img/avatars/' . $_SESSION['user_image'] : 'assets/img/avatars/default-avatar-icon.jpg'; ?>" alt="<?php echo isset($_SESSION["user_name"]) ? $_SESSION["user_name"] : "Usuario"; ?>">
                   </div>
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
                   <a class="dropdown-item" href="index.php?view=profile">
-                    <i class="align-middle me-1" data-feather="user"></i> Perfil
+                    <svg class="icon me-2">
+                        <use xlink:href="assets/vendors/@coreui/icons/svg/free.svg#cil-user"></use>
+                    </svg> Perfil
                   </a>
-                  <div class="dropdown-divider"></div>
                   <a class="dropdown-item" href="logout.php">
-                    <i class="align-middle me-1" data-feather="log-out"></i> Cerrar sesión
+                    <svg class="icon me-2">
+                        <use xlink:href="assets/vendors/@coreui/icons/svg/free.svg#cil-account-logout"></use>
+                    </svg> Cerrar Sesión
                   </a>
                 </div>
               </div>
@@ -324,8 +331,6 @@ foreach($configs as $conf) {
     <script src="vendors/@coreui/chartjs/js/coreui-chartjs.js"></script>
     <script src="vendors/@coreui/utils/js/coreui-utils.js"></script>
     <script src="assets/js/main.js"></script>
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         // Inicializar todos los dropdowns

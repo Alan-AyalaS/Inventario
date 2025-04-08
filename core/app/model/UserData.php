@@ -69,6 +69,15 @@ class UserData {
 
 	}
 
+	public static function getByUsername($username){
+		$sql = "select * from ".self::$tablename." where username=\"$username\"";
+		$query = Executor::doit($sql);
+		$user = Model::one($query[0],new UserData());
+		// Debug
+		error_log("User image from DB: " . ($user ? $user->image : 'null'));
+		return $user;
+	}
+
 
 }
 

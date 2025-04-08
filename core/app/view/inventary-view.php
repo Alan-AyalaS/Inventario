@@ -213,8 +213,8 @@ if($selected_category_name == "Jersey") {
 
         <!-- ===== INICIO DE SECCIÓN PROTEGIDA - NO MODIFICAR ===== -->
         <!-- Esta sección maneja los filtros principales -->
-        <div class="form-inline d-flex align-items-end">
-            <div class="form-group me-2">
+        <div class="form-inline d-flex flex-wrap align-items-end gap-2">
+            <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
                 <label for="category_id" class="me-2">Categoría:</label>
                 <div class="custom-select-wrapper">
                     <div class="custom-select" id="customCategorySelect">
@@ -256,7 +256,7 @@ if($selected_category_name == "Jersey") {
                     </select>
                 </div>
             </div>
-            <div class="form-group me-2">
+            <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
                 <label for="availability" class="me-2">Disponibilidad:</label>
                 <div class="custom-select-wrapper">
                     <div class="custom-select" id="customAvailabilitySelect">
@@ -301,7 +301,7 @@ if($selected_category_name == "Jersey") {
                     </select>
                 </div>
             </div>
-            <div class="form-group me-2">
+            <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
                 <label for="search" class="me-2">Buscar:</label>
                 <div class="input-group">
                     <input type="text" name="search" id="search" class="form-control" value="<?php echo isset($_GET["search"]) ? $_GET["search"] : ''; ?>" placeholder="Buscar productos...">
@@ -310,7 +310,7 @@ if($selected_category_name == "Jersey") {
                     </button>
                 </div>
             </div>
-            <div class="form-group me-2">
+            <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
                 <label for="size" class="me-2">Talla:</label>
                 <div class="custom-select-wrapper" id="sizeWrapper">
                     <div class="custom-select" id="customSizeSelect">
@@ -350,7 +350,7 @@ if($selected_category_name == "Jersey") {
                     </select>
                 </div>
             </div>
-            <div class="form-group me-2">
+            <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
                 <label for="date_filter" class="me-2">Fecha:</label>
                 <select name="date_filter" id="date_filter" class="form-control" onchange="filterProducts()">
                     <option value="">Todas las fechas</option>
@@ -361,7 +361,7 @@ if($selected_category_name == "Jersey") {
                     <option value="this_year" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_year"){ echo "selected"; } ?>>Este año</option>
                 </select>
             </div>
-            <div class="col-md-1">
+            <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
                 <label for="limit" class="me-2">Mostrar:</label>
                 <div class="input-group">
                     <input type="number" class="form-control" id="limit" name="limit" min="1" value="<?php echo isset($_GET['limit']) ? $_GET['limit'] : 100; ?>" style="width: 80px;">
@@ -370,21 +370,23 @@ if($selected_category_name == "Jersey") {
                     </button>
                 </div>
             </div>
-            <button type="button" class="btn btn-secondary" id="clearFiltersBtn" onclick="clearFilters()">Limpiar filtros</button>
-            <div class="ms-auto">
-                <a href="index.php?view=inventary&order=<?php echo $order == 'desc' ? 'asc' : 'desc'; ?><?php 
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-secondary" id="clearFiltersBtn" onclick="clearFilters()">Limpiar filtros</button>
+                <div class="ms-auto">
+                    <a href="index.php?view=inventary&order=<?php echo $order == 'desc' ? 'asc' : 'desc'; ?><?php 
 if(isset($_GET["category_id"])) echo "&category_id=".$_GET["category_id"];
 if(isset($_GET["search"])) echo "&search=".$_GET["search"];
 if(isset($_GET["availability"])) echo "&availability=".$_GET["availability"];
 if(isset($_GET["date_filter"])) echo "&date_filter=".$_GET["date_filter"];
 if(isset($_GET["limit"])) echo "&limit=".$_GET["limit"];
 if(isset($_GET["size"])) echo "&size=".$_GET["size"];
-                ?>" class="btn btn-secondary">
-                    <i class="bi bi-sort-<?php echo $order == 'desc' ? 'down' : 'up'; ?>"></i> 
-    <?php echo $order == 'desc' ? 'Ascendente' : 'Descendente'; ?>
-                </a>
+                    ?>" class="btn btn-secondary">
+                        <i class="bi bi-sort-<?php echo $order == 'desc' ? 'down' : 'up'; ?>"></i> 
+        <?php echo $order == 'desc' ? 'Ascendente' : 'Descendente'; ?>
+                    </a>
+                </div>
+            </div>
         </div>
-    </div>
         <!-- ===== FIN DE SECCIÓN PROTEGIDA ===== -->
 
 <!-- Botón para eliminar seleccionados -->

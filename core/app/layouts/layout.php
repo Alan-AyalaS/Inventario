@@ -344,7 +344,16 @@ if(isset($_SESSION["user_id"])) {
         </div>
       </div>
       <footer class="footer">
-        <div><a href="https://evilnapsis.com/">Evilnapsis </a> © 2023.</div>
+        <div><a href="index.php?view=home"><?php 
+        $system_name = "INVENTIO LITE"; // Valor por defecto
+        foreach($configs as $conf) {
+            if($conf->short == "title") {
+                $system_name = $conf->val;
+                break;
+            }
+        }
+        echo $system_name;
+        ?></a> © <?php echo date('Y'); ?>.</div>
         <div class="ms-auto">Version <b>4.1</b></div> 
       </footer>
     </div>

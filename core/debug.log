@@ -1,0 +1,215 @@
+===== USERDATA DEBUG START =====
+SQL query (getById): select * from user where id=8
+Raw query result (getById): Array
+(
+    [0] => 8
+    [id] => 8
+    [1] => Nene
+    [name] => Nene
+    [2] => Nene
+    [lastname] => Nene
+    [3] => Nene
+    [username] => Nene
+    [4] => nene
+    [email] => nene
+    [5] => adcd7048512e64b48da55b027577886ee5a36350
+    [password] => adcd7048512e64b48da55b027577886ee5a36350
+    [6] => 67f49f1948fb4.jpg
+    [image] => 67f49f1948fb4.jpg
+    [7] => 1
+    [is_active] => 1
+    [8] => 0
+    [is_admin] => 0
+    [9] => 2025-04-07 21:58:48
+    [created_at] => 2025-04-07 21:58:48
+)
+
+Found user data (getById): UserData Object
+(
+    [id] => 8
+    [name] => Nene
+    [lastname] => Nene
+    [username] => Nene
+    [email] => nene
+    [password] => adcd7048512e64b48da55b027577886ee5a36350
+    [is_active] => 1
+    [is_admin] => 0
+    [image] => 67f49f1948fb4.jpg
+    [created_at] => 2025-04-07 21:58:48
+)
+
+is_admin from DB (getById): 0
+is_admin type (getById): integer
+===== USERDATA DEBUG END =====
+===== USERDATA DEBUG START =====
+SQL query (getById): select * from user where id=8
+Raw query result (getById): Array
+(
+    [0] => 8
+    [id] => 8
+    [1] => Nene
+    [name] => Nene
+    [2] => Nene
+    [lastname] => Nene
+    [3] => Nene
+    [username] => Nene
+    [4] => nene
+    [email] => nene
+    [5] => adcd7048512e64b48da55b027577886ee5a36350
+    [password] => adcd7048512e64b48da55b027577886ee5a36350
+    [6] => 67f49f1948fb4.jpg
+    [image] => 67f49f1948fb4.jpg
+    [7] => 1
+    [is_active] => 1
+    [8] => 0
+    [is_admin] => 0
+    [9] => 2025-04-07 21:58:48
+    [created_at] => 2025-04-07 21:58:48
+)
+
+Found user data (getById): UserData Object
+(
+    [id] => 8
+    [name] => Nene
+    [lastname] => Nene
+    [username] => Nene
+    [email] => nene
+    [password] => adcd7048512e64b48da55b027577886ee5a36350
+    [is_active] => 1
+    [is_admin] => 0
+    [image] => 67f49f1948fb4.jpg
+    [created_at] => 2025-04-07 21:58:48
+)
+
+is_admin from DB (getById): 0
+is_admin type (getById): integer
+===== USERDATA DEBUG END =====
+===== USERDATA DEBUG START =====
+SQL query (getById): select * from user where id=8
+Raw query result (getById): Array
+(
+    [0] => 8
+    [id] => 8
+    [1] => Nene
+    [name] => Nene
+    [2] => Nene
+    [lastname] => Nene
+    [3] => Nene
+    [username] => Nene
+    [4] => nene
+    [email] => nene
+    [5] => adcd7048512e64b48da55b027577886ee5a36350
+    [password] => adcd7048512e64b48da55b027577886ee5a36350
+    [6] => 67f49f1948fb4.jpg
+    [image] => 67f49f1948fb4.jpg
+    [7] => 1
+    [is_active] => 1
+    [8] => 0
+    [is_admin] => 0
+    [9] => 2025-04-07 21:58:48
+    [created_at] => 2025-04-07 21:58:48
+)
+
+Found user data (getById): UserData Object
+(
+    [id] => 8
+    [name] => Nene
+    [lastname] => Nene
+    [username] => Nene
+    [email] => nene
+    [password] => adcd7048512e64b48da55b027577886ee5a36350
+    [is_active] => 1
+    [is_admin] => 0
+    [image] => 67f49f1948fb4.jpg
+    [created_at] => 2025-04-07 21:58:48
+)
+
+is_admin from DB (getById): 0
+is_admin type (getById): integer
+===== USERDATA DEBUG END =====
+===== USERDATA DEBUG START =====
+SQL query (getById): select * from user where id=8
+Raw query result (getById): Array
+(
+    [0] => 8
+    [id] => 8
+    [1] => Nene
+    [name] => Nene
+    [2] => Nene
+    [lastname] => Nene
+    [3] => Nene
+    [username] => Nene
+    [4] => nene
+    [email] => nene
+    [5] => adcd7048512e64b48da55b027577886ee5a36350
+    [password] => adcd7048512e64b48da55b027577886ee5a36350
+    [6] => 67f49f1948fb4.jpg
+    [image] => 67f49f1948fb4.jpg
+    [7] => 1
+    [is_active] => 1
+    [8] => 0
+    [is_admin] => 0
+    [9] => 2025-04-07 21:58:48
+    [created_at] => 2025-04-07 21:58:48
+)
+
+Found user data (getById): UserData Object
+(
+    [id] => 8
+    [name] => Nene
+    [lastname] => Nene
+    [username] => Nene
+    [email] => nene
+    [password] => adcd7048512e64b48da55b027577886ee5a36350
+    [is_active] => 1
+    [is_admin] => 0
+    [image] => 67f49f1948fb4.jpg
+    [created_at] => 2025-04-07 21:58:48
+)
+
+is_admin from DB (getById): 0
+is_admin type (getById): integer
+===== USERDATA DEBUG END =====
+===== USERDATA DEBUG START =====
+SQL query (getById): select * from user where id=8
+Raw query result (getById): Array
+(
+    [0] => 8
+    [id] => 8
+    [1] => Nene
+    [name] => Nene
+    [2] => Nene
+    [lastname] => Nene
+    [3] => Nene
+    [username] => Nene
+    [4] => nene
+    [email] => nene
+    [5] => adcd7048512e64b48da55b027577886ee5a36350
+    [password] => adcd7048512e64b48da55b027577886ee5a36350
+    [6] => 67f49f1948fb4.jpg
+    [image] => 67f49f1948fb4.jpg
+    [7] => 1
+    [is_active] => 1
+    [8] => 0
+    [is_admin] => 0
+    [9] => 2025-04-07 21:58:48
+    [created_at] => 2025-04-07 21:58:48
+)
+
+Found user data (getById): UserData Object
+(
+    [id] => 8
+    [name] => Nene
+    [lastname] => Nene
+    [username] => Nene
+    [email] => nene
+    [password] => adcd7048512e64b48da55b027577886ee5a36350
+    [is_active] => 1
+    [is_admin] => 0
+    [image] => 67f49f1948fb4.jpg
+    [created_at] => 2025-04-07 21:58:48
+)
+
+is_admin from DB (getById): 0
+is_admin type (getById): integer
+===== USERDATA DEBUG END =====

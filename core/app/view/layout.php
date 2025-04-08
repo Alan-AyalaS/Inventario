@@ -9,13 +9,13 @@ foreach($configs as $conf) {
 
 // Obtener el usuario actual y verificar si es administrador
 $current_user = UserData::getById($_SESSION["user_id"]);
-$is_admin = isset($current_user) && $current_user->is_admin == 1;
+$is_admin = isset($current_user) && ($current_user->is_admin === "1" || $current_user->is_admin === 1);
 
 // Debug info
-echo "<!-- Current user is_admin: " . ($is_admin ? 'true' : 'false') . " -->";
-echo "<!-- Current user data: ";
-print_r($current_user);
-echo " -->";
+echo "<!-- Debug Admin Check -->\n";
+echo "<!-- is_admin value: " . $current_user->is_admin . " -->\n";
+echo "<!-- is_admin type: " . gettype($current_user->is_admin) . " -->\n";
+echo "<!-- is_admin check result: " . ($is_admin ? 'true' : 'false') . " -->\n";
 ?>
 
 <!-- Botón de Debug Info -->

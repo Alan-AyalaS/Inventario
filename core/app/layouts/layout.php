@@ -84,6 +84,12 @@ foreach($configs as $conf) {
         $purchases_enabled = true;
     }
 }
+
+// Definir $current_user si el usuario está logueado
+if(isset($_SESSION["user_id"])) {
+    require_once 'core/app/model/UserData.php';
+    $current_user = UserData::getById($_SESSION["user_id"]);
+}
 ?>
 <?php if(!isset($_SESSION["user_id"])):?>
 <div class="bg-light min-vh-100 d-flex flex-row align-items-center">
@@ -219,6 +225,20 @@ foreach($configs as $conf) {
 <!--
         <li class="nav-title">Components</li>
 -->
+        <!-- DEBUG INFO -->
+        <!-- Current user: <?php print_r($current_user); ?> -->
+        <!-- is_admin value: <?php echo isset($current_user) ? $current_user->is_admin : 'not set'; ?> -->
+        <!-- is_admin type: <?php echo isset($current_user) ? gettype($current_user->is_admin) : 'not set'; ?> -->
+        <!-- Condition result: <?php echo isset($current_user) && $current_user->is_admin == "1" ? 'true' : 'false'; ?> -->
+        <?php 
+        // Definir $is_admin antes de usarla
+        $is_admin = false;
+        if(isset($current_user)) {
+            $is_admin = ($current_user->is_admin == "1");
+        }
+        ?>
+        <!-- DEBUG: is_admin = <?php var_dump($is_admin); ?> -->
+        <?php if($is_admin): ?>
         <li class="nav-group"><a class="nav-link nav-group-toggle" href="#">
             <svg class="nav-icon">
               <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-settings"></use>
@@ -228,6 +248,7 @@ foreach($configs as $conf) {
             <li class="nav-item"><a class="nav-link" href="./?view=settings&opt=all"><span class="nav-icon"></span> AJUSTES</a></li>
           </ul>
         </li>
+        <?php endif; ?>
         <!--
         <li class="nav-item mt-auto"><a class="nav-link" href="https://coreui.io/docs/templates/installation/" target="_blank">
             <svg class="nav-icon">
@@ -357,13 +378,57 @@ foreach($configs as $conf) {
                 <div class="modal-body">
                     <pre><?php 
                         $debug_info = array(
-                            'user' => array(
-                                'id' => $_SESSION["user_id"],
-                                'name' => $_SESSION["user_name"],
-                                'lastname' => isset($_SESSION["user_lastname"]) ? $_SESSION["user_lastname"] : '',
-                                'image' => isset($_SESSION["user_image"]) ? $_SESSION["user_image"] : 'default-avatar-icon.jpg'
+                            '1. Información del Usuario Actual' => array(
+                                'ID' => $_SESSION["user_id"],
+                                'Nombre' => $_SESSION["user_name"],
+                                'is_admin' => isset($current_user) ? $current_user->is_admin : 'not set',
+                                'Tipo de is_admin' => isset($current_user) ? gettype($current_user->is_admin) : 'not set'
                             ),
-                            'session' => $_SESSION
+                            '2. Estado de la Condición' => array(
+                                '¿$current_user está definido?' => isset($current_user) ? 'Sí' : 'No',
+                                'Valor de is_admin' => isset($current_user) ? $current_user->is_admin : 'not set',
+                                'Tipo de is_admin' => isset($current_user) ? gettype($current_user->is_admin) : 'not set'
+                            ),
+                            '3. Comparaciones detalladas' => array(
+                                'is_admin === 1' => isset($current_user) ? ($current_user->is_admin === 1 ? 'Sí' : 'No') : 'not set',
+                                'is_admin === "1"' => isset($current_user) ? ($current_user->is_admin === "1" ? 'Sí' : 'No') : 'not set',
+                                'is_admin == 1' => isset($current_user) ? ($current_user->is_admin == 1 ? 'Sí' : 'No') : 'not set',
+                                'is_admin == "1"' => isset($current_user) ? ($current_user->is_admin == "1" ? 'Sí' : 'No') : 'not set',
+                                'is_admin == true' => isset($current_user) ? ($current_user->is_admin == true ? 'Sí' : 'No') : 'not set',
+                                'is_admin == false' => isset($current_user) ? ($current_user->is_admin == false ? 'Sí' : 'No') : 'not set',
+                                'is_admin === true' => isset($current_user) ? ($current_user->is_admin === true ? 'Sí' : 'No') : 'not set',
+                                'is_admin === false' => isset($current_user) ? ($current_user->is_admin === false ? 'Sí' : 'No') : 'not set',
+                                'is_admin === "0"' => isset($current_user) ? ($current_user->is_admin === "0" ? 'Sí' : 'No') : 'not set',
+                                'is_admin === 0' => isset($current_user) ? ($current_user->is_admin === 0 ? 'Sí' : 'No') : 'not set',
+                                'is_admin == 0' => isset($current_user) ? ($current_user->is_admin == 0 ? 'Sí' : 'No') : 'not set',
+                                'is_admin == "0"' => isset($current_user) ? ($current_user->is_admin == "0" ? 'Sí' : 'No') : 'not set'
+                            ),
+                            '4. Conversión a número' => array(
+                                'is_admin convertido a int' => isset($current_user) ? (int)$current_user->is_admin : 'not set',
+                                'is_admin_num === 1' => isset($current_user) ? ((int)$current_user->is_admin === 1 ? 'Sí' : 'No') : 'not set'
+                            ),
+                            '5. Variables de Sesión' => $_SESSION,
+                            '6. Objeto Usuario Completo' => isset($current_user) ? (array)$current_user : 'not set',
+                            '7. Consulta SQL' => 'SELECT * FROM user WHERE id = ' . (isset($_SESSION["user_id"]) ? $_SESSION["user_id"] : 'not set'),
+                            '8. Verificación del Menú' => array(
+                                '¿Existe el menú de administración en el código?' => 'Sí',
+                                'Posición del menú en el código' => '2184'
+                            ),
+                            '9. Información del Layout' => array(
+                                'Valor de is_admin en layout' => isset($current_user) ? $current_user->is_admin : 'not set',
+                                'Tipo de is_admin en layout' => isset($current_user) ? gettype($current_user->is_admin) : 'not set',
+                                'Resultado de la condición is_admin' => isset($current_user) && ($current_user->is_admin == "1" || $current_user->is_admin == 1) ? 'true' : 'false',
+                                'Código de la condición' => '$is_admin = isset($current_user) && ($current_user->is_admin === "1" || $current_user->is_admin === 1);'
+                            ),
+                            '10. Información Adicional' => array(
+                                '¿Dónde se define $current_user?' => 'En el archivo layout.php',
+                                '¿Cuándo se define $current_user?' => 'Antes de mostrar el menú',
+                                '¿Qué valor tiene $is_admin?' => isset($is_admin) ? ($is_admin ? 'true' : 'false') : 'not set',
+                                '¿La condición if($is_admin) se evalúa como true?' => isset($is_admin) ? ($is_admin ? 'Sí' : 'No') : 'not set',
+                                '¿El menú de administración está visible?' => isset($is_admin) && $is_admin ? 'Sí' : 'No',
+                                '¿El código del menú está presente?' => 'Sí',
+                                '¿La condición if($is_admin) está presente?' => 'Sí'
+                            )
                         );
                         echo json_encode($debug_info, JSON_PRETTY_PRINT);
                     ?></pre>

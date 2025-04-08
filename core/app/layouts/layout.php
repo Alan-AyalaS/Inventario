@@ -46,6 +46,45 @@
     <link href="vendors/@coreui/chartjs/css/coreui-chartjs.css" rel="stylesheet">
   </head>
   <body>
+<?php
+require_once 'core/app/model/ConfigurationData.php';
+$configs = ConfigurationData::getAll();
+$system_title = "INVENTIO LITE"; // Valor por defecto
+$providers_enabled = false;
+$clients_enabled = false;
+$sells_enabled = true;
+$sell_enabled = true;
+$box_enabled = true;
+$reports_enabled = true;
+$purchases_enabled = false;
+
+foreach($configs as $conf) {
+    if($conf->short == "active_providers" && $conf->val == 1) {
+        $providers_enabled = true;
+    }
+    if($conf->short == "active_clients" && $conf->val == 1) {
+        $clients_enabled = true;
+    }
+    if($conf->short == "title") {
+        $system_title = $conf->val;
+    }
+    if($conf->short == "active_sells" && $conf->val == 0) {
+        $sells_enabled = false;
+    }
+    if($conf->short == "active_sell" && $conf->val == 0) {
+        $sell_enabled = false;
+    }
+    if($conf->short == "active_box" && $conf->val == 0) {
+        $box_enabled = false;
+    }
+    if($conf->short == "active_reports" && $conf->val == 0) {
+        $reports_enabled = false;
+    }
+    if($conf->short == "active_purchases" && $conf->val == 1) {
+        $purchases_enabled = true;
+    }
+}
+?>
 <?php if(!isset($_SESSION["user_id"])):?>
 <div class="bg-light min-vh-100 d-flex flex-row align-items-center">
 <div class="container">
@@ -54,7 +93,7 @@
 <div class="card-group d-block d-md-flex row">
 <div class="card col-md-12 p-4 mb-0">
 <div class="card-body">
-<h1>INVENTIO <b>LITE</b></h1>
+<h1><?php echo $system_title; ?></h1>
 <br>
 <p class="text-medium-emphasis">Iniciar Sesion al Sistema</p>
 <form method="post" action="./?action=processlogin">
@@ -62,7 +101,7 @@
 <svg class="icon">
 <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-user"></use>
 </svg></span>
-<input class="form-control" type="text" name="username" placeholder="Email">
+<input class="form-control" type="text" name="username" placeholder="Email o Usuario">
 </div>
 <div class="input-group mb-4"><span class="input-group-text">
 <svg class="icon">
@@ -97,46 +136,7 @@
 <div class="sidebar-brand d-none d-md-flex">
 <div class="sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
 
-<h4><a href="./" style="color: white;"><?php
-require_once 'core/app/model/ConfigurationData.php';
-$configs = ConfigurationData::getAll();
-$providers_enabled = false;
-$clients_enabled = false;
-$system_title = "INVENTIO LITE"; // Valor por defecto
-$sells_enabled = true;
-$sell_enabled = true;
-$box_enabled = true;
-$reports_enabled = true;
-$purchases_enabled = false;
-
-foreach($configs as $conf) {
-    if($conf->short == "active_providers" && $conf->val == 1) {
-        $providers_enabled = true;
-    }
-    if($conf->short == "active_clients" && $conf->val == 1) {
-        $clients_enabled = true;
-    }
-    if($conf->short == "title") {
-        $system_title = $conf->val;
-    }
-    if($conf->short == "active_sells" && $conf->val == 0) {
-        $sells_enabled = false;
-    }
-    if($conf->short == "active_sell" && $conf->val == 0) {
-        $sell_enabled = false;
-    }
-    if($conf->short == "active_box" && $conf->val == 0) {
-        $box_enabled = false;
-    }
-    if($conf->short == "active_reports" && $conf->val == 0) {
-        $reports_enabled = false;
-    }
-    if($conf->short == "active_purchases" && $conf->val == 1) {
-        $purchases_enabled = true;
-    }
-}
-?>
-<?php echo $system_title; ?></a></h4>
+<h4><a href="./" style="color: white;"><?php echo $system_title; ?></a></h4>
 
 </div>
 <div class="sidebar-brand-narrow" width="46" height="46" alt="CoreUI Logo">
@@ -185,20 +185,6 @@ foreach($configs as $conf) {
             </svg> CATALOGOS</a>
           <ul class="nav-group-items">
             <li class="nav-item"><a class="nav-link" href="./?view=categories"><span class="nav-icon"></span> CATEGORIAS  </a></li>
-            <?php
-            require_once 'core/app/model/ConfigurationData.php';
-            $configs = ConfigurationData::getAll();
-            $providers_enabled = false;
-            $clients_enabled = false;
-            foreach($configs as $conf) {
-                if($conf->short == "active_providers" && $conf->val == 1) {
-                    $providers_enabled = true;
-                }
-                if($conf->short == "active_clients" && $conf->val == 1) {
-                    $clients_enabled = true;
-                }
-            }
-            ?>
             <?php if($clients_enabled): ?>
             <li class="nav-item"><a class="nav-link" href="./?view=clients"><span class="nav-icon"></span> CLIENTES  </a></li>
             <?php endif; ?>

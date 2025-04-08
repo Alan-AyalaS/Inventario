@@ -399,29 +399,37 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
 </div>
 
 <!-- Modal para ajustar inventario -->
-        <div class="modal fade" id="adjustModal" tabindex="-1" aria-labelledby="adjustModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-                        <h5 class="modal-title" id="adjustModalLabel">Ajustar Inventario</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-                        <form id="adjustForm" method="post" action="index.php?view=adjustinventory">
-                            <input type="hidden" name="product_id" id="productId">
-                            <input type="hidden" name="operation_type" id="operationType">
-          <div class="mb-3">
-            <label for="quantity" class="form-label">Cantidad</label>
-                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="button" class="btn btn-primary" onclick="submitAdjustForm()">Ajustar</button>
-      </div>
+<div class="modal fade" id="adjustModal" tabindex="-1" aria-labelledby="adjustModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="adjustModalLabel">Ajustar Inventario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="adjustForm" method="post" action="index.php?view=adjustinventory" onsubmit="return submitAdjustForm(event)">
+                    <input type="hidden" name="product_id" id="productId">
+                    <input type="hidden" name="operation_type" id="operationType">
+                    <!-- Campos ocultos para mantener los filtros -->
+                    <input type="hidden" name="category_id" id="category_id">
+                    <input type="hidden" name="search" id="search">
+                    <input type="hidden" name="availability" id="availability">
+                    <input type="hidden" name="date_filter" id="date_filter">
+                    <input type="hidden" name="limit" id="limit">
+                    <input type="hidden" name="size" id="size">
+                    <input type="hidden" name="page" id="page">
+                    <div class="mb-3">
+                        <label for="quantity" class="form-label">Cantidad</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Ajustar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <!-- Alerta dinámica -->
@@ -833,6 +841,7 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
 	</div>
 </div>
 
+<!-- Agregar los scripts de Bootstrap antes del cierre del body -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 // Variable global para almacenar el mensaje de la operación
@@ -844,61 +853,85 @@ let categoriesData = <?php echo json_encode($categories); ?>;
 let filteredProducts = [...allProducts];
 
 function showAdjustModal(productId, operationType) {
-    // Obtener el producto actual
-    const product = allProducts.find(p => p.id == productId);
-    if (!product) return;
-
     // Establecer los valores del modal
     document.getElementById('productId').value = productId;
     document.getElementById('operationType').value = operationType;
     document.getElementById('adjustModalLabel').textContent = 
         operationType === 'add' ? 'Agregar al Inventario' : 'Restar del Inventario';
     
-    // Seleccionar automáticamente la talla del producto
-    const tallaSelect = document.getElementById('talla');
-    if (tallaSelect) {
-        // Si el producto tiene talla unitalla o no tiene talla, seleccionar "unitalla"
-        if (!product.size || product.size === 'unitalla') {
-            tallaSelect.value = 'unitalla';
-        } else {
-            tallaSelect.value = product.size;
-        }
-    }
+    // Establecer los valores de los filtros actuales
+    const urlParams = new URLSearchParams(window.location.search);
     
-    // Mostrar el modal
-    var modal = new bootstrap.Modal(document.getElementById('adjustModal'));
-    modal.show();
+    // Copiar todos los parámetros de filtro
+    const filterParams = ['category_id', 'search', 'availability', 'date_filter', 'limit', 'size', 'page'];
+    filterParams.forEach(param => {
+        if (urlParams.has(param)) {
+            const value = urlParams.get(param);
+            document.getElementById(param).value = value;
+        }
+    });
+    
+    // Mostrar el modal usando Bootstrap 5
+    const modalElement = document.getElementById('adjustModal');
+    if (modalElement) {
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+        
+        // Enfocar el input de cantidad cuando el modal se muestre completamente
+        modalElement.addEventListener('shown.bs.modal', function () {
+            document.getElementById('quantity').focus();
+        });
+    } else {
+        console.error('No se encontró el elemento del modal');
+    }
 }
 
-function submitAdjustForm() {
+function submitAdjustForm(event) {
+    event.preventDefault(); // Prevenir el envío normal del formulario
+    
     const form = document.getElementById('adjustForm');
-    const productId = document.getElementById('productId').value;
-    const operationType = document.getElementById('operationType').value;
     const quantity = document.getElementById('quantity').value;
+    const operationType = document.getElementById('operationType').value;
     
-    if(!productId) {
-        alert('Error: ID del producto no encontrado');
-        return;
+    if (quantity <= 0) {
+        alert('La cantidad debe ser mayor que 0');
+        return false;
     }
     
-    if(!operationType) {
-        alert('Error: Tipo de operación no especificado');
-        return;
-    }
+    // Enviar el formulario usando fetch
+    fetch('index.php?view=adjustinventory', {
+        method: 'POST',
+        body: new FormData(form)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la respuesta del servidor');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Guardar el mensaje en localStorage
+            localStorage.setItem('inventoryAlert', data.message);
+            // Redirigir usando la URL proporcionada por el servidor
+            window.location.href = data.redirect;
+        } else {
+            alert(data.message || 'Error al procesar la solicitud');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Si hay un error pero los cambios se aplicaron, recargar la página
+        window.location.reload();
+    });
     
-    if(!quantity || quantity <= 0) {
-        alert('Por favor ingrese una cantidad válida');
-        return;
-    }
-    
-    // Enviar el formulario normalmente
-    form.submit();
+    return false;
 }
 
 // Verificar si hay una alerta pendiente al cargar la página
 window.addEventListener('load', function() {
     setTimeout(function() {
-        const alertMessage = sessionStorage.getItem('inventoryAlert');
+        const alertMessage = localStorage.getItem('inventoryAlert');
         if (alertMessage) {
             // Crear y mostrar la alerta
             const alertDiv = document.createElement('div');
@@ -928,8 +961,8 @@ window.addEventListener('load', function() {
                 }, 500);
             }, 3000);
             
-            // Eliminar el mensaje del sessionStorage
-            sessionStorage.removeItem('inventoryAlert');
+            // Eliminar el mensaje del localStorage
+            localStorage.removeItem('inventoryAlert');
         }
     }, 500); // Esperar 500ms después de que la página se cargue completamente
 });

@@ -55,14 +55,15 @@ $pdf->Cell(0, 10, 'Generado el: ' . date("d/m/Y H:i:s"), 0, 1, 'C');
 $pdf->Ln(10);
 
 // Establecer fuente para la tabla
-$pdf->SetFont('helvetica', 'B', 10);
+$pdf->SetFont('helvetica', 'B', 9);
 
 // Encabezados de la tabla
-$header = array('Código', 'Nombre', 'Precio Entrada', 'Precio Salida', 'Unidad', 'Disponible', 'Mínima');
-$w = array(25, 70, 30, 30, 25, 30, 30);
+$header = array('Código', 'Nombre', 'Talla', 'Categoría', 'Precio Compra', 'Precio Venta', 'Unidad', 'Mínimo', 'Disponible', 'Total');
+$w = array(20, 60, 20, 25, 25, 25, 20, 20, 25, 25);
 
 // Establecer color de fondo para los encabezados
-$pdf->SetFillColor(242, 242, 242);
+$pdf->SetFillColor(44, 62, 80); // Color oscuro profesional
+$pdf->SetTextColor(255, 255, 255); // Texto blanco
 
 // Imprimir encabezados
 for($i = 0; $i < count($header); $i++) {
@@ -71,36 +72,74 @@ for($i = 0; $i < count($header); $i++) {
 $pdf->Ln();
 
 // Establecer fuente para los datos
-$pdf->SetFont('helvetica', '', 9);
+$pdf->SetFont('helvetica', '', 8);
+
+// Variables para el agrupamiento
+$current_product_name = '';
+$group_total = 0;
+$products_in_group = 0;
+$fill = false;
+
+// Ordenar productos por nombre
+usort($products, function($a, $b) {
+    return strcmp(trim($a->name), trim($b->name));
+});
 
 // Imprimir datos
 foreach($products as $product) {
     $available = OperationData::getQYesF($product->id);
+    $product_name = trim($product->name);
     
-    // Determinar el color de fondo para la cantidad disponible
+    // Lógica de agrupación
+    if($current_product_name !== '' && $current_product_name !== $product_name) {
+        $group_total = $available;
+        $products_in_group = 1;
+    } else if($current_product_name === $product_name) {
+        $group_total += $available;
+        $products_in_group++;
+    } else {
+        $group_total = $available;
+        $products_in_group = 1;
+    }
+    
+    // Alternar colores de fondo
+    $fill = !$fill;
+    $pdf->SetFillColor(248, 249, 250);
+    $pdf->SetTextColor(0, 0, 0);
+    
+    // Imprimir datos de la fila
+    $pdf->Cell($w[0], 7, $product->id, 1, 0, 'C', $fill);
+    $pdf->Cell($w[1], 7, $product->name, 1, 0, 'L', $fill);
+    $pdf->Cell($w[2], 7, $product->size, 1, 0, 'C', $fill);
+    $pdf->Cell($w[3], 7, $product->getCategory()->name, 1, 0, 'C', $fill);
+    $pdf->Cell($w[4], 7, '$'.number_format($product->price_in, 2), 1, 0, 'R', $fill);
+    $pdf->Cell($w[5], 7, '$'.number_format($product->price_out, 2), 1, 0, 'R', $fill);
+    $pdf->Cell($w[6], 7, $product->unit, 1, 0, 'C', $fill);
+    $pdf->Cell($w[7], 7, $product->inventary_min, 1, 0, 'C', $fill);
+    
+    // Colorear la celda de disponible según el nivel
     if($available <= $product->inventary_min/2) {
         $pdf->SetFillColor(220, 53, 69); // Rojo
         $pdf->SetTextColor(255, 255, 255); // Texto blanco
     } elseif($available <= $product->inventary_min) {
         $pdf->SetFillColor(255, 193, 7); // Amarillo
         $pdf->SetTextColor(0, 0, 0); // Texto negro
+    }
+    $pdf->Cell($w[8], 7, $available, 1, 0, 'C', true);
+    
+    // Restaurar colores
+    $pdf->SetFillColor(248, 249, 250);
+    $pdf->SetTextColor(0, 0, 0);
+    
+    // Mostrar el total
+    if($current_product_name !== $product_name || $current_product_name === '') {
+        $pdf->Cell($w[9], 7, $available, 1, 0, 'C', $fill);
     } else {
-        $pdf->SetFillColor(255, 255, 255); // Blanco
-        $pdf->SetTextColor(0, 0, 0); // Texto negro
+        $pdf->Cell($w[9], 7, $group_total, 1, 0, 'C', $fill);
     }
     
-    $pdf->Cell($w[0], 7, $product->id, 1);
-    $pdf->Cell($w[1], 7, $product->name, 1);
-    $pdf->Cell($w[2], 7, $product->price_in, 1);
-    $pdf->Cell($w[3], 7, $product->price_out, 1);
-    $pdf->Cell($w[4], 7, $product->unit, 1);
-    $pdf->Cell($w[5], 7, $available, 1, 0, 'C', true);
-    $pdf->Cell($w[6], 7, $product->inventary_min, 1);
     $pdf->Ln();
-    
-    // Restaurar colores por defecto
-    $pdf->SetFillColor(255, 255, 255);
-    $pdf->SetTextColor(0, 0, 0);
+    $current_product_name = $product_name;
 }
 
 // Salida del PDF

@@ -275,7 +275,7 @@ foreach($configs as $conf) {
                 <span class="me-2 text-dark"><?php echo isset($_SESSION["user_name"]) ? $_SESSION["user_name"] : "Usuario"; ?></span>
                 <button class="btn btn-link nav-link py-0 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                   <div class="avatar avatar-md">
-                    <img class="avatar-img" src="assets/img/user.png" alt="user@email.com">
+                    <img class="avatar-img" src="assets/img/avatars/default-avatar-icon.jpg" alt="user@email.com">
                   </div>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">

@@ -1,4 +1,5 @@
 <?php
+session_start();
 
 // define('LBROOT',getcwd()); // LegoBox Root ... the server root
 // include("core/controller/Database.php");
@@ -9,20 +10,23 @@ $pass = sha1(md5($_POST['password']));
 
 $base = new Database();
 $con = $base->connect();
- $sql = "select * from user where (email= \"".$user."\" or username= \"".$user."\") and password= \"".$pass."\" and is_active=1";
+$sql = "select * from user where (email= \"".$user."\" or username= \"".$user."\") and password= \"".$pass."\" and is_active=1";
 //print $sql;
 $query = $con->query($sql);
 $found = false;
 $userid = null;
+$user_data = null;
 while($r = $query->fetch_array()){
-	$found = true ;
+	$found = true;
 	$userid = $r['id'];
+	$user_data = $r;
 }
 
 if($found==true) {
 //	session_start();
 //	print $userid;
-	$_SESSION['user_id']=$userid ;
+	$_SESSION['user_id']=$userid;
+	$_SESSION['user_name']=$user_data['username'];
 //	setcookie('userid',$userid);
 //	print $_SESSION['userid'];
 	print "Cargando ... $user";

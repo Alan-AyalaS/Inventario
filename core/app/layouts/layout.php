@@ -270,20 +270,26 @@ foreach($configs as $conf) {
               -->
           </ul>
           <ul class="header-nav ms-3">
-            <li class="nav-item dropdown"><a class="nav-link py-0" data-coreui-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-                <div class="avatar avatar-md"><img class="avatar-img" src="assets/img/user.png" alt="user@email.com"></div>
-              </a>
-              <div class="dropdown-menu dropdown-menu-end pt-0">
-                <div class="dropdown-header bg-light py-2">
-                  <div class="fw-semibold">Account</div>
-                </div><a class="dropdown-item" href="#">
-                  <svg class="icon me-2">
-                    <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-settings"></use>
-                  </svg> Settings</a>
-                <div class="dropdown-divider"></div><a class="dropdown-item" href="./logout.php">
-                  <svg class="icon me-2">
-                    <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-account-logout"></use>
-                  </svg> Logout </a>
+            <li class="nav-item dropdown">
+              <div class="d-flex align-items-center">
+                <span class="me-2 text-dark"><?php echo isset($_SESSION["user_name"]) ? $_SESSION["user_name"] : "Usuario"; ?></span>
+                <button class="btn btn-link nav-link py-0 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                  <div class="avatar avatar-md">
+                    <img class="avatar-img" src="assets/img/user.png" alt="user@email.com">
+                  </div>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><div class="dropdown-header">Cuenta</div></li>
+                  <li><a class="dropdown-item" href="#">
+                    <svg class="icon me-2">
+                      <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-settings"></use>
+                    </svg> Configuración</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="./logout.php">
+                    <svg class="icon me-2">
+                      <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-account-logout"></use>
+                    </svg> Cerrar Sesión</a></li>
+                </ul>
               </div>
             </li>
           </ul>
@@ -321,7 +327,16 @@ foreach($configs as $conf) {
     <script src="vendors/@coreui/chartjs/js/coreui-chartjs.js"></script>
     <script src="vendors/@coreui/utils/js/coreui-utils.js"></script>
     <script src="assets/js/main.js"></script>
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar todos los dropdowns
+        var dropdownElementList = [].slice.call(document.querySelectorAll('[data-coreui-toggle="dropdown"]'))
+        var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+          return new coreui.Dropdown(dropdownToggleEl)
+        });
+      });
     </script>
 
   </body>

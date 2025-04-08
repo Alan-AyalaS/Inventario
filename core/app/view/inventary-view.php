@@ -661,9 +661,9 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
                                 <th style="width: 100px;">Precio de Salida</th>
                                 <th style="width: 80px;">Unidad</th>
 						<th style="width: 100px;">Mínima en Inventario</th>
-                                <th style="width: 80px;">Disponible</th>
-                                <th style="width: 80px;">Total</th>
-                                <th style="width: 150px;">Acciones</th>
+                                <th style="width: 50px;">Disponible</th>
+                                <th style="width: 60px;">Total</th>
+                                <th style="width: 180px;">Acciones</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -2165,29 +2165,78 @@ tr:hover .total-cell.highlighted {
 .actions-cell {
     white-space: nowrap;
     width: 1%;
-    padding: 8px !important;
+    padding: 2px !important;
     position: relative;
     z-index: 2;
-    text-align: center;
-    background-color: #fff;
+    min-width: 80px;
 }
 
 .actions-cell .btn-group {
-    display: inline-flex;
-    gap: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
 }
 
 .actions-cell .btn {
     padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    border-radius: 0.25rem;
-    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    min-width: 32px;
+    height: calc(50% - 1px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 auto;
 }
 
-/* Asegurar que la celda de acciones siempre esté visible */
-tr:hover .actions-cell {
-    background-color: #fff;
+.actions-cell .btn i {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Media queries para responsive */
+@media (max-width: 1200px) {
+    .actions-cell {
+        min-width: 90px;
+    }
+    
+    .actions-cell .btn {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.85rem;
+        min-width: 28px;
+    }
+}
+
+@media (max-width: 992px) {
+    .actions-cell {
+        min-width: 80px;
+    }
+    
+    .actions-cell .btn {
+        padding: 0.15rem 0.3rem;
+        font-size: 0.8rem;
+        min-width: 26px;
+    }
+}
+
+@media (max-width: 768px) {
+    .actions-cell {
+        min-width: 70px;
+    }
+    
+    .actions-cell .btn {
+        padding: 0.15rem 0.25rem;
+        font-size: 0.75rem;
+        min-width: 24px;
+    }
+    
+    .actions-cell .btn i {
+        font-size: 0.75rem;
+    }
 }
 
 /* Estilos para simular el rowspan */

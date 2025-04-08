@@ -392,7 +392,7 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
 <!-- Botón para eliminar seleccionados -->
 <div class="row mt-3">
     <div class="col-md-12">
-        <button type="button" class="btn btn-danger" id="deleteSelected" disabled>
+        <button type="button" class="btn btn-danger" id="deleteSelected" disabled style="margin-bottom: 15px;">
             <i class="fas fa-trash"></i> Eliminar seleccionados
         </button>
     </div>
@@ -466,20 +466,18 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
 </div>
 
 <!-- Modal para eliminar productos seleccionados -->
-<div class="modal fade" id="deleteSelectedModal" tabindex="-1" role="dialog" aria-labelledby="deleteSelectedModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<div class="modal fade" id="deleteSelectedModal" tabindex="-1" aria-labelledby="deleteSelectedModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="deleteSelectedModalLabel">Eliminar productos seleccionados</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 ¿Estás seguro de que deseas eliminar los productos seleccionados? Esta acción no se puede deshacer.
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-danger" id="confirmDeleteSelected">Eliminar</button>
             </div>
         </div>
@@ -1002,6 +1000,9 @@ window.addEventListener('load', function() {
     const confirmDeleteSelectedBtn = document.getElementById('confirmDeleteSelected');
     let lastChecked = null;
 
+    // Inicializar el modal de Bootstrap 5
+    const deleteSelectedModal = new bootstrap.Modal(document.getElementById('deleteSelectedModal'));
+
     // Seleccionar/deseleccionar todos
     if (selectAll) {
         selectAll.addEventListener('change', function() {
@@ -1055,7 +1056,7 @@ window.addEventListener('load', function() {
     // Mostrar modal de confirmación
     if (deleteSelectedBtn) {
         deleteSelectedBtn.addEventListener('click', function() {
-            $('#deleteSelectedModal').modal('show');
+            deleteSelectedModal.show();
         });
     }
 
@@ -1097,6 +1098,8 @@ window.addEventListener('load', function() {
                     // Guardar el mensaje en localStorage para mostrarlo después de recargar
                     const count = selectedIds.length;
                     localStorage.setItem('deleteSuccessMessage', `Se eliminaron exitosamente ${count} producto${count > 1 ? 's' : ''}.`);
+                    // Cerrar el modal
+                    deleteSelectedModal.hide();
                     // Recargar la página
                     window.location.href = window.location.href;
                 } else {
@@ -1107,8 +1110,6 @@ window.addEventListener('load', function() {
                 console.error('Error completo:', error);
                 alert('Error al eliminar los productos: ' + error.message);
             });
-
-            $('#deleteSelectedModal').modal('hide');
         });
     }
 

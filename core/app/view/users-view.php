@@ -47,14 +47,18 @@
 				<td><?php echo $user->name." ".$user->lastname; ?></td>
 				<td><?php echo $user->username; ?></td>
 				<td><?php echo $user->email; ?></td>
-				<td>
+				<td class="text-center">
 					<?php if($user->is_active):?>
-						<i class="glyphicon glyphicon-ok"></i>
+						<i class="bi bi-check-circle-fill text-success"></i>
+					<?php else: ?>
+						<i class="bi bi-x-circle-fill text-danger"></i>
 					<?php endif; ?>
 				</td>
-				<td>
+				<td class="text-center">
 					<?php if($user->is_admin):?>
-						<i class="glyphicon glyphicon-ok"></i>
+						<i class="bi bi-check-circle-fill text-success"></i>
+					<?php else: ?>
+						<i class="bi bi-x-circle-fill text-danger"></i>
 					<?php endif; ?>
 				</td>
 				<td style="width:30px;"><a href="index.php?view=edituser&id=<?php echo $user->id;?>" class="btn btn-warning btn-xs">Editar</a></td>
@@ -67,6 +71,7 @@
 
 		}else{
 			// no hay usuarios
+			echo "<p class='alert alert-warning'>No hay usuarios registrados</p>";
 		}
 
 

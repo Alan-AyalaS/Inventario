@@ -3,6 +3,7 @@
 if(count($_POST)>0){
 	$is_admin=0;
 	if(isset($_POST["is_admin"])){$is_admin=1;}
+	
 	$user = new UserData();
 	$user->name = $_POST["name"];
 	$user->lastname = $_POST["lastname"];
@@ -10,12 +11,13 @@ if(count($_POST)>0){
 	$user->email = $_POST["email"];
 	$user->is_admin=$is_admin;
 	$user->password = sha1(md5($_POST["password"]));
-	$user->add();
-
-print "<script>window.location='index.php?view=users';</script>";
-
-
+	
+	try {
+		$user->add();
+		print "<script>window.location='index.php?view=users';</script>";
+	} catch (Exception $e) {
+		echo "<div class='alert alert-danger'>Error al crear usuario: " . $e->getMessage() . "</div>";
+	}
 }
-
 
 ?>

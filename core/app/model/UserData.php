@@ -15,8 +15,8 @@ class UserData {
 
 	public function add(){
 		$sql = "insert into user (name,lastname,username,email,is_admin,password,created_at) ";
-		$sql .= "value (\"$this->name\",\"$this->lastname\",\"$this->username\",\"$this->email\",\"$this->is_admin\",\"$this->password\",$this->created_at)";
-		Executor::doit($sql);
+		$sql .= "value (\"$this->name\",\"$this->lastname\",\"$this->username\",\"$this->email\",\"$this->is_admin\",\"$this->password\",NOW())";
+		return Executor::doit($sql);
 	}
 
 	public static function delById($id){

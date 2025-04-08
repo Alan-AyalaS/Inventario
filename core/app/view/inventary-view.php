@@ -1809,25 +1809,23 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function highlightTotalGroup(groupId) {
-    const totalCell = document.getElementById('total-cell-' + groupId);
-    if (totalCell) {
-        // Usar el mismo color de hover que tiene la tabla por defecto
-        totalCell.style.backgroundColor = 'rgba(0,0,0,.075)';
-    }
+    const rows = document.querySelectorAll(`tr.total-group-${groupId}`);
+    rows.forEach(row => {
+        row.classList.add('highlighted');
+    });
 }
 
 function unhighlightTotalGroup(groupId) {
-    const totalCell = document.getElementById('total-cell-' + groupId);
-    if (totalCell) {
-        totalCell.style.backgroundColor = '';
-    }
+    const rows = document.querySelectorAll(`tr.total-group-${groupId}`);
+    rows.forEach(row => {
+        row.classList.remove('highlighted');
+    });
 }
 
-// Agregar eventos de mouse a todas las filas del grupo excepto la primera
 document.addEventListener('DOMContentLoaded', function() {
     const groups = {};
     
-    // Primero, agrupar las filas por su groupId
+    // Agrupar las filas por su groupId
     document.querySelectorAll('tr[class^="total-group-"]').forEach(row => {
         const groupId = row.className.match(/total-group-(\d+)/)[1];
         if (!groups[groupId]) {
@@ -1836,17 +1834,34 @@ document.addEventListener('DOMContentLoaded', function() {
         groups[groupId].push(row);
     });
 
-    // Luego, agregar eventos solo a las filas que no son la primera de su grupo
+    // Agregar eventos a todas las filas del grupo
     Object.keys(groups).forEach(groupId => {
         const rows = groups[groupId];
-        // Saltamos el primer elemento (índice 0) y agregamos eventos al resto
-        for (let i = 1; i < rows.length; i++) {
-            rows[i].addEventListener('mouseenter', function() {
+        rows.forEach(row => {
+            row.addEventListener('mouseenter', function() {
                 highlightTotalGroup(groupId);
             });
             
-            rows[i].addEventListener('mouseleave', function() {
-                unhighlightTotalGroup(groupId);
+            row.addEventListener('mouseleave', function(e) {
+                const relatedTarget = e.relatedTarget;
+                if (!relatedTarget || !relatedTarget.closest(`tr.total-group-${groupId}`)) {
+                    unhighlightTotalGroup(groupId);
+                }
+            });
+        });
+
+        // Agregar eventos a la celda total
+        const totalCell = document.getElementById(`total-cell-${groupId}`);
+        if (totalCell) {
+            totalCell.addEventListener('mouseenter', function() {
+                highlightTotalGroup(groupId);
+            });
+            
+            totalCell.addEventListener('mouseleave', function(e) {
+                const relatedTarget = e.relatedTarget;
+                if (!relatedTarget || !relatedTarget.closest(`tr.total-group-${groupId}`)) {
+                    unhighlightTotalGroup(groupId);
+                }
             });
         }
     });
@@ -1856,6 +1871,32 @@ document.addEventListener('DOMContentLoaded', function() {
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
 
 <style>
+/* Estilos base para la tabla */
+tr:hover {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Estilos para la celda total */
+[id^="total-cell-"] {
+    transition: background-color 0.15s ease;
+    background-color: transparent !important;
+}
+
+/* Cuando la celda total está resaltada */
+[id^="total-cell-"].highlighted {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Asegurar que el hover de la tabla no interfiera */
+tr:hover [id^="total-cell-"] {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Mantener el resaltado consistente para todas las filas del grupo */
+tr:hover td:not([id^="total-cell-"]) {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
 /* Estilos para los select personalizados */
 .custom-select-wrapper {
     position: relative;
@@ -2119,6 +2160,143 @@ td:not(.total-cell) {
 
 /* Estilos para la transición suave del resaltado */
 [id^="total-cell-"] {
-    transition: background-color 0.3s ease;
+    transition: background-color 0.15s ease;
+    background-color: transparent !important;
+    pointer-events: none;
+}
+
+[id^="total-cell-"].highlighted {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Desactivar el hover de la tabla para la celda total */
+tr:hover [id^="total-cell-"] {
+    background-color: transparent !important;
+}
+
+/* Mantener el resaltado cuando se pasa entre filas del mismo grupo */
+tr:hover [id^="total-cell-"].highlighted {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Desactivar el hover de la tabla para todas las filas */
+tr:hover {
+    background-color: transparent !important;
+}
+
+/* Aplicar el resaltado solo a las celdas que no son total */
+tr:hover td:not([id^="total-cell-"]) {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Estilos para el resaltado de la celda total */
+[id^="total-cell-"] {
+    transition: background-color 0.15s ease;
+    background-color: transparent !important;
+}
+
+[id^="total-cell-"].highlighted {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Asegurar que el hover de la tabla no interfiera con el resaltado personalizado */
+tr:hover [id^="total-cell-"] {
+    background-color: transparent !important;
+}
+
+/* Mantener el resaltado cuando se pasa entre filas del mismo grupo */
+tr:hover [id^="total-cell-"].highlighted {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Estilo para el hover de la fila */
+tr:hover {
+    background-color: rgba(0,0,0,.075);
+}
+
+/* Excluir la celda total del hover de la fila */
+tr:hover td:not([id^="total-cell-"]) {
+    background-color: rgba(0,0,0,.075);
+}
+
+/* Asegurar que la celda total se ilumine con el mismo color que las celdas normales */
+tr:hover [id^="total-cell-"] {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Estilos para el resaltado de la celda total */
+[id^="total-cell-"] {
+    transition: background-color 0.15s ease;
+    background-color: transparent !important;
+}
+
+[id^="total-cell-"].highlighted {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Asegurar que el hover de la tabla no interfiera con el resaltado personalizado */
+tr:hover [id^="total-cell-"] {
+    background-color: transparent !important;
+}
+
+/* Mantener el resaltado cuando se pasa entre filas del mismo grupo */
+tr:hover [id^="total-cell-"].highlighted {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Estilo para el hover de la fila */
+tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Excluir la celda total del hover de la fila */
+tr:hover td:not([id^="total-cell-"]) {
+    background-color: #f8f9fa;
+}
+
+/* Asegurar que la celda total se ilumine con el mismo color que las celdas normales */
+tr:hover [id^="total-cell-"] {
+    background-color: #f8f9fa !important;
+}
+
+/* Estilos para el resaltado */
+tr.highlighted {
+    background-color: rgba(0,0,0,.025) !important;
+}
+
+tr.highlighted td {
+    background-color: rgba(0,0,0,.025) !important;
+}
+
+/* La fila activa (sobre la que está el mouse) */
+tr:hover {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+tr:hover td {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Transición suave */
+tr, tr td {
+    transition: background-color 0.15s ease;
+}
+
+/* Eliminar todas las reglas duplicadas */
+tr:hover {
+    background-color: transparent !important;
+}
+
+tr:hover td {
+    background-color: transparent !important;
+}
+
+[id^="total-cell-"] {
+    transition: background-color 0.15s ease;
+    background-color: transparent !important;
+}
+
+[id^="total-cell-"].highlighted {
+    background-color: rgba(0,0,0,.075) !important;
 }
 </style>

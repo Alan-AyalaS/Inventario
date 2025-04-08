@@ -2464,3 +2464,27 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<style>
+/* Estilos para la celda total */
+[id^="total-cell-"] {
+    transition: background-color 0.15s ease;
+    background-color: transparent !important;
+    pointer-events: auto !important; /* Permitir eventos del mouse */
+    position: relative;
+    z-index: 1;
+}
+
+[id^="total-cell-"]:hover {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Resaltar el grupo cuando se pasa el mouse sobre la celda total */
+[id^="total-cell-"]:hover ~ tr[class^="total-group-"] {
+    background-color: rgba(0,0,0,.025) !important;
+}
+
+[id^="total-cell-"]:hover ~ tr[class^="total-group-"] td {
+    background-color: rgba(0,0,0,.025) !important;
+}
+</style>

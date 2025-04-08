@@ -1813,6 +1813,10 @@ function highlightTotalGroup(groupId) {
     rows.forEach(row => {
         row.classList.add('highlighted');
     });
+    const totalCell = document.getElementById(`total-cell-${groupId}`);
+    if (totalCell) {
+        totalCell.classList.add('highlighted');
+    }
 }
 
 function unhighlightTotalGroup(groupId) {
@@ -1820,6 +1824,10 @@ function unhighlightTotalGroup(groupId) {
     rows.forEach(row => {
         row.classList.remove('highlighted');
     });
+    const totalCell = document.getElementById(`total-cell-${groupId}`);
+    if (totalCell) {
+        totalCell.classList.remove('highlighted');
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {

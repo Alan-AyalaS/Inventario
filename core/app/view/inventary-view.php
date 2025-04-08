@@ -1920,8 +1920,8 @@ tr:hover td:not([id^="total-cell-"]) {
     position: relative;
     display: flex;
     flex-direction: column;
-    border: 2px solid #6c757d;
-    border-radius: 4px;
+    border: 1px solid rgb(177 183 193);
+    border-radius: 0.375rem;
     background-color: white;
     cursor: pointer;
     z-index: 1000;
@@ -1938,6 +1938,7 @@ button[data-bs-toggle="modal"][data-bs-target^="#debugModal"] {
     align-items: center;
     justify-content: space-between;
     padding: 8px 12px;
+    border-radius: 0.375rem;
     font-size: 14px;
     font-weight: 400;
     color: #000;

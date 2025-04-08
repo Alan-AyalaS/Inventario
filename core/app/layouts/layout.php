@@ -278,6 +278,8 @@ foreach($configs as $conf) {
                     <!-- DEBUG INFO -->
                     <!-- User image in session: <?php echo isset($_SESSION['user_image']) ? $_SESSION['user_image'] : 'not set'; ?> -->
                     <!-- User image path: <?php echo isset($_SESSION['user_image']) && !empty($_SESSION['user_image']) ? 'assets/img/avatars/' . $_SESSION['user_image'] : 'default'; ?> -->
+                    <!-- Image exists: <?php echo file_exists('assets/img/avatars/' . (isset($_SESSION['user_image']) ? $_SESSION['user_image'] : 'default-avatar-icon.jpg')) ? 'true' : 'false'; ?> -->
+                    <!-- Image path: <?php echo 'assets/img/avatars/' . (isset($_SESSION['user_image']) ? $_SESSION['user_image'] : 'default-avatar-icon.jpg'); ?> -->
                     <!-- Session dump: <?php print_r($_SESSION); ?> -->
                     <img class="avatar-img" src="<?php echo isset($_SESSION['user_image']) && !empty($_SESSION['user_image']) ? 'assets/img/avatars/' . $_SESSION['user_image'] : 'assets/img/avatars/default-avatar-icon.jpg'; ?>" alt="<?php echo isset($_SESSION["user_name"]) ? $_SESSION["user_name"] : "Usuario"; ?>">
                   </div>
@@ -303,12 +305,15 @@ foreach($configs as $conf) {
           <nav aria-label="breadcrumb">
             <ol class="breadcrumb my-0 ms-2">
               <li class="breadcrumb-item">
-                <!-- if breadcrumb is single--><span>Home</span>
+                <span>Home</span>
               </li>
               <li class="breadcrumb-item active"><span>Dashboard</span></li>
             </ol>
           </nav>
         </div>
+        <button type="button" class="btn btn-primary" data-coreui-toggle="modal" data-coreui-target="#debugModal">
+            Debug Info
+        </button>
       </header>
       <div class="body flex-grow-1 px-3">
         <div class="container-fluid">
@@ -341,5 +346,33 @@ foreach($configs as $conf) {
       });
     </script>
 
+    <!-- Modal de depuración -->
+    <div class="modal fade" id="debugModal" tabindex="-1" role="dialog" aria-labelledby="debugModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="debugModalLabel">Información de Depuración</h5>
+                    <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <pre><?php 
+                        $debug_info = array(
+                            'user' => array(
+                                'id' => $_SESSION["user_id"],
+                                'name' => $_SESSION["user_name"],
+                                'lastname' => isset($_SESSION["user_lastname"]) ? $_SESSION["user_lastname"] : '',
+                                'image' => isset($_SESSION["user_image"]) ? $_SESSION["user_image"] : 'default-avatar-icon.jpg'
+                            ),
+                            'session' => $_SESSION
+                        );
+                        echo json_encode($debug_info, JSON_PRETTY_PRINT);
+                    ?></pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
   </body>
 </html>

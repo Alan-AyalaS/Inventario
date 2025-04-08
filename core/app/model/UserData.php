@@ -30,8 +30,12 @@ class UserData {
 
 // partiendo de que ya tenemos creado un objecto UserData previamente utilizamos el contexto
 	public function update(){
+		// Debug info
+		echo "<!-- Updating user with image: " . $this->image . " -->";
 		$sql = "update ".self::$tablename." set name=\"$this->name\",email=\"$this->email\",username=\"$this->username\",lastname=\"$this->lastname\",is_active=\"$this->is_active\",is_admin=\"$this->is_admin\",image=\"$this->image\" where id=$this->id";
+		echo "<!-- SQL query: " . $sql . " -->";
 		Executor::doit($sql);
+		echo "<!-- Update completed -->";
 	}
 
 	public function update_passwd(){
@@ -74,7 +78,10 @@ class UserData {
 		$query = Executor::doit($sql);
 		$user = Model::one($query[0],new UserData());
 		// Debug
+		error_log("SQL Query: " . $sql);
+		error_log("Query result: " . json_encode($query[0]));
 		error_log("User image from DB: " . ($user ? $user->image : 'null'));
+		error_log("User object from DB: " . json_encode($user));
 		return $user;
 	}
 

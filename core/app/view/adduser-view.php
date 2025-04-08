@@ -11,6 +11,7 @@ if(count($_POST)>0){
 	$user->email = $_POST["email"];
 	$user->is_admin=$is_admin;
 	$user->password = sha1(md5($_POST["password"]));
+	$user->is_active = isset($_POST["is_active"]) ? 1 : 0;
 	
 	// Procesar la imagen
 	if(isset($_FILES["image"]) && $_FILES["image"]["error"] == 0) {
@@ -29,6 +30,9 @@ if(count($_POST)>0){
 				$user->image = $filename;
 			}
 		}
+	} else {
+		// Asignar imagen por defecto
+		$user->image = "default-avatar-icon.jpg";
 	}
 	
 	try {

@@ -12,23 +12,33 @@ if($user!=null){
 		print_r($user);
 		echo " -->";
 		echo "<!-- User image: " . $user->image . " -->";
+		echo "<!-- User image type: " . gettype($user->image) . " -->";
+		echo "<!-- User image empty: " . (empty($user->image) ? 'true' : 'false') . " -->";
+		echo "<!-- User image null: " . (is_null($user->image) ? 'true' : 'false') . " -->";
 		
 		$_SESSION["user_id"]=$user->id;
 		$_SESSION["user_name"]=$user->name;
-		$_SESSION["user_lastname"]=$user->lastname;
-		$_SESSION["user_image"]=$user->image ? $user->image : 'default-avatar-icon.jpg';
+		$_SESSION["user_lastname"]=$user->lastname ? $user->lastname : '';
+		$_SESSION["user_image"]=$user->image;
 		
 		// Debug session
 		echo "<!-- Session after setting: ";
 		print_r($_SESSION);
 		echo " -->";
 		echo "<!-- Session image: " . $_SESSION["user_image"] . " -->";
+		echo "<!-- Session image type: " . gettype($_SESSION["user_image"]) . " -->";
+		echo "<!-- Session image empty: " . (empty($_SESSION["user_image"]) ? 'true' : 'false') . " -->";
+		echo "<!-- Session image null: " . (is_null($_SESSION["user_image"]) ? 'true' : 'false') . " -->";
 		
-		print "<script>window.location='index.php';</script>";
+		// Redirigir después de mostrar la información de depuración
+		header("Location: index.php");
+		exit();
 	}else{
-		print "<script>window.location='index.php?error=1';</script>";
+		header("Location: index.php?error=1");
+		exit();
 	}
 }else{
-	print "<script>window.location='index.php?error=1';</script>";
+	header("Location: index.php?error=1");
+	exit();
 }
 ?> 

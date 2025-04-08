@@ -20,20 +20,16 @@ if(count($_POST)>0){
 			mkdir($target_dir, 0777, true);
 		}
 		$imageFileType = strtolower(pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION));
-		// Si ya tiene una imagen, mantener el mismo nombre pero con la nueva extensión
-		if($user->image != "") {
-			$filename = pathinfo($user->image, PATHINFO_FILENAME) . "." . $imageFileType;
-		} else {
-			$filename = uniqid() . "." . $imageFileType;
-		}
+		// Generar un nombre único para la nueva imagen
+		$filename = uniqid() . "." . $imageFileType;
 		$target_file = $target_dir . $filename;
 		
 		// Verificar si es una imagen real
 		$check = getimagesize($_FILES["image"]["tmp_name"]);
 		if($check !== false) {
 			if(move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-				// Eliminar la imagen anterior si existe y tiene diferente nombre
-				if($user->image != "" && $user->image != $filename && file_exists($target_dir . $user->image)) {
+				// Eliminar la imagen anterior si existe y no es la imagen por defecto
+				if($user->image != "" && $user->image != "default-avatar-icon.jpg" && file_exists($target_dir . $user->image)) {
 					unlink($target_dir . $user->image);
 				}
 				$user->image = $filename;
@@ -46,6 +42,9 @@ if(count($_POST)>0){
 	// Actualizar la imagen en la sesión si es el usuario actual
 	if($user->id == $_SESSION["user_id"]) {
 		$_SESSION["user_image"] = $user->image;
+		// Debug info
+		echo "<!-- Updated session image: " . $_SESSION["user_image"] . " -->";
+		echo "<!-- User image: " . $user->image . " -->";
 	}
 
 	if($_POST["password"]!=""){

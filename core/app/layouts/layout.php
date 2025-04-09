@@ -356,49 +356,34 @@ if(isset($_SESSION["user_id"])) {
     <script src="vendors/@coreui/utils/js/coreui-utils.js"></script>
     <script src="assets/js/main.js"></script>
     <script>
-    console.log('Script iniciado');
+    // ======================================================
+    // IMPORTANTE: CÓDIGO PROTEGIDO - NO MODIFICAR SIN AUTORIZACIÓN
+    // Este código maneja la funcionalidad del sidebar y su estado persistente.
+    // Cualquier modificación debe ser aprobada por el usuario.
+    // Última modificación: Implementación del estado persistente del sidebar
+    // ======================================================
     
     function initializeSidebar() {
-        console.log('Inicializando sidebar...');
-        
         const sidebar = document.getElementById('sidebar');
-        console.log('Sidebar encontrado:', sidebar);
-        
         const sidebarState = localStorage.getItem('sidebarState');
-        console.log('Estado guardado en localStorage:', sidebarState);
-        
-        // Obtener la instancia del sidebar de CoreUI
         const sidebarInstance = coreui.Sidebar.getInstance(sidebar);
-        console.log('Instancia del sidebar:', sidebarInstance);
         
         // Verificar el estado actual del sidebar
         const isNarrow = sidebar.classList.contains('sidebar-narrow-unfoldable');
-        console.log('¿Sidebar está plegado?', isNarrow);
-        console.log('Clases actuales del sidebar:', sidebar.classList.toString());
         
         // Aplicar el estado guardado
         if (sidebarState === 'collapsed' && !isNarrow) {
-            console.log('Aplicando estado colapsado');
             sidebarInstance.toggleUnfoldable();
-            console.log('Después de toggleUnfoldable() - Clases:', sidebar.classList.toString());
         } else if (sidebarState === 'expanded' && isNarrow) {
-            console.log('Aplicando estado expandido');
             sidebarInstance.toggleUnfoldable();
-            console.log('Después de toggleUnfoldable() - Clases:', sidebar.classList.toString());
         }
 
         // Escuchar cambios en las clases del sidebar
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                    console.log('Cambio en clases detectado');
                     const isNowNarrow = sidebar.classList.contains('sidebar-narrow-unfoldable');
-                    console.log('Nuevas clases:', sidebar.classList.toString());
-                    console.log('¿Sidebar está plegado?', isNowNarrow);
-                    
-                    // Actualizar el estado en localStorage
                     localStorage.setItem('sidebarState', isNowNarrow ? 'collapsed' : 'expanded');
-                    console.log('Nuevo estado guardado:', localStorage.getItem('sidebarState'));
                 }
             });
         });
@@ -411,12 +396,10 @@ if(isset($_SESSION["user_id"])) {
 
     // Esperar a que CoreUI esté completamente cargado
     if (typeof coreui !== 'undefined') {
-        console.log('CoreUI está disponible, inicializando sidebar...');
         setTimeout(initializeSidebar, 100);
     }
 
     window.addEventListener('load', function() {
-        console.log('Página completamente cargada');
         if (typeof coreui !== 'undefined') {
             setTimeout(initializeSidebar, 200);
         }

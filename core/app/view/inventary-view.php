@@ -1354,18 +1354,10 @@ function updateClearFiltersButton() {
 
     // Obtener valores actuales
     const searchTerm = document.getElementById('search').value.trim();
-        const categoryId = document.getElementById('category_id').value;
-        const availability = document.getElementById('availability').value;
+    const categoryId = document.getElementById('category_id').value;
+    const availability = document.getElementById('availability').value;
     const size = document.getElementById('size').value;
-        const dateFilter = document.getElementById('date_filter').value;
-        
-    console.log('Valores actuales:', {
-        searchTerm,
-        categoryId,
-        availability,
-        size,
-        dateFilter
-    });
+    const dateFilter = document.getElementById('date_filter').value;
     
     // Verificar si hay algún filtro activo
     const hasActiveFilters = 
@@ -1374,12 +1366,9 @@ function updateClearFiltersButton() {
         availability !== '' || // No es "Todas las cantidades"
         size !== '' || // No es "Todas las tallas"
         dateFilter !== ''; // No es "Todas las fechas"
-
-    console.log('¿Hay filtros activos?', hasActiveFilters);
     
     // Mostrar u ocultar el botón
     clearFiltersBtn.style.display = hasActiveFilters ? '' : 'none';
-    console.log('Estado del botón:', clearFiltersBtn.style.display);
 }
 
 // Función para limpiar filtros

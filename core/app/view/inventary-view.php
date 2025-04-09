@@ -411,11 +411,6 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
 
 <!-- Botón para eliminar seleccionados -->
 <div class="row mt-3">
-    <div class="col-md-12">
-        <button type="button" class="btn btn-danger" id="deleteSelected" disabled style="margin-bottom: 15px;">
-            <i class="fas fa-trash"></i> Eliminar seleccionados
-        </button>
-    </div>
 </div>
 
 <!-- Modal para ajustar inventario -->
@@ -1404,6 +1399,7 @@ function clearFilters() {
     url.searchParams.delete('date_filter');
     url.searchParams.delete('search');
     url.searchParams.delete('page');
+    url.searchParams.delete('jerseyType'); // Agregar esta línea para limpiar el tipo de jersey
     
     // Mantener el filtro "Mostrar"
     if (currentLimit) {
@@ -2594,5 +2590,20 @@ $(document).ready(function() {
             $('#jerseyType').hide();
         }
     }).trigger('change'); // Trigger change to set initial state
+});
+</script>
+
+<script>
+document.getElementById('tipoJersey').addEventListener('change', function() {
+    this.form.submit();
+});
+</script>
+
+
+<script>
+document.getElementById('jerseyType').addEventListener('change', function() {
+    const url = new URL(window.location.href);
+    url.searchParams.set('jerseyType', this.value);
+    window.location.href = url.toString();
 });
 </script>

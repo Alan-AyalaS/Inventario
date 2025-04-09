@@ -73,6 +73,17 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
 	$products = $filtered_products;
 }
 
+// Filtrar por tipo de jersey si está seleccionado
+if(isset($_GET["jerseyType"]) && $_GET["jerseyType"] != "") {
+    $filtered_products = [];
+    foreach($products as $product) {
+        if($product->jersey_type == $_GET["jerseyType"]) {
+            $filtered_products[] = $product;
+        }
+    }
+    $products = $filtered_products;
+}
+
 // Obtener la categoría seleccionada
 $selected_category = isset($_GET["category_id"]) ? $_GET["category_id"] : "";
 $selected_category_name = "";
@@ -385,6 +396,15 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
         <?php echo $order == 'desc' ? 'Ascendente' : 'Descendente'; ?>
                 </a>
                 </div>
+        </div>
+        <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
+            <label for="jerseyType" class="me-2">Tipo de Jersey:</label>
+            <select id="jerseyType" name="jerseyType" class="form-control">
+                <option value="">Todos</option>
+                <option value="adulto">Adulto</option>
+                <option value="nino">Niño</option>
+                <option value="dama">Dama</option>
+            </select>
         </div>
     </div>
         <!-- ===== FIN DE SECCIÓN PROTEGIDA ===== -->
@@ -2563,3 +2583,16 @@ document.addEventListener('DOMContentLoaded', function() {
     background-color: rgba(0,0,0,.025) !important;
 }
 </style>
+
+<script>
+$(document).ready(function() {
+    $('#category_id').change(function() {
+        var selectedCategory = $(this).find('option:selected').text().trim().toLowerCase();
+        if (selectedCategory === 'jersey') {
+            $('#jerseyType').show();
+        } else {
+            $('#jerseyType').hide();
+        }
+    }).trigger('change'); // Trigger change to set initial state
+});
+</script>

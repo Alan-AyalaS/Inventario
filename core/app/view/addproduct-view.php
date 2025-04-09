@@ -36,14 +36,6 @@ if(count($_POST)>0){
         'XL' => $_POST["talla_xl"],
         'XXL' => $_POST["talla_xxl"]
       ];
-    } else if($tipoJersey === 'dama') {
-      $tallas = [
-        'S' => $_POST["talla_s_dama"],
-        'M' => $_POST["talla_m_dama"],
-        'L' => $_POST["talla_l_dama"],
-        'XL' => $_POST["talla_xl_dama"],
-        'XXL' => $_POST["talla_xxl_dama"]
-      ];
     } else {
       $tallas = [
         '16' => $_POST["talla_16"],
@@ -55,6 +47,7 @@ if(count($_POST)>0){
         '28' => $_POST["talla_28"]
       ];
     }
+    $product->jersey_type = $tipoJersey;
   } elseif($categoryName === 'tenis') {
     $tallas = [
       '6' => $_POST["talla_6"],

@@ -21,6 +21,8 @@ if(count($_POST)>0){
   $product->is_active=$is_active;
   $product->category_id=$category_id;
 
+  $product->jersey_type = $_POST["tipo_jersey"];
+
 	$product->user_id = $_SESSION["user_id"];
 	$product->update();
 

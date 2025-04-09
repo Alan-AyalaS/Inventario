@@ -337,9 +337,6 @@ if(isset($_SESSION["user_id"])) {
             </ol>
           </nav>
         </div>
-        <button type="button" class="btn btn-primary" data-coreui-toggle="modal" data-coreui-target="#debugModal">
-            Debug Info
-        </button>
       </header>
       <div class="body flex-grow-1 px-3">
         <div class="container-fluid">

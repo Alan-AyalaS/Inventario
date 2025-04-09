@@ -52,6 +52,7 @@ if(isset($_POST['name']) && isset($_POST['lastname']) && isset($_POST['username'
 	}
 
 	$user->update();
+	$_SESSION['success'] = "Perfil actualizado correctamente";
 }
 
 Core::redir("./index.php?view=users");

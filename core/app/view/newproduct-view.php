@@ -145,16 +145,36 @@ $categories = CategoryData::getAll();
       <div class="col-md-6">
         <div class="row">
           <div class="col-md-2">
-            <label>6</label>
-            <input type="number" name="talla_6" class="form-control" min="0" value="0">
+            <label>23.5</label>
+            <input type="number" name="talla_23_5" class="form-control" min="0" value="0">
           </div>
           <div class="col-md-2">
-            <label>8</label>
-            <input type="number" name="talla_8" class="form-control" min="0" value="0">
+            <label>24</label>
+            <input type="number" name="talla_24" class="form-control" min="0" value="0">
           </div>
           <div class="col-md-2">
-            <label>9</label>
-            <input type="number" name="talla_9" class="form-control" min="0" value="0">
+            <label>24.5</label>
+            <input type="number" name="talla_24_5" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>25</label>
+            <input type="number" name="talla_25" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>25.5</label>
+            <input type="number" name="talla_25_5" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>26</label>
+            <input type="number" name="talla_26" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>26.5</label>
+            <input type="number" name="talla_26_5" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>27</label>
+            <input type="number" name="talla_27" class="form-control" min="0" value="0">
           </div>
         </div>
       </div>
@@ -260,22 +280,22 @@ $categories = CategoryData::getAll();
 $(document).ready(function(){
     // Función para manejar el cambio de categoría
     $('#categorySelect').change(function(){
-        var categoria = $(this).find('option:selected').text().trim().toLowerCase();
-        console.log('Categoría seleccionada:', categoria); // Para depuración
+        var selectedCategory = $(this).find('option:selected').text().trim().toLowerCase();
+        console.log('Categoría seleccionada:', selectedCategory); // Para depuración
         
-        if(categoria === 'jersey') {
+        if(selectedCategory === 'jersey') {
             $('#tallasContainer').show();
             $('#tipoJersey').show();
             $('#tallasAdulto').show();
             $('#tallasNino, #tallasTenis, #tallaUnica, #tallasDama').hide();
             $('#inventarioInicialContainer').hide();
-        } else if(categoria === 'tenis') {
+        } else if(selectedCategory === 'tenis') {
             $('#tallasContainer').show();
             $('#tipoJersey').hide();
             $('#tallasTenis').show();
             $('#tallasAdulto, #tallasNino, #tallaUnica, #tallasDama').hide();
             $('#inventarioInicialContainer').hide();
-        } else if(categoria === 'gorra' || categoria === 'gorras' || categoria === 'variado' || categoria === 'balón' || categoria === 'balon') {
+        } else if(selectedCategory === 'gorra' || selectedCategory === 'gorras' || selectedCategory === 'variado' || selectedCategory === 'balón' || selectedCategory === 'balon') {
             $('#tallasContainer').hide();
             $('#tipoJersey, #tallasAdulto, #tallasNino, #tallasTenis, #tallaUnica, #tallasDama').hide();
             $('#inventarioInicialContainer').show();
@@ -305,5 +325,15 @@ $(document).ready(function(){
             console.log(e.which);
         }
     });
+
+    // Ocultar el texto de 'Tipo de Jersey' para la categoría 'Tenis'
+    $('#categorySelect').change(function() {
+        var selectedCategory = $(this).find('option:selected').text().trim().toLowerCase();
+        if (selectedCategory === 'tenis') {
+            $('#tipoJersey').closest('.form-group').hide();
+        } else {
+            $('#tipoJersey').closest('.form-group').show();
+        }
+    }).trigger('change');
 });
 </script>

@@ -54,9 +54,14 @@ if(count($_POST)>0){
     $product->jersey_type = $tipoJersey;
   } elseif($categoryName === 'tenis') {
     $tallas = [
-      '6' => $_POST["talla_6"],
-      '8' => $_POST["talla_8"],
-      '9' => $_POST["talla_9"]
+      '23.5' => $_POST["talla_23_5"],
+      '24' => $_POST["talla_24"],
+      '24.5' => $_POST["talla_24_5"],
+      '25' => $_POST["talla_25"],
+      '25.5' => $_POST["talla_25_5"],
+      '26' => $_POST["talla_26"],
+      '26.5' => $_POST["talla_26_5"],
+      '27' => $_POST["talla_27"]
     ];
   } elseif(in_array($categoryName, ['gorras', 'gorra', 'variado', 'balón', 'balon'])) {
     $tallas = ['unitalla' => $_POST["inventario_inicial"]];

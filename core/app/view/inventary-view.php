@@ -104,12 +104,12 @@ if($selected_category != "") {
 $available_sizes = [];
 if($selected_category_name == "Jersey") {
     $available_sizes = [
-        "adulto" => ["S", "M", "L", "XL", "XXL"],
+        "adulto" => ["S", "M", "L", "XL", "XXL", "3XL", "4XL", "6XL", "8XL"],
         "niño" => ["16", "18", "20", "22", "24", "26", "28"]
     ];
 } elseif($selected_category_name == "Tenis") {
     $available_sizes = [
-        "tenis" => ["6", "7", "8", "9"]
+        "tenis" => ["23.5", "24", "24.5", "25", "25.5", "26", "26.5", "27"]
     ];
 } elseif($selected_category_name == "Variado") {
     // Para la categoría Variado, mostrar todas las tallas disponibles
@@ -123,9 +123,9 @@ if($selected_category_name == "Jersey") {
 } else {
     // Cuando no hay categoría seleccionada, mostrar todas las tallas agrupadas
     $available_sizes = [
-        "adulto" => ["S", "M", "L", "XL", "XXL"],
+        "adulto" => ["S", "M", "L", "XL", "XXL", "3XL", "4XL", "6XL", "8XL"],
         "niño" => ["16", "18", "20", "22", "24", "26", "28"],
-        "tenis" => ["6", "7", "8", "9"]
+        "tenis" => ["23.5", "24", "24.5", "25", "25.5", "26", "26.5", "27"]
     ];
 }
 ?>

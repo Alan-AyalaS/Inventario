@@ -147,6 +147,12 @@ $user = UserData::getById($_SESSION["user_id"]);
             </div>
             <div class="modal-body">
                 <div id="passwordErrorMessage" class="alert alert-danger" style="display: none;"></div>
+                <div class="alert alert-info">
+                    <i class="cil-info-circle me-2"></i>
+                    <strong>Nota importante:</strong> Después de hacer clic en "Guardar Cambios", por favor recarga la página manualmente. 
+                    Si aparece un mensaje de éxito en la parte superior, significa que tu contraseña se actualizó correctamente. 
+                    En caso de no ver ningún mensaje, significa que la contraseña actual ingresada es incorrecta.
+                </div>
                 <form id="changePasswordForm">
                     <div class="row">
                         <div class="col-md-12">
@@ -379,26 +385,32 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Script para el modal de cambiar contraseña
 document.addEventListener('DOMContentLoaded', function() {
+    // Script para el modal de cambiar contraseña
     const changePasswordForm = document.getElementById('changePasswordForm');
     const changePasswordModal = document.getElementById('changePasswordModal');
     const passwordErrorMessage = document.getElementById('passwordErrorMessage');
     const savePasswordBtn = document.getElementById('savePasswordBtn');
     const changePasswordBtn = document.querySelector('button[data-bs-target="#changePasswordModal"]');
 
-    // Asegurarse de que el botón de cambiar contraseña funcione
-    if (changePasswordBtn) {
-        changePasswordBtn.addEventListener('click', function() {
-            const modal = coreui.Modal.getInstance(changePasswordModal);
-            if (!modal) {
-                new coreui.Modal(changePasswordModal).show();
-            } else {
-                modal.show();
-            }
-        });
+    if (!changePasswordForm || !changePasswordModal || !savePasswordBtn || !changePasswordBtn) {
+        console.error('Elementos del modal de cambiar contraseña no encontrados');
+        return;
     }
 
-    savePasswordBtn.addEventListener('click', function() {
+    // Asegurarse de que el botón de cambiar contraseña funcione
+    changePasswordBtn.addEventListener('click', function() {
+        const modal = coreui.Modal.getInstance(changePasswordModal);
+        if (!modal) {
+            new coreui.Modal(changePasswordModal).show();
+        } else {
+            modal.show();
+        }
+    });
+
+    // Función para manejar el envío del formulario
+    function handlePasswordChange() {
         const currentPassword = document.getElementById('current_password').value;
         const newPassword = document.getElementById('new_password').value;
         const confirmPassword = document.getElementById('confirm_password').value;
@@ -418,28 +430,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Enviar el formulario
         const formData = new FormData(changePasswordForm);
+        
         fetch('index.php?view=updateuser', {
             method: 'POST',
             body: formData
         })
         .then(response => response.text())
         .then(data => {
-            if (data.includes('La contraseña actual no es correcta')) {
-                passwordErrorMessage.style.display = 'block';
-                passwordErrorMessage.textContent = 'La contraseña actual no es correcta';
-            } else if (data.includes('success')) {
-                const modal = coreui.Modal.getInstance(changePasswordModal);
-                if (modal) {
-                    modal.hide();
-                }
-                window.location.reload();
+            if (data.includes('success')) {
+                window.location.href = window.location.pathname;
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            passwordErrorMessage.style.display = 'block';
-            passwordErrorMessage.textContent = 'Error al guardar los cambios';
         });
+    }
+
+    // Event listeners
+    savePasswordBtn.addEventListener('click', handlePasswordChange);
+    changePasswordForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        handlePasswordChange();
     });
 
     // Limpiar mensaje de error cuando se cierra el modal

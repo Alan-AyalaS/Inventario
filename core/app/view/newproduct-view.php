@@ -52,6 +52,7 @@ $categories = CategoryData::getAll();
         <select name="tipo_jersey" class="form-control" id="tipoJersey">
           <option value="adulto">Adulto</option>
           <option value="nino">Niño</option>
+          <option value="dama">Dama</option>
         </select>
       </div>
     </div>
@@ -143,6 +144,35 @@ $categories = CategoryData::getAll();
       </div>
     </div>
 
+    <!-- Tallas para Dama -->
+    <div id="tallasDama" class="form-group" style="display: none;">
+      <label class="col-lg-2 control-label">Tallas Dama</label>
+      <div class="col-md-6">
+        <div class="row">
+          <div class="col-md-2">
+            <label>S</label>
+            <input type="number" name="talla_s_dama" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>M</label>
+            <input type="number" name="talla_m_dama" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>L</label>
+            <input type="number" name="talla_l_dama" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>XL</label>
+            <input type="number" name="talla_xl_dama" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>XXL</label>
+            <input type="number" name="talla_xxl_dama" class="form-control" min="0" value="0">
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Talla única para Gorras y Variado -->
     <div id="tallaUnica" class="form-group" style="display: none;">
       <label class="col-lg-2 control-label">Talla única</label>
@@ -221,22 +251,18 @@ $(document).ready(function(){
             $('#tallasContainer').show();
             $('#tipoJersey').show();
             $('#tallasAdulto').show();
-            $('#tallasNino, #tallasTenis, #tallaUnica').hide();
+            $('#tallasNino, #tallasTenis, #tallaUnica, #tallasDama').hide();
             $('#inventarioInicialContainer').hide();
         } else if(categoria === 'tenis') {
             $('#tallasContainer').show();
             $('#tipoJersey').hide();
             $('#tallasTenis').show();
-            $('#tallasAdulto, #tallasNino, #tallaUnica').hide();
+            $('#tallasAdulto, #tallasNino, #tallaUnica, #tallasDama').hide();
             $('#inventarioInicialContainer').hide();
         } else if(categoria === 'gorra' || categoria === 'gorras' || categoria === 'variado' || categoria === 'balón' || categoria === 'balon') {
             $('#tallasContainer').hide();
-            $('#tipoJersey, #tallasAdulto, #tallasNino, #tallasTenis, #tallaUnica').hide();
+            $('#tipoJersey, #tallasAdulto, #tallasNino, #tallasTenis, #tallaUnica, #tallasDama').hide();
             $('#inventarioInicialContainer').show();
-        } else {
-            $('#tallasContainer').hide();
-            $('#tipoJersey, #tallasAdulto, #tallasNino, #tallasTenis, #tallaUnica').hide();
-            $('#inventarioInicialContainer').hide();
         }
     });
 
@@ -245,10 +271,13 @@ $(document).ready(function(){
         var tipo = $(this).val();
         if(tipo === 'adulto') {
             $('#tallasAdulto').show();
-            $('#tallasNino').hide();
+            $('#tallasNino, #tallasDama').hide();
+        } else if(tipo === 'dama') {
+            $('#tallasDama').show();
+            $('#tallasAdulto, #tallasNino').hide();
         } else {
-            $('#tallasAdulto').hide();
             $('#tallasNino').show();
+            $('#tallasAdulto, #tallasDama').hide();
         }
     });
 

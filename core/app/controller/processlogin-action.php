@@ -1,47 +1,29 @@
 <?php
 session_start();
+require_once("core/app/model/UserData.php");
 
-$user = UserData::getByMail($_POST["username"]);
-if($user==null){
+if(isset($_POST["username"]) && isset($_POST["password"])){
 	$user = UserData::getByUsername($_POST["username"]);
-}
-if($user!=null){
-	if($user->password==sha1(md5($_POST["password"]))){
-		// Debug info
-		echo "<!-- DEBUG INFO -->\n";
-		echo "<!-- User object dump: ";
-		print_r($user);
-		echo " -->\n";
-		echo "<!-- User image from DB: " . $user->image . " -->\n";
-		echo "<!-- User image type: " . gettype($user->image) . " -->\n";
-		echo "<!-- User image empty: " . (empty($user->image) ? 'true' : 'false') . " -->\n";
-		
-		$_SESSION["user_id"]=$user->id;
-		$_SESSION["user_name"]=$user->name;
-		$_SESSION["user_lastname"]=$user->lastname ? $user->lastname : '';
-		
-		// Asegurarse de que la imagen se guarde en la sesión
-		if(!empty($user->image)) {
-			$_SESSION["user_image"] = $user->image;
+	if($user!=null && $user->is_active){
+		if(password_verify($_POST["password"], $user->password)){
+			$_SESSION["user_id"]=$user->id;
+			$_SESSION["user_name"]=$user->username;
+			$_SESSION["user_image"]=$user->image;
+			$_SESSION["is_admin"]=$user->is_admin;
+			$_SESSION["user_lastname"]=$user->lastname;
+			$_SESSION["user_fullname"]=$user->name." ".$user->lastname;
+			$_SESSION["user_email"]=$user->email;
+			Core::redir("./");
 		} else {
-			$_SESSION["user_image"] = "default-avatar-icon.jpg";
+			$_SESSION["login_error"] = "Error: Contraseña incorrecta.";
+			Core::redir("./?view=login");
 		}
-		
-		// Debug session
-		echo "<!-- Session after setting: ";
-		print_r($_SESSION);
-		echo " -->\n";
-		echo "<!-- Session image: " . $_SESSION["user_image"] . " -->\n";
-		
-		// Redirigir después de mostrar la información de depuración
-		header("Location: index.php");
-		exit();
-	}else{
-		header("Location: index.php?error=1");
-		exit();
+	} else {
+		$_SESSION["login_error"] = "Error: Usuario no encontrado o inactivo.";
+		Core::redir("./?view=login");
 	}
-}else{
-	header("Location: index.php?error=1");
-	exit();
+} else {
+	$_SESSION["login_error"] = "Error: Datos incompletos.";
+	Core::redir("./?view=login");
 }
 ?> 

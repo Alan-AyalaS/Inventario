@@ -10,7 +10,7 @@ if(count($_POST)>0){
 	$user->username = $_POST["username"];
 	$user->email = $_POST["email"];
 	$user->is_admin=$is_admin;
-	$user->password = sha1(md5($_POST["password"]));
+	$user->password = password_hash($_POST["password"], PASSWORD_DEFAULT);
 	$user->is_active = isset($_POST["is_active"]) ? 1 : 0;
 	
 	// Procesar la imagen

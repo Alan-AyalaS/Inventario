@@ -15,27 +15,40 @@ if(count($_POST)>0 && isset($_POST["user_id"])){
 		$password_updated = false;
 		$password_error = null;
 
-		// 2. Procesar cambio de contraseña (si se proporcionó la nueva)
+		// 2. PROCESAR CAMBIO DE CONTRASEÑA
+		
+		// ESCENARIO A: Cambio desde el modal de perfil (requiere actual y confirmación)
 		if(isset($_POST["new_password"]) && $_POST["new_password"] != "") {
-			// Verificar que la contraseña actual y la confirmación también se enviaron
 			if (isset($_POST["current_password"]) && $_POST["current_password"] != "" && isset($_POST["confirm_password"])) {
-				// Verificar que la contraseña actual sea correcta
+				$current_password_matches = false;
+				// Verificar actual con verify
 				if (password_verify($_POST["current_password"], $user->password)) {
-					// Verificar que la nueva contraseña y la confirmación coincidan
+					$current_password_matches = true;
+				}
+				// Verificar actual con sha1(md5) para migración
+				else if ($user->password == sha1(md5($_POST["current_password"])) ) {
+					$current_password_matches = true;
+				}
+				
+				if ($current_password_matches) {
 					if ($_POST["new_password"] == $_POST["confirm_password"]) {
-						// Hashear la nueva contraseña
 						$user->password = password_hash($_POST["new_password"], PASSWORD_DEFAULT);
 						$password_updated = true;
 					} else {
-						$password_error = "La nueva contraseña y la confirmación no coinciden.";
+						$password_error = "La nueva contraseña y la confirmación no coinciden (desde perfil).";
 					}
 				} else {
-					$password_error = "La contraseña actual introducida es incorrecta.";
+					$password_error = "La contraseña actual introducida es incorrecta (desde perfil).";
 				}
 			} else {
-				 $password_error = "Debes introducir la contraseña actual y confirmar la nueva para cambiarla.";
+				 $password_error = "Debes introducir la contraseña actual y confirmar la nueva para cambiarla (desde perfil).";
 			}
 		}
+		// ESCENARIO B: Cambio desde la edición de admin (no requiere verificación de contraseña actual)
+		if(isset($_POST["password"]) && !empty($_POST["password"])){
+			$user->password = password_hash($_POST["password"], PASSWORD_DEFAULT);
+		}
+		// NOTA: Si ni new_password ni password están seteados o están vacíos, no se hace nada con la contraseña.
 
 		// 3. Procesar la imagen (si se subió una nueva)
 		if(isset($_FILES["image"]) && $_FILES["image"]["error"] == 0) {
@@ -71,7 +84,7 @@ if(count($_POST)>0 && isset($_POST["user_id"])){
 
 		// 4. Guardar los cambios en la BD (solo si no hubo error de contraseña)
 		if ($password_error === null) {
-			 $user->update(); // Este método debería guardar todos los campos actualizados
+			 $user->update();
 			 
 			 // Actualizar la imagen y nombre en la sesión si es el usuario actual
 			 if($user->id == $_SESSION["user_id"]) {
@@ -83,12 +96,11 @@ if(count($_POST)>0 && isset($_POST["user_id"])){
 				 $_SESSION["user_update_success"] = "Usuario actualizado correctamente.";
 			 }
 			 
-			 // Redirigir a la vista de perfil si es el usuario actual
-			 if($user->id == $_SESSION["user_id"]) {
-				 Core::redir("./?view=profile");
-			 } else {
-				 // Redirigir a la lista si fue un admin editando
+			 // Redirigir según el origen
+			 if(isset($_POST["is_admin_edit"]) && $_POST["is_admin_edit"] == "true"){
 				 Core::redir("./?view=users");
+			 }else{
+				 Core::redir("./?view=profile");
 			 }
 
 		} else {

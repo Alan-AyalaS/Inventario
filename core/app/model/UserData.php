@@ -30,14 +30,22 @@ class UserData {
 
 // partiendo de que ya tenemos creado un objecto UserData previamente utilizamos el contexto
 	public function update(){
-		// Debug info
-		echo "<!-- Updating user with image: " . $this->image . " -->";
-		$sql = "update ".self::$tablename." set name=\"$this->name\",email=\"$this->email\",username=\"$this->username\",lastname=\"$this->lastname\",is_active=\"$this->is_active\",is_admin=\"$this->is_admin\",image=\"$this->image\" where id=$this->id";
-		echo "<!-- SQL query: " . $sql . " -->";
+		$sql = "update ".self::$tablename." set ";
+		$sql .= "name=\"$this->name\", ";
+		$sql .= "lastname=\"$this->lastname\", ";
+		$sql .= "username=\"$this->username\", ";
+		$sql .= "email=\"$this->email\", ";
+		$sql .= "image=\"$this->image\", "; 
+		$sql .= "is_active=\"$this->is_active\", ";
+		$sql .= "is_admin=\"$this->is_admin\", ";
+		$sql .= "password=\"$this->password\" "; 
+		$sql .= " where id=$this->id";
+		
 		Executor::doit($sql);
-		echo "<!-- Update completed -->";
 	}
 
+	// Este método ya no es estrictamente necesario si update() maneja la contraseña,
+	// pero lo dejamos por si se usa en otro lugar. Considerar refactorizar.
 	public function update_passwd(){
 		$sql = "update ".self::$tablename." set password=\"$this->password\" where id=$this->id";
 		Executor::doit($sql);

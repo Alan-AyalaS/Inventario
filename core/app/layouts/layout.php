@@ -138,13 +138,21 @@ if(isset($_SESSION["user_id"])) {
 </div>
 <?php else:?>
     <div class="sidebar sidebar-dark sidebar-fixed" id="sidebar">
-      <button class="sidebar-toggler" type="button" data-coreui-toggle="unfoldable"></button>
       <div class="sidebar-brand d-none d-md-flex">
         <div class="sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
-          <h4><a href="./" style="color: white;"><?php echo $system_title; ?></a></h4>
+          <div class="d-flex align-items-center justify-content-between w-100 h-100" style="cursor: pointer; position: relative; z-index: 1; padding: 0 15px;" data-coreui-toggle="unfoldable">
+            <div style="flex: 1; display: flex; align-items: center; pointer-events: none;">
+              <h4 style="color: white; margin: 0; padding: 0;"><?php echo $system_title; ?></h4>
+            </div>
+            <div style="display: flex; align-items: center; pointer-events: none;">
+              <svg class="icon icon-lg" style="margin-left: 10px;">
+                <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-menu"></use>
+              </svg>
+            </div>
+          </div>
         </div>
         <div class="sidebar-brand-narrow" width="46" height="46" alt="CoreUI Logo">
-          <h4><a href="./" style="color: white;"><?php echo substr($system_title, 0, 1); ?><b><?php echo substr($system_title, -1); ?></b></a></h4>
+          <h4 style="color: white;"><?php echo substr($system_title, 0, 1); ?><b><?php echo substr($system_title, -1); ?></b></h4>
         </div>
       </div>
 

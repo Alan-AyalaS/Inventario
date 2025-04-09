@@ -411,6 +411,11 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
 
 <!-- Botón para eliminar seleccionados -->
 <div class="row mt-3">
+    <div class="col-md-12">
+        <button type="button" class="btn btn-danger" id="deleteSelected" disabled style="margin-bottom: 15px;">
+            <i class="fas fa-trash"></i> Eliminar seleccionados
+        </button>
+    </div>
 </div>
 
 <!-- Modal para ajustar inventario -->

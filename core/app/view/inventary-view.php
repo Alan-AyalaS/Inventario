@@ -73,11 +73,15 @@ if(isset($_GET["availability"]) && $_GET["availability"] != "") {
 	$products = $filtered_products;
 }
 
-// Filtrar por tipo de jersey si está seleccionado
+// Filtrar por tipo de jersey si está seleccionado y no es 'Todos'
 if(isset($_GET["jerseyType"]) && $_GET["jerseyType"] != "") {
     $filtered_products = [];
     foreach($products as $product) {
-        if($product->jersey_type == $_GET["jerseyType"]) {
+        $jerseyType = $product->jersey_type;
+        if ($jerseyType == 'nino') {
+            $jerseyType = 'niño';
+        }
+        if($_GET["jerseyType"] == "" || $jerseyType == $_GET["jerseyType"]) {
             $filtered_products[] = $product;
         }
     }
@@ -400,10 +404,10 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
         <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
             <label for="jerseyType" class="me-2">Tipo de Jersey:</label>
             <select id="jerseyType" name="jerseyType" class="form-control">
-                <option value="">Todos</option>
-                <option value="adulto">Adulto</option>
-                <option value="nino">Niño</option>
-                <option value="dama">Dama</option>
+                <option value="" <?php echo (!isset($_GET["jerseyType"]) || $_GET["jerseyType"] == "") ? 'selected' : ''; ?>>Todos</option>
+                <option value="adulto" <?php echo (isset($_GET["jerseyType"]) && $_GET["jerseyType"] == "adulto") ? 'selected' : ''; ?>>Adulto</option>
+                <option value="niño" <?php echo (isset($_GET["jerseyType"]) && $_GET["jerseyType"] == "niño") ? 'selected' : ''; ?>>Niño</option>
+                <option value="dama" <?php echo (isset($_GET["jerseyType"]) && $_GET["jerseyType"] == "dama") ? 'selected' : ''; ?>>Dama</option>
             </select>
         </div>
     </div>
@@ -747,6 +751,25 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
 							<span class="badge" style="background-color: <?php echo $categoryColor; ?>; color: white; padding: 5px 10px; border-radius: 4px;" data-category-id="<?php echo $product->category_id; ?>">
 								<?php echo htmlspecialchars($categoryName); ?>
 							</span>
+							<?php if ($product->category_id == 1 && $categoryName == 'Jersey'): ?>
+								<?php
+								$jerseyColor = '#28a745'; // Verde por defecto para adulto
+								if ($product->jersey_type == 'niño' || $product->jersey_type == 'nino') {
+									$jerseyColor = '#007bff'; // Azul para niño
+								} elseif ($product->jersey_type == 'dama') {
+									$jerseyColor = '#ff69b4'; // Rosa para dama
+								}
+								?>
+								<?php
+								$jerseyTypeDisplay = $product->jersey_type;
+								if ($jerseyTypeDisplay == 'nino') {
+									$jerseyTypeDisplay = 'niño';
+								}
+								?>
+								<span class="badge" style="background-color: <?php echo $jerseyColor; ?>; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px;">
+									<?php echo htmlspecialchars($jerseyTypeDisplay); ?>
+								</span>
+							<?php endif; ?>
 						</td>
 						<td><?php echo $product->price_in; ?></td>
 						<td><?php echo $product->price_out; ?></td>

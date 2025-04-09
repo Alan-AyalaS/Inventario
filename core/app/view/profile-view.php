@@ -5,6 +5,15 @@ $user = UserData::getById($_SESSION["user_id"]);
     <div class="col-md-12">
         <h1>Mi Perfil</h1>
         <br>
+        <!-- Mensaje de confirmación -->
+        <?php if(isset($_SESSION["success"])): ?>
+            <div class="alert alert-success">
+                <?php 
+                    echo $_SESSION["success"];
+                    unset($_SESSION["success"]);
+                ?>
+            </div>
+        <?php endif; ?>
         <div class="card">
             <div class="card-header">
                 INFORMACIÓN DEL PERFIL
@@ -16,6 +25,9 @@ $user = UserData::getById($_SESSION["user_id"]);
                         <br><br>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                             Editar Perfil
+                        </button>
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                            Cambiar Contraseña
                         </button>
                     </div>
                     <div class="col-md-8">
@@ -63,9 +75,18 @@ $user = UserData::getById($_SESSION["user_id"]);
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="editProfileModalLabel">Editar Perfil</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <!-- Mensaje de error en el modal -->
+                <?php if(isset($_SESSION["password_error"])): ?>
+                    <div class="alert alert-danger">
+                        <?php 
+                            echo $_SESSION["password_error"];
+                            unset($_SESSION["password_error"]);
+                        ?>
+                    </div>
+                <?php endif; ?>
                 <form class="form-horizontal" method="post" action="index.php?view=updateuser" role="form" enctype="multipart/form-data" id="editProfileForm">
                     <div class="row">
                         <div class="col-md-6">
@@ -101,35 +122,58 @@ $user = UserData::getById($_SESSION["user_id"]);
                                 <input type="file" name="image" id="imageInput" class="form-control" accept="image/*">
                                 <small class="form-text text-muted">Selecciona una imagen nueva para cambiarla.</small>
                             </div>
-                            <hr>
-                             <h6 class="mt-3">Cambiar Contraseña (Opcional)</h6>
-                             <div class="form-group mb-3">
-                                <label for="current_password" class="form-label">Contraseña Actual</label>
-                                <input type="password" name="current_password" class="form-control" id="current_password" placeholder="Introduce tu contraseña actual">
-                                <small class="form-text text-muted">Necesaria si quieres cambiar la contraseña.</small>
-                             </div>
-                             <div class="form-group mb-3">
-                                <label for="new_password" class="form-label">Nueva Contraseña</label>
-                                <input type="password" name="new_password" class="form-control" id="new_password" placeholder="Deja en blanco para no cambiar">
-                             </div>
-                             <div class="form-group mb-3">
-                                <label for="confirm_password" class="form-label">Confirmar Nueva Contraseña</label>
-                                <input type="password" name="confirm_password" class="form-control" id="confirm_password" placeholder="Repite la nueva contraseña">
-                             </div>
                         </div>
                     </div>
                     
                     <input type="hidden" name="user_id" value="<?php echo $user->id;?>">
                     <hr>
                     <div class="d-flex justify-content-end">
-                       <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
+                       <button type="button" class="btn btn-secondary me-2" data-coreui-dismiss="modal">Cancelar</button>
                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-</div> 
+</div>
+
+<!-- Modal para cambiar contraseña -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">Cambiar Contraseña</h5>
+                <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="passwordErrorMessage" class="alert alert-danger" style="display: none;"></div>
+                <form id="changePasswordForm">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group mb-3">
+                                <label for="current_password" class="form-label">Contraseña Actual</label>
+                                <input type="password" name="current_password" class="form-control" id="current_password" placeholder="Introduce tu contraseña actual" required>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="new_password" class="form-label">Nueva Contraseña</label>
+                                <input type="password" name="new_password" class="form-control" id="new_password" placeholder="Introduce tu nueva contraseña" required>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="confirm_password" class="form-label">Confirmar Nueva Contraseña</label>
+                                <input type="password" name="confirm_password" class="form-control" id="confirm_password" placeholder="Repite tu nueva contraseña" required>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="user_id" value="<?php echo $user->id;?>">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="savePasswordBtn">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
 console.log('[TEST] Script tag en profile-view.php ejecutado.'); // Prueba básica
@@ -261,5 +305,148 @@ document.addEventListener('DOMContentLoaded', function() {
              }
         });
     }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const editProfileForm = document.getElementById('editProfileForm');
+    const editModal = document.getElementById('editProfileModal');
+    const newPasswordInput = document.getElementById('new_password');
+    const modalErrorMessage = document.getElementById('modalErrorMessage');
+
+    // Verificar si debemos abrir el modal automáticamente
+    if (window.location.href.includes('showModal=true')) {
+        const modal = coreui.Modal.getInstance(editModal);
+        if (modal) {
+            modal.show();
+        }
+    }
+
+    editProfileForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Verificar si se está intentando cambiar la contraseña
+        const isChangingPassword = newPasswordInput && newPasswordInput.value.trim() !== '';
+        
+        if (isChangingPassword) {
+            // Validar que la contraseña actual no esté vacía
+            const currentPassword = document.getElementById('current_password').value;
+            if (!currentPassword) {
+                modalErrorMessage.style.display = 'block';
+                modalErrorMessage.textContent = 'Debes proporcionar tu contraseña actual para cambiarla';
+                return;
+            }
+
+            // Validar que las nuevas contraseñas coincidan
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            if (newPassword !== confirmPassword) {
+                modalErrorMessage.style.display = 'block';
+                modalErrorMessage.textContent = 'Las nuevas contraseñas no coinciden';
+                return;
+            }
+        }
+
+        // Enviar el formulario
+        const formData = new FormData(editProfileForm);
+        fetch('index.php?view=updateuser', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            if (data.includes('La contraseña actual no es correcta')) {
+                // Redirigir a la misma página pero con el parámetro para mostrar el modal
+                window.location.href = window.location.pathname + '?showModal=true';
+            } else if (data.includes('success')) {
+                const modal = coreui.Modal.getInstance(editModal);
+                if (modal) {
+                    modal.hide();
+                }
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            modalErrorMessage.style.display = 'block';
+            modalErrorMessage.textContent = 'Error al guardar los cambios';
+        });
+    });
+
+    // Limpiar mensaje de error cuando se cierra el modal
+    editModal.addEventListener('hidden.coreui.modal', function () {
+        modalErrorMessage.style.display = 'none';
+        modalErrorMessage.textContent = '';
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const changePasswordForm = document.getElementById('changePasswordForm');
+    const changePasswordModal = document.getElementById('changePasswordModal');
+    const passwordErrorMessage = document.getElementById('passwordErrorMessage');
+    const savePasswordBtn = document.getElementById('savePasswordBtn');
+    const changePasswordBtn = document.querySelector('button[data-bs-target="#changePasswordModal"]');
+
+    // Asegurarse de que el botón de cambiar contraseña funcione
+    if (changePasswordBtn) {
+        changePasswordBtn.addEventListener('click', function() {
+            const modal = coreui.Modal.getInstance(changePasswordModal);
+            if (!modal) {
+                new coreui.Modal(changePasswordModal).show();
+            } else {
+                modal.show();
+            }
+        });
+    }
+
+    savePasswordBtn.addEventListener('click', function() {
+        const currentPassword = document.getElementById('current_password').value;
+        const newPassword = document.getElementById('new_password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+
+        // Validaciones
+        if (!currentPassword) {
+            passwordErrorMessage.style.display = 'block';
+            passwordErrorMessage.textContent = 'Debes proporcionar tu contraseña actual';
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            passwordErrorMessage.style.display = 'block';
+            passwordErrorMessage.textContent = 'Las nuevas contraseñas no coinciden';
+            return;
+        }
+
+        // Enviar el formulario
+        const formData = new FormData(changePasswordForm);
+        fetch('index.php?view=updateuser', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            if (data.includes('La contraseña actual no es correcta')) {
+                passwordErrorMessage.style.display = 'block';
+                passwordErrorMessage.textContent = 'La contraseña actual no es correcta';
+            } else if (data.includes('success')) {
+                const modal = coreui.Modal.getInstance(changePasswordModal);
+                if (modal) {
+                    modal.hide();
+                }
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            passwordErrorMessage.style.display = 'block';
+            passwordErrorMessage.textContent = 'Error al guardar los cambios';
+        });
+    });
+
+    // Limpiar mensaje de error cuando se cierra el modal
+    changePasswordModal.addEventListener('hidden.coreui.modal', function () {
+        passwordErrorMessage.style.display = 'none';
+        passwordErrorMessage.textContent = '';
+        changePasswordForm.reset();
+    });
 });
 </script> 

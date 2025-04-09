@@ -1,5 +1,9 @@
 <?php
-session_start();
+// Asegurarnos de que la sesión esté iniciada
+if (session_status() == PHP_SESSION_NONE) {
+	session_start();
+}
+
 require_once("core/app/model/UserData.php");
 
 if(isset($_POST["username"]) && isset($_POST["password"])){
@@ -13,17 +17,18 @@ if(isset($_POST["username"]) && isset($_POST["password"])){
 			$_SESSION["user_lastname"]=$user->lastname;
 			$_SESSION["user_fullname"]=$user->name." ".$user->lastname;
 			$_SESSION["user_email"]=$user->email;
-			Core::redir("./");
+			header("Location: ./");
+			exit();
 		} else {
-			$_SESSION["login_error"] = "Error: Contraseña incorrecta.";
-			Core::redir("./?view=login");
+			header("Location: ./?view=login&error=1");
+			exit();
 		}
 	} else {
-		$_SESSION["login_error"] = "Error: Usuario no encontrado o inactivo.";
-		Core::redir("./?view=login");
+		header("Location: ./?view=login&error=1");
+		exit();
 	}
 } else {
-	$_SESSION["login_error"] = "Error: Datos incompletos.";
-	Core::redir("./?view=login");
+	header("Location: ./?view=login&error=1");
+	exit();
 }
 ?> 

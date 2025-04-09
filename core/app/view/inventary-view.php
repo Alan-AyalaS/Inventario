@@ -2607,3 +2607,19 @@ document.getElementById('jerseyType').addEventListener('change', function() {
     window.location.href = url.toString();
 });
 </script>
+
+<script>
+$(document).ready(function() {
+    const jerseyTypeDiv = $('#jerseyType').closest('.form-group');
+    jerseyTypeDiv.hide(); // Ocultar inicialmente
+
+    $('#category_id').change(function() {
+        var selectedCategory = $(this).find('option:selected').text().trim().toLowerCase();
+        if (selectedCategory === 'jersey') {
+            jerseyTypeDiv.show();
+        } else {
+            jerseyTypeDiv.hide();
+        }
+    }).trigger('change'); // Trigger change para establecer el estado inicial
+});
+</script>

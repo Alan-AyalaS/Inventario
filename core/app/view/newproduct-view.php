@@ -125,11 +125,11 @@ $categories = CategoryData::getAll();
           </div>
           <div class="col-md-2">
             <label>24</label>
-            <input type="number" name="talla_24" class="form-control" min="0" value="0">
+            <input type="number" name="talla_24_nino" class="form-control" min="0" value="0">
           </div>
           <div class="col-md-2">
             <label>26</label>
-            <input type="number" name="talla_26" class="form-control" min="0" value="0">
+            <input type="number" name="talla_26_nino" class="form-control" min="0" value="0">
           </div>
           <div class="col-md-2">
             <label>28</label>

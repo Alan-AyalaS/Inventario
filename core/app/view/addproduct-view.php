@@ -48,14 +48,14 @@ if(count($_POST)>0){
         'XL' => $_POST["talla_xl_dama"],
         'XXL' => $_POST["talla_xxl_dama"]
       ];
-    } else {
+    } else if($tipoJersey === 'nino') {
       $tallas = [
         '16' => $_POST["talla_16"],
         '18' => $_POST["talla_18"],
         '20' => $_POST["talla_20"],
         '22' => $_POST["talla_22"],
-        '24' => $_POST["talla_24"],
-        '26' => $_POST["talla_26"],
+        '24' => $_POST["talla_24_nino"],
+        '26' => $_POST["talla_26_nino"],
         '28' => $_POST["talla_28"]
       ];
     }

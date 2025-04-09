@@ -137,7 +137,7 @@ if(isset($_SESSION["user_id"])) {
 </div>
 </div>
 <?php else:?>
-    <div class="sidebar sidebar-dark sidebar-fixed" id="sidebar">
+    <div class="sidebar sidebar-dark sidebar-fixed" id="sidebar" data-coreui-toggle="unfoldable">
       <div class="sidebar-brand d-none d-md-flex">
         <div class="sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
           <div class="d-flex align-items-center justify-content-between w-100 h-100" style="cursor: pointer; position: relative; z-index: 1; padding: 0 15px;" data-coreui-toggle="unfoldable">
@@ -356,6 +356,71 @@ if(isset($_SESSION["user_id"])) {
     <script src="vendors/@coreui/utils/js/coreui-utils.js"></script>
     <script src="assets/js/main.js"></script>
     <script>
+    console.log('Script iniciado');
+    
+    function initializeSidebar() {
+        console.log('Inicializando sidebar...');
+        
+        const sidebar = document.getElementById('sidebar');
+        console.log('Sidebar encontrado:', sidebar);
+        
+        const sidebarState = localStorage.getItem('sidebarState');
+        console.log('Estado guardado en localStorage:', sidebarState);
+        
+        // Obtener la instancia del sidebar de CoreUI
+        const sidebarInstance = coreui.Sidebar.getInstance(sidebar);
+        console.log('Instancia del sidebar:', sidebarInstance);
+        
+        // Verificar el estado actual del sidebar
+        const isNarrow = sidebar.classList.contains('sidebar-narrow-unfoldable');
+        console.log('¿Sidebar está plegado?', isNarrow);
+        console.log('Clases actuales del sidebar:', sidebar.classList.toString());
+        
+        // Aplicar el estado guardado
+        if (sidebarState === 'collapsed' && !isNarrow) {
+            console.log('Aplicando estado colapsado');
+            sidebarInstance.toggleUnfoldable();
+            console.log('Después de toggleUnfoldable() - Clases:', sidebar.classList.toString());
+        } else if (sidebarState === 'expanded' && isNarrow) {
+            console.log('Aplicando estado expandido');
+            sidebarInstance.toggleUnfoldable();
+            console.log('Después de toggleUnfoldable() - Clases:', sidebar.classList.toString());
+        }
+
+        // Escuchar cambios en las clases del sidebar
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    console.log('Cambio en clases detectado');
+                    const isNowNarrow = sidebar.classList.contains('sidebar-narrow-unfoldable');
+                    console.log('Nuevas clases:', sidebar.classList.toString());
+                    console.log('¿Sidebar está plegado?', isNowNarrow);
+                    
+                    // Actualizar el estado en localStorage
+                    localStorage.setItem('sidebarState', isNowNarrow ? 'collapsed' : 'expanded');
+                    console.log('Nuevo estado guardado:', localStorage.getItem('sidebarState'));
+                }
+            });
+        });
+
+        observer.observe(sidebar, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+    }
+
+    // Esperar a que CoreUI esté completamente cargado
+    if (typeof coreui !== 'undefined') {
+        console.log('CoreUI está disponible, inicializando sidebar...');
+        setTimeout(initializeSidebar, 100);
+    }
+
+    window.addEventListener('load', function() {
+        console.log('Página completamente cargada');
+        if (typeof coreui !== 'undefined') {
+            setTimeout(initializeSidebar, 200);
+        }
+    });
     </script>
 
     <!-- Comentando temporalmente el script del sidebar para depuración -->

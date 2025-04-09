@@ -30,14 +30,14 @@
     </div>
   </div>
   <div class="form-group">
-    <label for="inputEmail1" class="col-lg-2 control-label">Email*</label>
+    <label for="inputEmail1" class="col-lg-2 control-label">Email</label>
     <div class="col-md-6">
       <input type="text" name="email" class="form-control" id="email" placeholder="Email">
     </div>
   </div>
 
   <div class="form-group">
-    <label for="inputEmail1" class="col-lg-2 control-label">Contrase&ntilde;a</label>
+    <label for="inputEmail1" class="col-lg-2 control-label">Contrase&ntilde;a*</label>
     <div class="col-md-6">
       <input type="password" name="password" class="form-control" id="inputEmail1" placeholder="Contrase&ntilde;a">
     </div>

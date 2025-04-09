@@ -271,6 +271,7 @@ if($selected_category_name == "Jersey") {
                     </select>
                 </div>
             </div>
+            
             <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
                 <label for="availability" class="me-2">Disponibilidad:</label>
                 <div class="custom-select-wrapper">
@@ -401,20 +402,20 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
                 </a>
                 </div>
         </div>
-        <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
-            <label for="jerseyType" class="me-2">Tipo de Jersey:</label>
-            <select id="jerseyType" name="jerseyType" class="form-control">
-                <option value="" <?php echo (!isset($_GET["jerseyType"]) || $_GET["jerseyType"] == "") ? 'selected' : ''; ?>>Todos</option>
-                <option value="adulto" <?php echo (isset($_GET["jerseyType"]) && $_GET["jerseyType"] == "adulto") ? 'selected' : ''; ?>>Adulto</option>
-                <option value="niño" <?php echo (isset($_GET["jerseyType"]) && $_GET["jerseyType"] == "niño") ? 'selected' : ''; ?>>Niño</option>
-                <option value="dama" <?php echo (isset($_GET["jerseyType"]) && $_GET["jerseyType"] == "dama") ? 'selected' : ''; ?>>Dama</option>
-            </select>
-        </div>
     </div>
         <!-- ===== FIN DE SECCIÓN PROTEGIDA ===== -->
 
 <!-- Botón para eliminar seleccionados -->
 <div class="row mt-3">
+<div class="form-group flex-grow-1 flex-md-grow-0 me-2">
+                <label for="jerseyType" class="d-block">Tipo de Jersey:</label>
+                <select id="jerseyType" name="jerseyType" class="form-control">
+                    <option value="" <?php echo (!isset($_GET["jerseyType"]) || $_GET["jerseyType"] == "") ? 'selected' : ''; ?>>Todos</option>
+                    <option value="adulto" <?php echo (isset($_GET["jerseyType"]) && $_GET["jerseyType"] == "adulto") ? 'selected' : ''; ?>>Adulto</option>
+                    <option value="niño" <?php echo (isset($_GET["jerseyType"]) && $_GET["jerseyType"] == "niño") ? 'selected' : ''; ?>>Niño</option>
+                    <option value="dama" <?php echo (isset($_GET["jerseyType"]) && $_GET["jerseyType"] == "dama") ? 'selected' : ''; ?>>Dama</option>
+                </select>
+            </div>
     <div class="col-md-12">
         <button type="button" class="btn btn-danger" id="deleteSelected" disabled style="margin-bottom: 15px;">
             <i class="fas fa-trash"></i> Eliminar seleccionados
@@ -1397,11 +1398,11 @@ function updateClearFiltersButton() {
 
     // Obtener valores actuales
     const searchTerm = document.getElementById('search').value.trim();
-    const categoryId = document.getElementById('category_id').value;
-    const availability = document.getElementById('availability').value;
+        const categoryId = document.getElementById('category_id').value;
+        const availability = document.getElementById('availability').value;
     const size = document.getElementById('size').value;
-    const dateFilter = document.getElementById('date_filter').value;
-    
+        const dateFilter = document.getElementById('date_filter').value;
+        
     // Verificar si hay algún filtro activo
     const hasActiveFilters = 
         searchTerm !== '' || // Hay texto en la búsqueda
@@ -2609,19 +2610,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </style>
 
 <script>
-$(document).ready(function() {
-    $('#category_id').change(function() {
-        var selectedCategory = $(this).find('option:selected').text().trim().toLowerCase();
-        if (selectedCategory === 'jersey') {
-            $('#jerseyType').show();
-        } else {
-            $('#jerseyType').hide();
-        }
-    }).trigger('change'); // Trigger change to set initial state
-});
-</script>
-
-<script>
 document.getElementById('tipoJersey').addEventListener('change', function() {
     this.form.submit();
 });
@@ -2636,18 +2624,11 @@ document.getElementById('jerseyType').addEventListener('change', function() {
 });
 </script>
 
-<script>
-$(document).ready(function() {
-    const jerseyTypeDiv = $('#jerseyType').closest('.form-group');
-    jerseyTypeDiv.hide(); // Ocultar inicialmente
+<style>
+    #jerseyType {
+        width: 200px;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+</style>
 
-    $('#category_id').change(function() {
-        var selectedCategory = $(this).find('option:selected').text().trim().toLowerCase();
-        if (selectedCategory === 'jersey') {
-            jerseyTypeDiv.show();
-        } else {
-            jerseyTypeDiv.hide();
-        }
-    }).trigger('change'); // Trigger change para establecer el estado inicial
-});
-</script>

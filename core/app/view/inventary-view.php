@@ -693,16 +693,16 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
 				</thead>
 				<tbody>
                     <?php
-                    $current_total = null;
+                    $current_name = null;
                     $rowspan = 1;
                     $products_count = count($curr_products);
                     $group_id = 0;
                     $total_groups = [];
                     
-                    // Primero, agrupar los productos por total
+                    // Primero, agrupar los productos por nombre
                     foreach($curr_products as $index => $product) {
-                        if($current_total !== $product->total) {
-                            $current_total = $product->total;
+                        if($current_name !== $product->name) {
+                            $current_name = $product->name;
                             $group_id++;
                         }
                         $total_groups[$group_id][] = $product;

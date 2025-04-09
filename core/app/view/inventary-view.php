@@ -1398,19 +1398,21 @@ function updateClearFiltersButton() {
 
     // Obtener valores actuales
     const searchTerm = document.getElementById('search').value.trim();
-        const categoryId = document.getElementById('category_id').value;
-        const availability = document.getElementById('availability').value;
+    const categoryId = document.getElementById('category_id').value;
+    const availability = document.getElementById('availability').value;
     const size = document.getElementById('size').value;
-        const dateFilter = document.getElementById('date_filter').value;
-        
+    const dateFilter = document.getElementById('date_filter').value;
+    const jerseyType = document.getElementById('jerseyType').value; // Agregar esta línea
+
     // Verificar si hay algún filtro activo
     const hasActiveFilters = 
         searchTerm !== '' || // Hay texto en la búsqueda
         categoryId !== '' || // No es "Todas las categorías"
         availability !== '' || // No es "Todas las cantidades"
         size !== '' || // No es "Todas las tallas"
-        dateFilter !== ''; // No es "Todas las fechas"
-    
+        dateFilter !== '' || // No es "Todas las fechas"
+        jerseyType !== ''; // No es "Todos" // Agregar esta línea
+
     // Mostrar u ocultar el botón
     clearFiltersBtn.style.display = hasActiveFilters ? '' : 'none';
 }

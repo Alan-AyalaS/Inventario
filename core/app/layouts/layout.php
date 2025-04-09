@@ -138,18 +138,15 @@ if(isset($_SESSION["user_id"])) {
 </div>
 <?php else:?>
     <div class="sidebar sidebar-dark sidebar-fixed" id="sidebar">
-
-<div class="sidebar-brand d-none d-md-flex">
-<div class="sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
-
-<h4><a href="./" style="color: white;"><?php echo $system_title; ?></a></h4>
-
-</div>
-<div class="sidebar-brand-narrow" width="46" height="46" alt="CoreUI Logo">
-<h4><a href="./" style="color: white;"><?php echo substr($system_title, 0, 1); ?><b><?php echo substr($system_title, -1); ?></b></a></h4>
-
-</div>
-</div>
+      <button class="sidebar-toggler" type="button" data-coreui-toggle="unfoldable"></button>
+      <div class="sidebar-brand d-none d-md-flex">
+        <div class="sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
+          <h4><a href="./" style="color: white;"><?php echo $system_title; ?></a></h4>
+        </div>
+        <div class="sidebar-brand-narrow" width="46" height="46" alt="CoreUI Logo">
+          <h4><a href="./" style="color: white;"><?php echo substr($system_title, 0, 1); ?><b><?php echo substr($system_title, -1); ?></b></a></h4>
+        </div>
+      </div>
 
 
 
@@ -262,33 +259,15 @@ if(isset($_SESSION["user_id"])) {
           </a></li>
         -->
       </ul>
-      <button class="sidebar-toggler" type="button" data-coreui-toggle="unfoldable"></button>
     </div>
     <div class="wrapper d-flex flex-column min-vh-100 bg-light">
       <header class="header header-sticky mb-4">
         <div class="container-fluid">
-          <button class="header-toggler px-md-0 me-md-3" type="button" onclick="coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()">
-            <svg class="icon icon-lg">
-              <use href="vendors/@coreui/icons/svg/free.svg#cil-menu"></use>
-            </svg>
-          </button><a class="header-brand d-md-none" href="#">
+          <a class="header-brand d-md-none" href="#">
             <svg width="118" height="46" alt="CoreUI Logo">
               <use xlink:href="assets/brand/coreui.svg#full"></use>
             </svg></a>
-            <!--
-          <ul class="header-nav d-none d-md-flex">
-            <li class="nav-item"><a class="nav-link" href="#">Dashboard</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Users</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Settings</a></li>
-          </ul>
-        -->
           <ul class="header-nav ms-auto">
-            <!--
-            <li class="nav-item"><a class="nav-link" href="#">
-                <svg class="icon icon-lg">
-                  <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-bell"></use>
-                </svg></a></li>
-              -->
           </ul>
           <ul class="header-nav ms-3">
             <li class="nav-item dropdown">

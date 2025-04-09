@@ -34,7 +34,11 @@ if(count($_POST)>0){
         'M' => $_POST["talla_m"],
         'L' => $_POST["talla_l"],
         'XL' => $_POST["talla_xl"],
-        'XXL' => $_POST["talla_xxl"]
+        'XXL' => $_POST["talla_xxl"],
+        '3XL' => $_POST["talla_3xl"],
+        '4XL' => $_POST["talla_4xl"],
+        '6XL' => $_POST["talla_6xl"],
+        '8XL' => $_POST["talla_8xl"]
       ];
     } else {
       $tallas = [

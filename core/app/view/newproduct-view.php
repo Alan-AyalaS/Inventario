@@ -82,6 +82,22 @@ $categories = CategoryData::getAll();
             <label>XXL</label>
             <input type="number" name="talla_xxl" class="form-control" min="0" value="0">
           </div>
+          <div class="col-md-2">
+            <label>3XL</label>
+            <input type="number" name="talla_3xl" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>4XL</label>
+            <input type="number" name="talla_4xl" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>6XL</label>
+            <input type="number" name="talla_6xl" class="form-control" min="0" value="0">
+          </div>
+          <div class="col-md-2">
+            <label>8XL</label>
+            <input type="number" name="talla_8xl" class="form-control" min="0" value="0">
+          </div>
         </div>
       </div>
     </div>

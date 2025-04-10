@@ -632,7 +632,7 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
 				?>
 
 				<h3>Pagina <?php echo $page." de ".$npaginas; ?></h3>
-			<div class="btn-group pull-right">
+			<div class="btn-group pagination-container">
 			<?php
 			$px=$page-1;
 			if($px>0):
@@ -841,7 +841,7 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
                             <?php endforeach; ?>
 				</tbody>
 			</table>
-			<div class="btn-group pull-right">
+			<div class="btn-group pagination-container">
 			<?php
 			for($i=0;$i<$npaginas;$i++){
 			    // Construir la URL con los parámetros de filtro actuales
@@ -2625,5 +2625,62 @@ document.getElementById('jerseyType').addEventListener('change', function() {
         display: inline-block;
         margin-bottom: 10px;
     }
+</style>
+
+<style>
+/* Estilos para la paginación */
+.pagination-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+    margin: 10px 0;
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 5px;
+}
+
+.pagination-container .btn {
+    min-width: 40px;
+    padding: 5px 10px;
+    margin: 0 2px;
+}
+
+.pagination-container .btn-sm {
+    font-size: 12px;
+}
+
+/* Media queries para responsive */
+@media (max-width: 768px) {
+    .pagination-container {
+        gap: 3px;
+    }
+    
+    .pagination-container .btn {
+        min-width: 35px;
+        padding: 3px 8px;
+        margin: 0 1px;
+    }
+    
+    .pagination-container .btn-sm {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 576px) {
+    .pagination-container {
+        gap: 2px;
+    }
+    
+    .pagination-container .btn {
+        min-width: 30px;
+        padding: 2px 6px;
+        margin: 0;
+    }
+    
+    .pagination-container .btn-sm {
+        font-size: 10px;
+    }
+}
 </style>
 

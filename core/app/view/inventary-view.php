@@ -615,16 +615,9 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
 			$total_products = count($products);
 			$is_full_list = ($limit == $total_products);
 
-			// Si el límite es diferente al total y hay filtros, aplicar filtros en el servidor
-			if (!$is_full_list && (isset($_GET['category_id']) || isset($_GET['search']) || isset($_GET['size']) || isset($_GET['availability']) || isset($_GET['date_filter']))) {
-				$curr_products = $products;
-				$npaginas = 1;
-				$page = 1;
-			} else {
-				// Obtener los productos para la página actual
-				$start_index = ($page - 1) * $limit;
-				$curr_products = array_slice($products, $start_index, $limit);
-			}
+			// Obtener los productos para la página actual
+			$start_index = ($page - 1) * $limit;
+			$curr_products = array_slice($products, $start_index, $limit);
 
 			if(count($products)>0){
 				// Calcular el número total de páginas

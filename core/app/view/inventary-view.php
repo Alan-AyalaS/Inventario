@@ -662,6 +662,7 @@ if(isset($_GET["size"])) echo "&size=".$_GET["size"];
                         $active_class = ($page == ($i+1)) ? 'btn-primary' : 'btn-default';
                         echo "<a href='$url' class='btn $active_class btn-sm'>".($i+1)."</a> ";
 			    }
+                
 			?>
 			</div>
 			<div class="clearfix"></div>
@@ -1944,71 +1945,146 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar todos los selectores personalizados
+    const customSelects = document.querySelectorAll('.custom-select');
+    
+    customSelects.forEach(select => {
+        const trigger = select.querySelector('.custom-select__trigger');
+        const options = select.querySelector('.custom-options');
+        
+        // Asegurar que el trigger y las opciones existan
+        if (trigger && options) {
+            // Manejar clic en el trigger
+            trigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                
+                // Cerrar otros selectores abiertos
+                customSelects.forEach(s => {
+                    if (s !== select) {
+                        s.classList.remove('open');
+                    }
+                });
+                
+                // Alternar estado del selector actual
+                select.classList.toggle('open');
+            });
+            
+            // Manejar clic en las opciones
+            options.querySelectorAll('.custom-option').forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const value = this.getAttribute('data-value');
+                    const text = this.textContent;
+                    
+                    // Actualizar el texto del trigger
+                    trigger.querySelector('span').textContent = text;
+                    
+                    // Cerrar el selector
+                    select.classList.remove('open');
+                    
+                    // Actualizar la URL con el nuevo filtro
+                    updateUrlWithFilter(select.id, value);
+                });
+            });
+        }
+    });
+    
+    // Cerrar selectores al hacer clic fuera
+    document.addEventListener('click', function() {
+        customSelects.forEach(select => {
+            select.classList.remove('open');
+        });
+    });
+    
+    // Función para actualizar la URL con el nuevo filtro
+    function updateUrlWithFilter(selectId, value) {
+        const url = new URL(window.location.href);
+        const params = new URLSearchParams(url.search);
+        
+        // Determinar el parámetro según el ID del selector
+        let paramName = '';
+        switch(selectId) {
+            case 'customCategorySelect':
+                paramName = 'category_id';
+                break;
+            case 'customAvailabilitySelect':
+                paramName = 'availability';
+                break;
+            case 'customSizeSelect':
+                paramName = 'size';
+                break;
+        }
+        
+        // Actualizar o eliminar el parámetro
+        if (value) {
+            params.set(paramName, value);
+        } else {
+            params.delete(paramName);
+        }
+        
+        // Actualizar la URL y recargar la página
+        url.search = params.toString();
+        window.location.href = url.toString();
+    }
+    
+    // Manejar el formulario de búsqueda
+    const searchForm = document.querySelector('form[role="search"]');
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const searchInput = this.querySelector('input[name="search"]');
+            if (searchInput) {
+                const url = new URL(window.location.href);
+                const params = new URLSearchParams(url.search);
+                params.set('search', searchInput.value);
+                url.search = params.toString();
+                window.location.href = url.toString();
+            }
+        });
+    }
+});
 </script>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
-
 <style>
-/* Estilos base para la tabla */
-tr:hover {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Estilos para la celda total */
-[id^="total-cell-"] {
-    transition: background-color 0.15s ease;
-    background-color: transparent !important;
-}
-
-/* Cuando la celda total está resaltada */
-[id^="total-cell-"].highlighted {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Asegurar que el hover de la tabla no interfiera */
-tr:hover [id^="total-cell-"] {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Mantener el resaltado consistente para todas las filas del grupo */
-tr:hover td:not([id^="total-cell-"]) {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Estilos para los select personalizados */
 .custom-select-wrapper {
     position: relative;
-    width: 200px;
+    display: inline-block;
+    min-width: 200px;
 }
 
 .custom-select {
     position: relative;
-    display: flex;
-    flex-direction: column;
-    border: 1px solid rgb(177 183 193);
-    border-radius: 0.375rem;
-    background-color: white;
-    cursor: pointer;
-    z-index: 1000;
-}
-
-/* Ocultar el botón de debug */
-button[data-bs-toggle="modal"][data-bs-target^="#debugModal"] {
-    display: none !important;
+    display: inline-block;
+    width: 100%;
 }
 
 .custom-select__trigger {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     padding: 8px 12px;
-    border-radius: 0.375rem;
-    font-size: 14px;
-    font-weight: 400;
-    color: #000;
-    background-color: white;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
     cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.custom-select__trigger .arrow {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    border-left: 2px solid #666;
+    border-bottom: 2px solid #666;
+    transform: rotate(-45deg);
+    transition: transform 0.3s ease;
+}
+
+.custom-select.open .custom-select__trigger .arrow {
+    transform: rotate(135deg);
 }
 
 .custom-options {
@@ -2016,28 +2092,24 @@ button[data-bs-toggle="modal"][data-bs-target^="#debugModal"] {
     top: 100%;
     left: 0;
     right: 0;
-    display: none;
-    background-color: white;
-    border: 1px solid #6c757d;
-    border-radius: 4px;
-    margin-top: 4px;
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-top: 0;
+    border-radius: 0 0 4px 4px;
     max-height: 200px;
     overflow-y: auto;
-    z-index: 1001;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    display: none;
+    z-index: 1000;
 }
 
 .custom-select.open .custom-options {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    display: block;
 }
 
 .custom-option {
     padding: 8px 12px;
-    font-size: 14px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.3s ease;
 }
 
 .custom-option:hover {
@@ -2047,640 +2119,111 @@ button[data-bs-toggle="modal"][data-bs-target^="#debugModal"] {
 .custom-option.selected {
     background-color: #e9ecef;
 }
-
-.custom-option-group {
-    border-bottom: 1px solid #dee2e6;
-    margin-bottom: 5px;
-}
-
-.custom-option-header {
-    padding: 8px 12px;
-    font-weight: bold;
-    background-color: #f8f9fa;
-    color: #6c757d;
-}
-
-.custom-option-group .custom-option {
-    padding-left: 24px;
-}
-
-#customSizeSelect {
-    display: block;
-}
-
-/* Estilos para resaltar el total */
-.total-cell {
-    position: relative !important;
-    background: none !important;
-    border: none !important;
-    padding: 0 !important;
-}
-
-/* Eliminar todas las líneas de la tabla para la celda total */
-table td.total-cell,
-tr td.total-cell,
-tbody tr td.total-cell,
-.table td.total-cell,
-.table tbody tr td.total-cell,
-.table-bordered td.total-cell,
-.table-bordered tbody tr td.total-cell {
-    border: none !important;
-    border-top: none !important;
-    border-bottom: none !important;
-    border-left: none !important;
-    border-right: none !important;
-    background: none !important;
-}
-
-/* Contenedor del valor total */
-.total-value[data-rowspan] {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    border: 1px solid #dee2e6 !important;
-    border-top-width: 1px !important;
-    border-bottom-width: 1px !important;
-    background: white !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    z-index: 2 !important;
-}
-
-/* Ocultar el valor cuando no es el primero del grupo */
-.total-value.hidden {
-    display: none !important;
-}
-
-/* Estilo para el resaltado */
-.total-cell.highlighted .total-value[data-rowspan] {
-    background-color: #e9ecef !important;
-}
-
-/* Resto de los estilos existentes */
-.total-cell {
-    background-color: #fff;
-    transition: background-color 0.3s ease;
-    position: relative;
-    z-index: 0;
-    padding: 0 !important;
-    border: none !important;
-}
-
-/* Eliminar todas las líneas de la celda total */
-.total-cell,
-.total-cell:not(:last-child),
-.total-cell:not(:first-child),
-tr:not(:last-child) .total-cell,
-tr .total-cell {
-    border: none !important;
-    border-top: none !important;
-    border-bottom: none !important;
-}
-
-/* Asegurar que solo los bordes externos sean visibles */
-.total-cell {
-    border-left: 1px solid #dee2e6 !important;
-    border-right: 1px solid #dee2e6 !important;
-}
-
-/* El primer elemento del grupo tiene borde superior */
-tr:first-child .total-cell,
-tr.total-group:first-child .total-cell {
-    border-top: 1px solid #dee2e6 !important;
-}
-
-/* El último elemento del grupo tiene borde inferior */
-tr:last-child .total-cell,
-tr.total-group:last-child .total-cell {
-    border-bottom: 1px solid #dee2e6 !important;
-}
-
-.total-value {
-    padding: 8px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
-
-.total-value[data-rowspan] {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: inherit;
-    z-index: 1;
-}
-
-.total-value.hidden {
-    display: none;
-}
-
-.total-cell.highlighted {
-    background-color: #e9ecef !important;
-}
-
-/* Asegurar que el resaltado tenga prioridad sobre otros estilos */
-tr:hover .total-cell.highlighted {
-    background-color: #e9ecef !important;
-}
-
-/* Estilos para la celda de acciones */
-.actions-cell {
-    white-space: nowrap;
-    width: 1%;
-    padding: 2px !important;
-    position: relative;
-    z-index: 2;
-    min-width: 80px;
-}
-
-.actions-cell .btn-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-}
-
-.actions-cell .btn {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.9rem;
-    line-height: 1.2;
-    min-width: 32px;
-    height: calc(50% - 1px);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1 1 auto;
-}
-
-.actions-cell .btn i {
-    margin: 0;
-    font-size: 0.9rem;
-}
-
-/* Media queries para responsive */
-@media (max-width: 1200px) {
-    .actions-cell {
-        min-width: 90px;
-    }
-    
-    .actions-cell .btn {
-        padding: 0.2rem 0.4rem;
-        font-size: 0.85rem;
-        min-width: 28px;
-    }
-}
-
-@media (max-width: 992px) {
-    .actions-cell {
-        min-width: 80px;
-    }
-    
-    .actions-cell .btn {
-        padding: 0.15rem 0.3rem;
-        font-size: 0.8rem;
-        min-width: 26px;
-    }
-}
-
-@media (max-width: 768px) {
-    .actions-cell {
-        min-width: 70px;
-    }
-    
-    .actions-cell .btn {
-        padding: 0.15rem 0.25rem;
-        font-size: 0.75rem;
-        min-width: 24px;
-    }
-    
-    .actions-cell .btn i {
-        font-size: 0.75rem;
-    }
-}
-
-/* Estilos para simular el rowspan */
-.total-group {
-    position: relative;
-}
-
-.total-group .total-cell {
-    border: none !important;
-}
-
-.total-group:last-child .total-cell {
-    border: none !important;
-}
-
-/* Asegurar que las celdas adyacentes mantengan sus bordes */
-td:not(.total-cell) {
-    border: 1px solid #dee2e6 !important;
-}
-
-/* Estilos para la transición suave del resaltado */
-[id^="total-cell-"] {
-    transition: background-color 0.15s ease;
-    background-color: transparent !important;
-    pointer-events: none;
-}
-
-[id^="total-cell-"].highlighted {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Desactivar el hover de la tabla para la celda total */
-tr:hover [id^="total-cell-"] {
-    background-color: transparent !important;
-}
-
-/* Mantener el resaltado cuando se pasa entre filas del mismo grupo */
-tr:hover [id^="total-cell-"].highlighted {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Desactivar el hover de la tabla para todas las filas */
-tr:hover {
-    background-color: transparent !important;
-}
-
-/* Aplicar el resaltado solo a las celdas que no son total */
-tr:hover td:not([id^="total-cell-"]) {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Estilos para el resaltado de la celda total */
-[id^="total-cell-"] {
-    transition: background-color 0.15s ease;
-    background-color: transparent !important;
-}
-
-[id^="total-cell-"].highlighted {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Asegurar que el hover de la tabla no interfiera con el resaltado personalizado */
-tr:hover [id^="total-cell-"] {
-    background-color: transparent !important;
-}
-
-/* Mantener el resaltado cuando se pasa entre filas del mismo grupo */
-tr:hover [id^="total-cell-"].highlighted {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Estilo para el hover de la fila */
-tr:hover {
-    background-color: rgba(0,0,0,.075);
-}
-
-/* Excluir la celda total del hover de la fila */
-tr:hover td:not([id^="total-cell-"]) {
-    background-color: rgba(0,0,0,.075);
-}
-
-/* Asegurar que la celda total se ilumine con el mismo color que las celdas normales */
-tr:hover [id^="total-cell-"] {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Estilos para el resaltado de la celda total */
-[id^="total-cell-"] {
-    transition: background-color 0.15s ease;
-    background-color: transparent !important;
-}
-
-[id^="total-cell-"].highlighted {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Asegurar que el hover de la tabla no interfiera con el resaltado personalizado */
-tr:hover [id^="total-cell-"] {
-    background-color: transparent !important;
-}
-
-/* Mantener el resaltado cuando se pasa entre filas del mismo grupo */
-tr:hover [id^="total-cell-"].highlighted {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Estilo para el hover de la fila */
-tr:hover {
-    background-color: #f8f9fa;
-}
-
-/* Excluir la celda total del hover de la fila */
-tr:hover td:not([id^="total-cell-"]) {
-    background-color: #f8f9fa;
-}
-
-/* Asegurar que la celda total se ilumine con el mismo color que las celdas normales */
-tr:hover [id^="total-cell-"] {
-    background-color: #f8f9fa !important;
-}
-
-/* Estilos para el resaltado */
-tr.highlighted {
-    background-color: rgba(0,0,0,.025) !important;
-}
-
-tr.highlighted td {
-    background-color: rgba(0,0,0,.025) !important;
-}
-
-/* La fila activa (sobre la que está el mouse) */
-tr:hover {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-tr:hover td {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Transición suave */
-tr, tr td {
-    transition: background-color 0.15s ease;
-}
-
-/* Eliminar todas las reglas duplicadas */
-tr:hover {
-    background-color: transparent !important;
-}
-
-tr:hover td {
-    background-color: transparent !important;
-}
-
-[id^="total-cell-"] {
-    transition: background-color 0.15s ease;
-    background-color: transparent !important;
-}
-
-[id^="total-cell-"].highlighted {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Estilos para el resaltado */
-tr.highlighted {
-    background-color: rgba(0,0,0,.025) !important;
-}
-
-tr.highlighted td {
-    background-color: rgba(0,0,0,.025) !important;
-}
-
-/* La fila activa (sobre la que está el mouse) */
-tr:hover {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-tr:hover td {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Transición suave */
-tr, tr td {
-    transition: background-color 0.15s ease;
-}
-
-/* Estilos para la celda total */
-[id^="total-cell-"] {
-    transition: background-color 0.15s ease;
-    background-color: transparent !important;
-}
-
-[id^="total-cell-"]:hover {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Resaltar todo el grupo cuando se pasa el mouse sobre la celda total */
-[id^="total-cell-"]:hover ~ tr.total-group-* {
-    background-color: rgba(0,0,0,.025) !important;
-}
-
-[id^="total-cell-"]:hover ~ tr.total-group-* td {
-    background-color: rgba(0,0,0,.025) !important;
-}
-
-/* ... existing code ... */
-<style>
-/* Estilos base para el resaltado */
-tr.highlighted {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-tr.highlighted td {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Estilo para la fila activa */
-tr:hover {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-tr:hover td {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Estilos para la celda total */
-[id^="total-cell-"] {
-    transition: background-color 0.15s ease;
-    background-color: transparent !important;
-}
-
-[id^="total-cell-"]:hover {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Transición suave para todos los elementos */
-tr, tr td, [id^="total-cell-"] {
-    transition: background-color 0.15s ease;
-}
 </style>
 
 <script>
-function highlightTotalGroup(groupId) {
-    // Resaltar todas las filas del grupo
-    const rows = document.querySelectorAll(`tr.total-group-${groupId}`);
-    rows.forEach(row => {
-        row.classList.add('highlighted');
-    });
-    
-    // Resaltar la celda total
-    const totalCell = document.getElementById(`total-cell-${groupId}`);
-    if (totalCell) {
-        totalCell.classList.add('highlighted');
-    }
-}
-
-function unhighlightTotalGroup(groupId) {
-    // Quitar el resaltado de todas las filas del grupo
-    const rows = document.querySelectorAll(`tr.total-group-${groupId}`);
-    rows.forEach(row => {
-        row.classList.remove('highlighted');
-    });
-    
-    // Quitar el resaltado de la celda total
-    const totalCell = document.getElementById(`total-cell-${groupId}`);
-    if (totalCell) {
-        totalCell.classList.remove('highlighted');
-    }
-}
-
+// Inicializar los selectores personalizados
 document.addEventListener('DOMContentLoaded', function() {
-    // Agrupar las filas por su groupId
-    const groups = {};
-    document.querySelectorAll('tr[class^="total-group-"]').forEach(row => {
-        const groupId = row.className.match(/total-group-(\d+)/)[1];
-        if (!groups[groupId]) {
-            groups[groupId] = [];
-        }
-        groups[groupId].push(row);
-    });
-
-    // Agregar eventos a todas las filas y celdas totales
-    Object.keys(groups).forEach(groupId => {
-        // Agregar eventos a las filas del grupo
-        groups[groupId].forEach(row => {
-            row.addEventListener('mouseenter', function() {
-                highlightTotalGroup(groupId);
-            });
-            
-            row.addEventListener('mouseleave', function(e) {
-                const relatedTarget = e.relatedTarget;
-                if (!relatedTarget || !relatedTarget.closest(`tr.total-group-${groupId}`)) {
-                    unhighlightTotalGroup(groupId);
-                }
+    // Selector de categoría
+    const categorySelect = document.querySelector('#customCategorySelect');
+    if (categorySelect) {
+        const trigger = categorySelect.querySelector('.custom-select__trigger');
+        const options = categorySelect.querySelector('.custom-options');
+        
+        trigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            categorySelect.classList.toggle('open');
+        });
+        
+        options.querySelectorAll('.custom-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                const text = this.textContent;
+                trigger.querySelector('span').textContent = text;
+                categorySelect.classList.remove('open');
+                
+                // Actualizar URL
+                const url = new URL(window.location.href);
+                url.searchParams.set('category_id', value);
+                window.location.href = url.toString();
             });
         });
-
-        // Agregar eventos a la celda total
-        const totalCell = document.getElementById(`total-cell-${groupId}`);
-        if (totalCell) {
-            totalCell.addEventListener('mouseenter', function() {
-                highlightTotalGroup(groupId);
+    }
+    
+    // Selector de disponibilidad
+    const availabilitySelect = document.querySelector('#customAvailabilitySelect');
+    if (availabilitySelect) {
+        const trigger = availabilitySelect.querySelector('.custom-select__trigger');
+        const options = availabilitySelect.querySelector('.custom-options');
+        
+        trigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            availabilitySelect.classList.toggle('open');
+        });
+        
+        options.querySelectorAll('.custom-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                const text = this.textContent;
+                trigger.querySelector('span').textContent = text;
+                availabilitySelect.classList.remove('open');
+                
+                // Actualizar URL
+                const url = new URL(window.location.href);
+                url.searchParams.set('availability', value);
+                window.location.href = url.toString();
             });
-            
-            totalCell.addEventListener('mouseleave', function(e) {
-                const relatedTarget = e.relatedTarget;
-                if (!relatedTarget || !relatedTarget.closest(`tr.total-group-${groupId}`)) {
-                    unhighlightTotalGroup(groupId);
-                }
+        });
+    }
+    
+    // Selector de talla
+    const sizeSelect = document.querySelector('#customSizeSelect');
+    if (sizeSelect) {
+        const trigger = sizeSelect.querySelector('.custom-select__trigger');
+        const options = sizeSelect.querySelector('.custom-options');
+        
+        trigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            sizeSelect.classList.toggle('open');
+        });
+        
+        options.querySelectorAll('.custom-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                const text = this.textContent;
+                trigger.querySelector('span').textContent = text;
+                sizeSelect.classList.remove('open');
+                
+                // Actualizar URL
+                const url = new URL(window.location.href);
+                url.searchParams.set('size', value);
+                window.location.href = url.toString();
             });
-        }
+        });
+    }
+    
+    // Formulario de búsqueda
+    const searchForm = document.querySelector('form[role="search"]');
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const searchInput = this.querySelector('input[name="search"]');
+            if (searchInput) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('search', searchInput.value);
+                window.location.href = url.toString();
+            }
+        });
+    }
+    
+    // Cerrar selectores al hacer clic fuera
+    document.addEventListener('click', function() {
+        [categorySelect, availabilitySelect, sizeSelect].forEach(select => {
+            if (select) select.classList.remove('open');
+        });
     });
 });
 </script>
-
-<style>
-/* Estilos para la celda total */
-[id^="total-cell-"] {
-    transition: background-color 0.15s ease;
-    background-color: transparent !important;
-    pointer-events: auto !important; /* Permitir eventos del mouse */
-    position: relative;
-    z-index: 1;
-}
-
-[id^="total-cell-"]:hover {
-    background-color: rgba(0,0,0,.075) !important;
-}
-
-/* Resaltar el grupo cuando se pasa el mouse sobre la celda total */
-[id^="total-cell-"]:hover ~ tr[class^="total-group-"] {
-    background-color: rgba(0,0,0,.025) !important;
-}
-
-[id^="total-cell-"]:hover ~ tr[class^="total-group-"] td {
-    background-color: rgba(0,0,0,.025) !important;
-}
-</style>
-
-<script>
-document.getElementById('tipoJersey').addEventListener('change', function() {
-    this.form.submit();
-});
-</script>
-
-
-<script>
-document.getElementById('jerseyType').addEventListener('change', function() {
-    const url = new URL(window.location.href);
-    url.searchParams.set('jerseyType', this.value);
-    window.location.href = url.toString();
-});
-</script>
-
-<style>
-    #jerseyType {
-        width: 200px;
-        display: inline-block;
-        margin-bottom: 10px;
-    }
-</style>
-
-<style>
-/* Estilos para la paginación */
-.pagination-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    justify-content: center;
-    margin: 10px 0;
-    max-width: 100%;
-    overflow-x: auto;
-    padding: 5px;
-}
-
-.pagination-container .btn {
-    min-width: 40px;
-    padding: 5px 10px;
-    margin: 0 2px;
-}
-
-.pagination-container .btn-sm {
-    font-size: 12px;
-}
-
-/* Media queries para responsive */
-@media (max-width: 768px) {
-    .pagination-container {
-        gap: 3px;
-    }
-    
-    .pagination-container .btn {
-        min-width: 35px;
-        padding: 3px 8px;
-        margin: 0 1px;
-    }
-    
-    .pagination-container .btn-sm {
-        font-size: 11px;
-    }
-}
-
-@media (max-width: 576px) {
-    .pagination-container {
-        gap: 2px;
-    }
-    
-    .pagination-container .btn {
-        min-width: 30px;
-        padding: 2px 6px;
-        margin: 0;
-    }
-    
-    .pagination-container .btn-sm {
-        font-size: 10px;
-    }
-}
-</style>
+</body>
+</html>
 

@@ -2,14 +2,27 @@
 class UserData {
 	public static $tablename = "user";
 
+	// Declarar las propiedades explícitamente
+	public $id;
+	public $name;
+	public $lastname;
+	public $username;
+	public $email;
+	public $password;
+	public $is_active;
+	public $is_admin;
+	public $image;
+	public $created_at;
 
-
-	public function Userdata(){
+	public function UserData(){
 		$this->name = "";
 		$this->lastname = "";
+		$this->username = "";
 		$this->email = "";
-		$this->image = "";
 		$this->password = "";
+		$this->is_active = "0";
+		$this->is_admin = "0";
+		$this->image = "";
 		$this->created_at = "NOW()";
 	}
 

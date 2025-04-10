@@ -1,7 +1,18 @@
 <?php
 class ConfigurationData {
 	public static $tablename = "configuration";
-
+	
+	// Declarar las propiedades explícitamente
+	public $id;
+	public $short;
+	public $name;
+	public $kind;
+	public $val;
+	public $lastname;
+	public $email;
+	public $image;
+	public $password;
+	public $created_at;
 
 	public function ConfigurationData(){
 		$this->name = "";

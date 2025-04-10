@@ -24,33 +24,34 @@ class Model {
 		$cnt = 0;
 		$array = array();
 		while($r = $query->fetch_array()){
-			$array[$cnt] = new $aclass;
-			$cnt2=1;
+			$obj = new $aclass;
+			$reflection = new ReflectionClass($aclass);
 			foreach ($r as $key => $v) {
-				if($cnt2>0 && $cnt2%2==0){ 
-					$array[$cnt]->$key = $v;
+				if ($reflection->hasProperty($key)) {
+					$property = $reflection->getProperty($key);
+					$property->setAccessible(true);
+					$property->setValue($obj, $v);
 				}
-				$cnt2++;
 			}
+			$array[$cnt] = $obj;
 			$cnt++;
 		}
 		return $array;
 	}
 	//////////////////////////////////
 	public static function one($query,$aclass){
-		$cnt = 0;
 		$found = null;
-		$data = new $aclass;
+		$obj = new $aclass;
+		$reflection = new ReflectionClass($aclass);
 		while($r = $query->fetch_array()){
-			$cnt=1;
 			foreach ($r as $key => $v) {
-				if($cnt>0 && $cnt%2==0){ 
-					$data->$key = $v;
+				if ($reflection->hasProperty($key)) {
+					$property = $reflection->getProperty($key);
+					$property->setAccessible(true);
+					$property->setValue($obj, $v);
 				}
-				$cnt++;
 			}
-
-			$found = $data;
+			$found = $obj;
 			break;
 		}
 		return $found;

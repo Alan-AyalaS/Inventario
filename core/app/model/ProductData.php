@@ -2,6 +2,28 @@
 class ProductData {
 	public static $tablename = "product";
 
+	// Declarar todas las propiedades explícitamente
+	public $id;
+	public $barcode;
+	public $name;
+	public $description;
+	public $price_in;
+	public $price_out;
+	public $unit;
+	public $user_id;
+	public $presentation;
+	public $category_id;
+	public $inventary_min;
+	public $size;
+	public $total;
+	public $availability;
+	public $jersey_type;
+	public $image;
+	public $created_at;
+	public $is_active;
+	public $stock;
+	public $price;
+
 	public function ProductData(){
 		$this->name = "";
 		$this->price_in = "";
@@ -13,6 +35,15 @@ class ProductData {
 		$this->size = "";
 		$this->total = 0;
 		$this->availability = 0;
+		$this->is_active = "1";
+		$this->stock = "";
+		$this->price = "";
+		$this->description = "";
+		$this->barcode = "";
+		$this->category_id = "";
+		$this->inventary_min = "";
+		$this->jersey_type = "";
+		$this->image = "";
 	}
 
 	public function getCategory(){ return CategoryData::getById($this->category_id);}

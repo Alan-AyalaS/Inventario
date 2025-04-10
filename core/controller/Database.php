@@ -7,11 +7,11 @@ class Database {
 	public $host;
 	public $ddbb;
 	function Database(){
-		$this->user="root";$this->pass="";$this->host="localhost";$this->ddbb="inventario";
+		$this->user="if0_38719796";$this->pass="n1B0MJi5VqmPiC";$this->host="sql309.infinityfree.com";$this->ddbb="if0_38719796_inventario";
 	}
 
 	function connect(){
-		$this->user="root";$this->pass="";$this->host="localhost";$this->ddbb="inventario";
+		$this->user="if0_38719796";$this->pass="n1B0MJi5VqmPiC";$this->host="sql309.infinityfree.com";$this->ddbb="if0_38719796_inventario";
 		$con = new mysqli($this->host,$this->user,$this->pass,$this->ddbb);
 		$con->query("set sql_mode=''");
 		return $con;

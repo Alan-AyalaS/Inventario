@@ -2,14 +2,36 @@
 class PersonData {
 	public static $tablename = "person";
 
+	// Declarar todas las propiedades explícitamente
+	public $id;
+	public $name;
+	public $lastname;
+	public $email1;
+	public $phone1;
+	public $address1;
+	public $created_at;
+	public $image;
+	public $kind;
+	public $is_active;
+	public $user_id;
+	public $email2;
+	public $phone2;
+	public $address2;
 
 	public function PersonData(){
 		$this->name = "";
 		$this->lastname = "";
-		$this->email = "";
-		$this->image = "";
-		$this->password = "";
+		$this->email1 = "";
+		$this->phone1 = "";
+		$this->address1 = "";
 		$this->created_at = "NOW()";
+		$this->image = "";
+		$this->kind = "";
+		$this->is_active = "1";
+		$this->user_id = "";
+		$this->email2 = "";
+		$this->phone2 = "";
+		$this->address2 = "";
 	}
 
 	public function add_client(){

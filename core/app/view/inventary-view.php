@@ -2016,6 +2016,9 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'customSizeSelect':
                 paramName = 'size';
                 break;
+            case 'jerseyType':
+                paramName = 'jerseyType';
+                break;
         }
         
         // Actualizar o eliminar el parámetro
@@ -2220,6 +2223,175 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', function() {
         [categorySelect, availabilitySelect, sizeSelect].forEach(select => {
             if (select) select.classList.remove('open');
+        });
+    });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar todos los selectores personalizados
+    const customSelects = document.querySelectorAll('.custom-select');
+    
+    customSelects.forEach(select => {
+        const trigger = select.querySelector('.custom-select__trigger');
+        const options = select.querySelector('.custom-options');
+        const originalSelect = select.nextElementSibling;
+        
+        if (trigger && options && originalSelect) {
+            // Abrir/cerrar el select
+            trigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                customSelects.forEach(s => {
+                    if (s !== select) {
+                        s.classList.remove('open');
+                    }
+                });
+                select.classList.toggle('open');
+            });
+            
+            // Seleccionar una opción
+            options.querySelectorAll('.custom-option').forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const value = this.getAttribute('data-value');
+                    const text = this.textContent;
+                    
+                    // Actualizar el select original
+                    originalSelect.value = value;
+                    
+                    // Actualizar el texto mostrado
+                    trigger.querySelector('span').textContent = text;
+                    
+                    // Actualizar las clases selected
+                    options.querySelectorAll('.custom-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    option.classList.add('selected');
+                    
+                    // Cerrar el select
+                    select.classList.remove('open');
+                    
+                    // Actualizar la URL con el nuevo filtro
+                    updateUrlWithFilter(select.id, value);
+                });
+            });
+        }
+    });
+    
+    // Manejar el formulario de búsqueda
+    const searchForm = document.querySelector('form[role="search"]');
+    if (searchForm) {
+        const searchInput = searchForm.querySelector('input[name="search"]');
+        const searchBtn = searchForm.querySelector('button[type="button"]');
+        
+        if (searchInput && searchBtn) {
+            searchBtn.addEventListener('click', function() {
+                const searchTerm = searchInput.value;
+                updateUrlWithFilter('search', searchTerm);
+            });
+            
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const searchTerm = searchInput.value;
+                    updateUrlWithFilter('search', searchTerm);
+                }
+            });
+        }
+    }
+    
+    // Manejar el filtro de mostrar
+    const limitInput = document.getElementById('limit');
+    const limitBtn = document.querySelector('button[onclick="applyLimitFilter()"]');
+    if (limitInput && limitBtn) {
+        limitBtn.addEventListener('click', function() {
+            const limit = limitInput.value;
+            updateUrlWithFilter('limit', limit);
+        });
+        
+        limitInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const limit = limitInput.value;
+                updateUrlWithFilter('limit', limit);
+            }
+        });
+    }
+    
+    // Manejar el botón de limpiar filtros
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', function() {
+            const url = new URL(window.location.href);
+            const params = new URLSearchParams(url.search);
+            
+            // Mantener solo los parámetros necesarios
+            const keepParams = ['view', 'limit'];
+            for (const [key] of params.entries()) {
+                if (!keepParams.includes(key)) {
+                    params.delete(key);
+                }
+            }
+            
+            url.search = params.toString();
+            window.location.href = url.toString();
+        });
+    }
+    
+    // Manejar el filtro de tipo de jersey
+    const jerseyTypeSelect = document.getElementById('jerseyType');
+    if (jerseyTypeSelect) {
+        jerseyTypeSelect.addEventListener('change', function() {
+            const value = this.value;
+            updateUrlWithFilter('jerseyType', value);
+        });
+    }
+    
+    // Función para actualizar la URL con el nuevo filtro
+    function updateUrlWithFilter(selectId, value) {
+        const url = new URL(window.location.href);
+        const params = new URLSearchParams(url.search);
+        
+        // Determinar el parámetro según el ID del selector
+        let paramName = '';
+        switch(selectId) {
+            case 'customCategorySelect':
+                paramName = 'category_id';
+                break;
+            case 'customAvailabilitySelect':
+                paramName = 'availability';
+                break;
+            case 'customSizeSelect':
+                paramName = 'size';
+                break;
+            case 'jerseyType':
+                paramName = 'jerseyType';
+                break;
+            case 'search':
+                paramName = 'search';
+                break;
+            case 'limit':
+                paramName = 'limit';
+                break;
+        }
+        
+        // Actualizar o eliminar el parámetro
+        if (value) {
+            params.set(paramName, value);
+        } else {
+            params.delete(paramName);
+        }
+        
+        // Actualizar la URL y recargar la página
+        url.search = params.toString();
+        window.location.href = url.toString();
+    }
+    
+    // Cerrar selectores al hacer clic fuera
+    document.addEventListener('click', function() {
+        customSelects.forEach(select => {
+            select.classList.remove('open');
         });
     });
 });

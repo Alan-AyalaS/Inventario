@@ -625,7 +625,7 @@ if($selected_category_name == "Jersey") {
                         // Determinar si es la primera fila del grupo
                         $is_first_in_group = $product === reset($current_group);
                     ?>
-                    <tr class="total-group-<?php echo $group_id; ?>">
+                    <tr data-group-name="<?php echo htmlspecialchars($product->name); ?>" class="product-row">
                                 <td>
                                     <input type="checkbox" class="product-checkbox" value="<?php echo $product->id; ?>">
 						</td>
@@ -1748,73 +1748,74 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function highlightTotalGroup(groupId) {
     // Resaltar todas las filas del grupo
-    const rows = document.querySelectorAll(`tr.total-group-${groupId}`);
+    const rows = document.querySelectorAll(`tr[data-group="${groupId}"]`);
     rows.forEach(row => {
         row.classList.add('highlighted');
+        // Asegurar que las celdas también tengan el resaltado
+        const cells = row.querySelectorAll('td');
+        cells.forEach(cell => {
+            cell.classList.add('highlighted');
+        });
     });
     
     // Resaltar la celda total
     const totalCell = document.getElementById(`total-cell-${groupId}`);
     if (totalCell) {
         totalCell.classList.add('highlighted');
+        totalCell.parentElement.classList.add('highlighted');
     }
 }
 
 function unhighlightTotalGroup(groupId) {
     // Quitar el resaltado de todas las filas del grupo
-    const rows = document.querySelectorAll(`tr.total-group-${groupId}`);
+    const rows = document.querySelectorAll(`tr[data-group="${groupId}"]`);
     rows.forEach(row => {
         row.classList.remove('highlighted');
+        // Quitar el resaltado de las celdas
+        const cells = row.querySelectorAll('td');
+        cells.forEach(cell => {
+            cell.classList.remove('highlighted');
+        });
     });
     
     // Quitar el resaltado de la celda total
     const totalCell = document.getElementById(`total-cell-${groupId}`);
     if (totalCell) {
         totalCell.classList.remove('highlighted');
+        totalCell.parentElement.classList.remove('highlighted');
     }
 }
 
+// Inicializar los eventos de los grupos cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
-    // Agrupar las filas por su groupId
-    const groups = {};
-    document.querySelectorAll('tr[class^="total-group-"]').forEach(row => {
-        const groupId = row.className.match(/total-group-(\d+)/)[1];
-        if (!groups[groupId]) {
-            groups[groupId] = [];
+    // Agrupar los productos por nombre
+    const productGroups = {};
+    document.querySelectorAll('tr td:nth-child(3)').forEach(nameCell => {
+        const productName = nameCell.textContent.trim();
+        const row = nameCell.closest('tr');
+        if (!productGroups[productName]) {
+            productGroups[productName] = [];
         }
-        groups[groupId].push(row);
+        productGroups[productName].push(row);
     });
 
-    // Agregar eventos a todas las filas y celdas totales
-    Object.keys(groups).forEach(groupId => {
-        // Agregar eventos a las filas del grupo
-        groups[groupId].forEach(row => {
-            row.addEventListener('mouseenter', function() {
-                highlightTotalGroup(groupId);
+    // Asignar data-group a cada fila del mismo grupo
+    Object.entries(productGroups).forEach(([name, rows], groupIndex) => {
+        rows.forEach(row => {
+            row.setAttribute('data-group', groupIndex);
+            
+            // Agregar eventos mouseenter/mouseleave a cada fila
+            row.addEventListener('mouseenter', () => {
+                highlightTotalGroup(groupIndex);
             });
             
-            row.addEventListener('mouseleave', function(e) {
-                const relatedTarget = e.relatedTarget;
-                if (!relatedTarget || !relatedTarget.closest(`tr.total-group-${groupId}`)) {
-                    unhighlightTotalGroup(groupId);
+            row.addEventListener('mouseleave', (e) => {
+                const toElement = e.relatedTarget;
+                if (!toElement || !toElement.closest(`tr[data-group="${groupIndex}"]`)) {
+                    unhighlightTotalGroup(groupIndex);
                 }
             });
         });
-
-        // Agregar eventos a la celda total
-        const totalCell = document.getElementById(`total-cell-${groupId}`);
-        if (totalCell) {
-            totalCell.addEventListener('mouseenter', function() {
-                highlightTotalGroup(groupId);
-            });
-            
-            totalCell.addEventListener('mouseleave', function(e) {
-                const relatedTarget = e.relatedTarget;
-                if (!relatedTarget || !relatedTarget.closest(`tr.total-group-${groupId}`)) {
-                    unhighlightTotalGroup(groupId);
-                }
-            });
-        }
     });
 });
 
@@ -2333,6 +2334,497 @@ document.querySelectorAll('select[id="category_id"], select[id="availability"], 
     });
 });
 </script>
+
+<script>
+// Función para resaltar el grupo total
+function highlightTotalGroup(groupId) {
+    // Resaltar todas las filas del grupo
+    const rows = document.querySelectorAll(`tr[data-group="${groupId}"]`);
+    rows.forEach(row => {
+        row.classList.add('highlighted');
+        // Asegurar que las celdas también tengan el resaltado
+        const cells = row.querySelectorAll('td');
+        cells.forEach(cell => {
+            cell.classList.add('highlighted');
+        });
+    });
+    
+    // Resaltar la celda total
+    const totalCell = document.getElementById(`total-cell-${groupId}`);
+    if (totalCell) {
+        totalCell.classList.add('highlighted');
+        totalCell.parentElement.classList.add('highlighted');
+    }
+}
+
+// Función para quitar el resaltado del grupo total
+function unhighlightTotalGroup(groupId) {
+    // Quitar el resaltado de todas las filas del grupo
+    const rows = document.querySelectorAll(`tr[data-group="${groupId}"]`);
+    rows.forEach(row => {
+        row.classList.remove('highlighted');
+        // Quitar el resaltado de las celdas
+        const cells = row.querySelectorAll('td');
+        cells.forEach(cell => {
+            cell.classList.remove('highlighted');
+        });
+    });
+    
+    // Quitar el resaltado de la celda total
+    const totalCell = document.getElementById(`total-cell-${groupId}`);
+    if (totalCell) {
+        totalCell.classList.remove('highlighted');
+        totalCell.parentElement.classList.remove('highlighted');
+    }
+}
+
+// Inicializar los eventos de los grupos cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    // Agrupar los productos por nombre
+    const productGroups = {};
+    document.querySelectorAll('tr td:nth-child(3)').forEach(nameCell => {
+        const productName = nameCell.textContent.trim();
+        const row = nameCell.closest('tr');
+        if (!productGroups[productName]) {
+            productGroups[productName] = [];
+        }
+        productGroups[productName].push(row);
+    });
+
+    // Asignar data-group a cada fila del mismo grupo
+    Object.entries(productGroups).forEach(([name, rows], groupIndex) => {
+        rows.forEach(row => {
+            row.setAttribute('data-group', groupIndex);
+            
+            // Agregar eventos mouseenter/mouseleave a cada fila
+            row.addEventListener('mouseenter', () => {
+                highlightTotalGroup(groupIndex);
+            });
+            
+            row.addEventListener('mouseleave', (e) => {
+                const toElement = e.relatedTarget;
+                if (!toElement || !toElement.closest(`tr[data-group="${groupIndex}"]`)) {
+                    unhighlightTotalGroup(groupIndex);
+                }
+            });
+        });
+    });
+});
+
+// Estilos para el resaltado de grupos
+tr.highlighted {
+    background-color: rgba(0,0,0,.075) !important;
+    transition: background-color 0.2s ease;
+}
+
+tr.highlighted td {
+    background-color: rgba(0,0,0,.075) !important;
+    transition: background-color 0.2s ease;
+}
+
+tr.highlighted td.highlighted {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Asegurar que los badges mantengan su color cuando la fila está resaltada */
+tr.highlighted .badge {
+    opacity: 0.9;
+}
+
+/* Asegurar que los botones de acción sean visibles cuando la fila está resaltada */
+tr.highlighted .btn-group .btn {
+    opacity: 1;
+}
+</script>
+
+<script>
+// Función para resaltar el grupo total
+function highlightTotalGroup(groupName) {
+    // Resaltar todas las filas del grupo
+    const rows = document.querySelectorAll(`tr[data-group-name="${groupName}"]`);
+    rows.forEach(row => {
+        row.classList.add('highlighted');
+        // Asegurar que las celdas también tengan el resaltado
+        const cells = row.querySelectorAll('td');
+        cells.forEach(cell => {
+            cell.classList.add('highlighted');
+        });
+    });
+}
+
+// Función para quitar el resaltado del grupo total
+function unhighlightTotalGroup(groupName) {
+    // Quitar el resaltado de todas las filas del grupo
+    const rows = document.querySelectorAll(`tr[data-group-name="${groupName}"]`);
+    rows.forEach(row => {
+        row.classList.remove('highlighted');
+        // Quitar el resaltado de las celdas
+        const cells = row.querySelectorAll('td');
+        cells.forEach(cell => {
+            cell.classList.remove('highlighted');
+        });
+    });
+}
+
+// Inicializar los eventos de los grupos cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    // Agrupar los productos por nombre
+    const rows = document.querySelectorAll('tr.product-row');
+    rows.forEach(row => {
+        const nameCell = row.querySelector('td:nth-child(3)');
+        if (nameCell) {
+            const productName = nameCell.textContent.trim();
+            // Usar el nombre del producto como identificador del grupo
+            row.setAttribute('data-group-name', productName);
+            
+            // Agregar eventos mouseenter/mouseleave a cada fila
+            row.addEventListener('mouseenter', () => {
+                highlightTotalGroup(productName);
+            });
+            
+            row.addEventListener('mouseleave', (e) => {
+                const toElement = e.relatedTarget;
+                if (!toElement || !toElement.closest(`tr[data-group-name="${productName}"]`)) {
+                    unhighlightTotalGroup(productName);
+                }
+            });
+        }
+    });
+});
+
+// Estilos para el resaltado de grupos
+tr.highlighted {
+    background-color: rgba(0,0,0,.075) !important;
+    transition: background-color 0.2s ease;
+}
+
+tr.highlighted td {
+    background-color: rgba(0,0,0,.075) !important;
+    transition: background-color 0.2s ease;
+}
+
+tr.highlighted td.highlighted {
+    background-color: rgba(0,0,0,.075) !important;
+}
+
+/* Asegurar que los badges mantengan su color cuando la fila está resaltada */
+tr.highlighted .badge {
+    opacity: 0.9;
+}
+
+/* Asegurar que los botones de acción sean visibles cuando la fila está resaltada */
+tr.highlighted .btn-group .btn {
+    opacity: 1;
+}
+</script>
+
+<script>
+// Función para resaltar el grupo total
+function highlightTotalGroup(groupKey) {
+    // Resaltar todas las filas del grupo
+    const rows = document.querySelectorAll(`tr[data-group-key="${groupKey}"]`);
+    rows.forEach(row => {
+        row.classList.add('highlighted');
+        // Asegurar que las celdas también tengan el resaltado
+        const cells = row.querySelectorAll('td');
+        cells.forEach(cell => {
+            cell.classList.add('highlighted');
+        });
+    });
+}
+
+// Función para quitar el resaltado del grupo total
+function unhighlightTotalGroup(groupKey) {
+    // Quitar el resaltado de todas las filas del grupo
+    const rows = document.querySelectorAll(`tr[data-group-key="${groupKey}"]`);
+    rows.forEach(row => {
+        row.classList.remove('highlighted');
+        // Quitar el resaltado de las celdas
+        const cells = row.querySelectorAll('td');
+        cells.forEach(cell => {
+            cell.classList.remove('highlighted');
+        });
+    });
+}
+
+// Inicializar los eventos de los grupos cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    // Agrupar los productos por nombre y tipo de jersey
+    const productGroups = {};
+    document.querySelectorAll('tr.product-row').forEach(row => {
+        const nameCell = row.querySelector('td:nth-child(3)');
+        const categoryCell = row.querySelector('td:nth-child(4)');
+        
+        if (nameCell && categoryCell) {
+            const productName = nameCell.textContent.trim();
+            const categoryBadges = categoryCell.querySelectorAll('.badge');
+            let jerseyType = 'default';
+            
+            // Buscar el tipo de jersey en los badges
+            if (categoryBadges.length > 1) {
+                jerseyType = categoryBadges[1].textContent.trim().toLowerCase();
+            }
+            
+            const groupKey = `${productName}-${jerseyType}`;
+            
+            if (!productGroups[groupKey]) {
+                productGroups[groupKey] = [];
+            }
+            productGroups[groupKey].push(row);
+        }
+    });
+
+    // Asignar data-group-key a cada fila del mismo grupo
+    Object.entries(productGroups).forEach(([groupKey, rows]) => {
+        rows.forEach(row => {
+            row.setAttribute('data-group-key', groupKey);
+            
+            // Agregar eventos mouseenter/mouseleave a cada fila
+            row.addEventListener('mouseenter', () => {
+                highlightTotalGroup(groupKey);
+            });
+            
+            row.addEventListener('mouseleave', () => {
+                unhighlightTotalGroup(groupKey);
+            });
+        });
+    });
+});
+
+// Estilos para el resaltado de grupos
+tr.highlighted {
+    background-color: #e9ecef !important;
+    transition: background-color 0.3s ease;
+}
+
+tr.highlighted td {
+    background-color: #e9ecef !important;
+}
+
+.highlighted .badge {
+    opacity: 1;
+}
+
+.highlighted .btn {
+    opacity: 1;
+}
+</script>
+
+<script>
+// ... existing code ...
+<script>
+// Función para obtener el tipo de jersey de una fila
+function getJerseyType(row) {
+    const categoryCell = row.querySelector('td:nth-child(5)');
+    if (categoryCell) {
+        const jerseyBadge = categoryCell.querySelector('.badge:nth-child(2)');
+        return jerseyBadge ? jerseyBadge.textContent.trim() : '';
+    }
+    return '';
+}
+
+// Función para obtener la categoría de una fila
+function getCategory(row) {
+    const categoryCell = row.querySelector('td:nth-child(5)');
+    if (categoryCell) {
+        const categoryBadge = categoryCell.querySelector('.badge:nth-child(1)');
+        return categoryBadge ? categoryBadge.textContent.trim() : '';
+    }
+    return '';
+}
+
+// Función para resaltar el grupo
+function highlightGroup(row) {
+    const productName = row.querySelector('td:nth-child(3)').textContent.trim();
+    const category = getCategory(row);
+    const jerseyType = getJerseyType(row);
+    
+    // Resaltar todas las filas que coincidan con los criterios
+    document.querySelectorAll('tr.product-row').forEach(otherRow => {
+        const otherName = otherRow.querySelector('td:nth-child(3)').textContent.trim();
+        const otherCategory = getCategory(otherRow);
+        const otherJerseyType = getJerseyType(otherRow);
+        
+        let shouldHighlight = false;
+        
+        // Si es un jersey, resaltar solo los del mismo nombre y tipo
+        if (category === 'Jersey' && otherCategory === 'Jersey') {
+            if (productName === otherName && jerseyType === otherJerseyType) {
+                shouldHighlight = true;
+            }
+        } 
+        // Para otras categorías, resaltar solo por nombre
+        else if (productName === otherName) {
+            shouldHighlight = true;
+        }
+        
+        if (shouldHighlight) {
+            otherRow.classList.add('highlighted');
+            otherRow.querySelectorAll('td').forEach(cell => {
+                cell.classList.add('highlighted');
+            });
+        }
+    });
+}
+
+// Función para quitar el resaltado del grupo
+function unhighlightGroup(row) {
+    const productName = row.querySelector('td:nth-child(3)').textContent.trim();
+    const category = getCategory(row);
+    const jerseyType = getJerseyType(row);
+    
+    // Quitar el resaltado de todas las filas que coincidan con los criterios
+    document.querySelectorAll('tr.product-row').forEach(otherRow => {
+        const otherName = otherRow.querySelector('td:nth-child(3)').textContent.trim();
+        const otherCategory = getCategory(otherRow);
+        const otherJerseyType = getJerseyType(otherRow);
+        
+        let shouldUnhighlight = false;
+        
+        // Si es un jersey, quitar resaltado solo de los del mismo nombre y tipo
+        if (category === 'Jersey' && otherCategory === 'Jersey') {
+            if (productName === otherName && jerseyType === otherJerseyType) {
+                shouldUnhighlight = true;
+            }
+        } 
+        // Para otras categorías, quitar resaltado por nombre
+        else if (productName === otherName) {
+            shouldUnhighlight = true;
+        }
+        
+        if (shouldUnhighlight) {
+            otherRow.classList.remove('highlighted');
+            otherRow.querySelectorAll('td').forEach(cell => {
+                cell.classList.remove('highlighted');
+            });
+        }
+    });
+}
+
+// Inicializar los eventos cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('tr.product-row').forEach(row => {
+        row.addEventListener('mouseenter', () => {
+            highlightGroup(row);
+        });
+        
+        row.addEventListener('mouseleave', (e) => {
+            const toElement = e.relatedTarget;
+            if (!toElement || !toElement.closest('tr.highlighted')) {
+                unhighlightGroup(row);
+            }
+        });
+    });
+});
+</script>
+
+<style>
+/* Estilos para el resaltado */
+tr.highlighted {
+    background-color: rgba(0,0,0,.075) !important;
+    transition: background-color 0.2s ease;
+}
+
+tr.highlighted td {
+    background-color: rgba(0,0,0,.075) !important;
+    transition: background-color 0.2s ease;
+}
+
+/* Mantener los badges y botones visibles */
+tr.highlighted .badge {
+    opacity: 0.9;
+}
+
+tr.highlighted .btn-group .btn {
+    opacity: 1;
+}
+</style>
+// ... existing code ...
+
+<script>
+// Función para obtener el tipo de jersey y nombre de un producto
+function getProductInfo(row) {
+    const nameCell = row.querySelector('td:nth-child(3)');
+    const categoryCell = row.querySelector('td:nth-child(4)');
+    const name = nameCell ? nameCell.textContent.trim() : '';
+    let jerseyType = '';
+    
+    if (categoryCell) {
+        const badges = categoryCell.querySelectorAll('.badge');
+        if (badges.length > 1) {
+            jerseyType = badges[1].textContent.trim().toLowerCase();
+        }
+    }
+    
+    return { name, jerseyType };
+}
+
+// Función para resaltar el grupo
+function highlightGroup(row) {
+    const { name, jerseyType } = getProductInfo(row);
+    
+    // Resaltar todas las filas que coincidan con el nombre y tipo de jersey
+    document.querySelectorAll('tr.product-row').forEach(otherRow => {
+        const otherInfo = getProductInfo(otherRow);
+        
+        if (otherInfo.name === name && otherInfo.jerseyType === jerseyType) {
+            otherRow.classList.add('highlighted');
+            otherRow.querySelectorAll('td').forEach(cell => {
+                cell.classList.add('highlighted');
+            });
+        }
+    });
+}
+
+// Función para quitar el resaltado
+function unhighlightGroup(row) {
+    const { name, jerseyType } = getProductInfo(row);
+    
+    document.querySelectorAll('tr.product-row').forEach(otherRow => {
+        const otherInfo = getProductInfo(otherRow);
+        
+        if (otherInfo.name === name && otherInfo.jerseyType === jerseyType) {
+            otherRow.classList.remove('highlighted');
+            otherRow.querySelectorAll('td').forEach(cell => {
+                cell.classList.remove('highlighted');
+            });
+        }
+    });
+}
+
+// Inicializar los eventos cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('tr.product-row').forEach(row => {
+        row.addEventListener('mouseenter', () => {
+            highlightGroup(row);
+        });
+        
+        row.addEventListener('mouseleave', () => {
+            unhighlightGroup(row);
+        });
+    });
+});
+</script>
+
+<style>
+.highlighted {
+    background-color: #e9ecef !important;
+    transition: background-color 0.3s ease;
+}
+
+.highlighted td {
+    background-color: #e9ecef !important;
+}
+
+.highlighted .badge {
+    opacity: 1 !important;
+}
+
+.highlighted .btn {
+    opacity: 1 !important;
+}
+</style>
+// ... existing code ...
 
 
 

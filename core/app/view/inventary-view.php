@@ -918,6 +918,80 @@ document.addEventListener('DOMContentLoaded', function() {
                 applyLimitFilter();
             }
         });
+
+        // Event listener para el checkbox de selección múltiple
+        const selectAllCheckbox = document.getElementById('selectAll');
+        const productCheckboxes = document.querySelectorAll('.product-checkbox');
+        const deleteSelectedBtn = document.getElementById('deleteSelected');
+        
+        // Función para actualizar el estado del botón de eliminar seleccionados
+        function updateDeleteButton() {
+            const selectedCount = document.querySelectorAll('.product-checkbox:checked').length;
+            deleteSelectedBtn.disabled = selectedCount === 0;
+        }
+        
+        // Event listener para el checkbox "Seleccionar todos"
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', function() {
+                productCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateDeleteButton();
+            });
+        }
+        
+        // Event listener para los checkboxes individuales
+        productCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                // Verificar si todos los checkboxes están seleccionados
+                const allChecked = Array.from(productCheckboxes).every(cb => cb.checked);
+                if (selectAllCheckbox) {
+                    selectAllCheckbox.checked = allChecked;
+                }
+                updateDeleteButton();
+            });
+        });
+        
+        // Event listener para el botón de eliminar seleccionados
+        if (deleteSelectedBtn) {
+            deleteSelectedBtn.addEventListener('click', function() {
+                const selectedProducts = Array.from(productCheckboxes)
+                    .filter(cb => cb.checked)
+                    .map(cb => cb.value);
+                
+                if (selectedProducts.length > 0) {
+                    // Mostrar el modal de confirmación
+                    const modal = new bootstrap.Modal(document.getElementById('deleteSelectedModal'));
+                    modal.show();
+                    
+                    // Configurar el botón de confirmación
+                    document.getElementById('confirmDeleteSelected').onclick = function() {
+                        // Crear un formulario dinámico para enviar los datos por POST
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = 'index.php?view=deleteproducts';
+                        
+                        // Crear el campo oculto con los IDs
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'product_ids';
+                        input.value = JSON.stringify(selectedProducts);
+                        
+                        // Agregar el campo al formulario
+                        form.appendChild(input);
+                        
+                        // Agregar el formulario al documento y enviarlo
+                        document.body.appendChild(form);
+                        
+                        // Cerrar el modal antes de enviar el formulario
+                        modal.hide();
+                        
+                        // Enviar el formulario
+                        form.submit();
+                    };
+                }
+            });
+        }
     }
 });
 

@@ -1133,6 +1133,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+function showDeleteModal(productId, productName) {
+    document.getElementById('productNameToDelete').textContent = productName;
+    document.getElementById('confirmDeleteBtn').href = 'index.php?view=delproduct&id=' + productId;
+    var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
 </script>
 
 <style>

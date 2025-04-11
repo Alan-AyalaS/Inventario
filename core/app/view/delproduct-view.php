@@ -3,23 +3,16 @@
 $product = ProductData::getById($_GET["id"]);
 $product_name = $product->name; // Guardar el nombre del producto antes de eliminarlo
 
-// Obtener todos los productos creados en la misma operación
-$sql = "SELECT p.* FROM product p 
-        INNER JOIN operation o ON p.id = o.product_id 
-        WHERE o.created_at = (
-            SELECT MIN(created_at) 
-            FROM operation 
-            WHERE product_id = $product->id
-        )";
+// Obtener todos los productos con el mismo nombre
+$sql = "SELECT * FROM product WHERE name = '$product->name'";
 $query = Executor::doit($sql);
 $related_products = Model::many($query[0], new ProductData());
 
-$operations = OperationData::getAllByProductId($_GET["id"]);
+// Primero eliminar todas las operaciones asociadas al producto
+$sql = "DELETE FROM operation WHERE product_id = $product->id";
+Executor::doit($sql);
 
-foreach ($operations as $op) {
-	$op->del();
-}
-
+// Luego eliminar el producto
 $product->del();
 
 // Si hay más de un producto en el grupo

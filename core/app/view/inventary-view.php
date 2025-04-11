@@ -305,7 +305,7 @@ if($selected_category_name == "Jersey") {
 
             <div class="form-group">
                 <button type="button" class="btn btn-secondary" onclick="clearFilters()">
-                    <i class="bi bi-x-circle"></i> Limpiar
+                    <i class="bi bi-x-circle"></i> Limpiar Filtros
                 </button>
             </div>
         </div>
@@ -538,41 +538,77 @@ if($selected_category_name == "Jersey") {
 				?>
 
 				<h3>Pagina <?php echo $page." de ".$npaginas; ?></h3>
-			<div class="btn-group pagination-container">
-			<?php
-			$px=$page-1;
-			if($px>0):
-			    // Construir la URL con los parámetros de filtro actuales
-			    $url = "index.php?view=inventary&limit=$limit&page=".($px);
-			    if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-			        $url .= "&category_id=".$_GET['category_id'];
-			    }
-			    if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-			        $url .= "&date_filter=".$_GET['date_filter'];
-			    }
-			?>
-			<a class="btn btn-sm btn-default" href="<?php echo $url; ?>"><i class="glyphicon glyphicon-chevron-left"></i> Atras </a>
-			<?php endif; ?>
+                <div class="pagination-container">
+    <?php
+    $px = $page-1;
+    if($px > 0):
+        $url = "index.php?view=inventary&limit=$limit&page=".($px);
+        if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
+            $url .= "&category_id=".$_GET['category_id'];
+        }
+        if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
+            $url .= "&date_filter=".$_GET['date_filter'];
+        }
+    ?>
+    <a class="btn btn-sm btn-default" href="<?php echo $url; ?>"><i class="glyphicon glyphicon-chevron-left"></i> Atras </a>
+    <?php endif; ?>
 
-			<?php 
-                    for($i=0;$i<$npaginas;$i++) {
-			    // Construir la URL con los parámetros de filtro actuales
-                        $url = "index.php?view=inventary&limit=$limit&page=".($i+1);
-			    if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-			        $url .= "&category_id=".$_GET['category_id'];
-			    }
-			    if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-			        $url .= "&date_filter=".$_GET['date_filter'];
-                        }
-                        
-                        $active_class = ($page == ($i+1)) ? 'btn-primary' : 'btn-default';
-                        echo "<a href='$url' class='btn $active_class btn-sm'>".($i+1)."</a> ";
-			    }
-                
-			?>
-			</div>
-			<div class="clearfix"></div>
-			<br><table class="table table-bordered table-hover">
+    <?php 
+    // Mostrar solo un rango de páginas si hay demasiadas
+    $maxPagesToShow = 10;
+    $startPage = max(1, $page - floor($maxPagesToShow / 2));
+    $endPage = min($npaginas, $startPage + $maxPagesToShow - 1);
+    
+    // Ajustar el inicio si estamos cerca del final
+    if ($endPage - $startPage + 1 < $maxPagesToShow) {
+        $startPage = max(1, $endPage - $maxPagesToShow + 1);
+    }
+    
+    // Mostrar primera página y "..." si es necesario
+    if ($startPage > 1) {
+        echo "<a href='index.php?view=inventary&limit=$limit&page=1' class='btn btn-sm btn-default'>1</a>";
+        if ($startPage > 2) {
+            echo "<span class='btn btn-sm btn-default disabled'>...</span>";
+        }
+    }
+    
+    // Mostrar el rango de páginas
+    for($i = $startPage; $i <= $endPage; $i++) {
+        $url = "index.php?view=inventary&limit=$limit&page=$i";
+        if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
+            $url .= "&category_id=".$_GET['category_id'];
+        }
+        if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
+            $url .= "&date_filter=".$_GET['date_filter'];
+        }
+        
+        $active_class = ($page == $i) ? 'btn-primary' : 'btn-default';
+        echo "<a href='$url' class='btn btn-sm $active_class'>$i</a> ";
+    }
+    
+    // Mostrar "..." y última página si es necesario
+    if ($endPage < $npaginas) {
+        if ($endPage < $npaginas - 1) {
+            echo "<span class='btn btn-sm btn-default disabled'>...</span>";
+        }
+        echo "<a href='index.php?view=inventary&limit=$limit&page=$npaginas' class='btn btn-sm btn-default'>$npaginas</a>";
+    }
+    
+    // Botón "Siguiente"
+    if($page < $npaginas):
+        $url = "index.php?view=inventary&limit=$limit&page=".($page + 1);
+        if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
+            $url .= "&category_id=".$_GET['category_id'];
+        }
+        if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
+            $url .= "&date_filter=".$_GET['date_filter'];
+        }
+    ?>
+    <a class="btn btn-sm btn-default" href="<?php echo $url; ?>">Siguiente <i class="glyphicon glyphicon-chevron-right"></i></a>
+    <?php endif; ?>
+</div>
+			<div class="table-responsive">
+				<table class="table table-bordered table-hover">
 				<thead>
 					<tr>
 						<th style="width: 50px;">
@@ -748,23 +784,76 @@ if($selected_category_name == "Jersey") {
                             <?php endforeach; ?>
 				</tbody>
 			</table>
-			<div class="btn-group pagination-container">
-			<?php
-			for($i=0;$i<$npaginas;$i++){
-			    // Construir la URL con los parámetros de filtro actuales
-			    $url = "index.php?view=inventary&limit=$limit&page=".($i+1);
-			    if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-			        $url .= "&category_id=".$_GET['category_id'];
-			    }
-			    if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-			        $url .= "&date_filter=".$_GET['date_filter'];
-			    }
-			    
-			    $active_class = ($page == ($i+1)) ? 'btn-primary' : 'btn-default';
-			    echo "<a href='$url' class='btn $active_class btn-sm'>".($i+1)."</a> ";
-			}
-			?>
 			</div>
+			<div class="pagination-container">
+    <?php
+    $px = $page-1;
+    if($px > 0):
+        $url = "index.php?view=inventary&limit=$limit&page=".($px);
+        if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
+            $url .= "&category_id=".$_GET['category_id'];
+        }
+        if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
+            $url .= "&date_filter=".$_GET['date_filter'];
+        }
+    ?>
+    <a class="btn btn-sm btn-default" href="<?php echo $url; ?>"><i class="glyphicon glyphicon-chevron-left"></i> Atras </a>
+    <?php endif; ?>
+
+    <?php 
+    // Mostrar solo un rango de páginas si hay demasiadas
+    $maxPagesToShow = 10;
+    $startPage = max(1, $page - floor($maxPagesToShow / 2));
+    $endPage = min($npaginas, $startPage + $maxPagesToShow - 1);
+    
+    // Ajustar el inicio si estamos cerca del final
+    if ($endPage - $startPage + 1 < $maxPagesToShow) {
+        $startPage = max(1, $endPage - $maxPagesToShow + 1);
+    }
+    
+    // Mostrar primera página y "..." si es necesario
+    if ($startPage > 1) {
+        echo "<a href='index.php?view=inventary&limit=$limit&page=1' class='btn btn-sm btn-default'>1</a>";
+        if ($startPage > 2) {
+            echo "<span class='btn btn-sm btn-default disabled'>...</span>";
+        }
+    }
+    
+    // Mostrar el rango de páginas
+    for($i = $startPage; $i <= $endPage; $i++) {
+        $url = "index.php?view=inventary&limit=$limit&page=$i";
+        if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
+            $url .= "&category_id=".$_GET['category_id'];
+        }
+        if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
+            $url .= "&date_filter=".$_GET['date_filter'];
+        }
+        
+        $active_class = ($page == $i) ? 'btn-primary' : 'btn-default';
+        echo "<a href='$url' class='btn btn-sm $active_class'>$i</a> ";
+    }
+    
+    // Mostrar "..." y última página si es necesario
+    if ($endPage < $npaginas) {
+        if ($endPage < $npaginas - 1) {
+            echo "<span class='btn btn-sm btn-default disabled'>...</span>";
+        }
+        echo "<a href='index.php?view=inventary&limit=$limit&page=$npaginas' class='btn btn-sm btn-default'>$npaginas</a>";
+    }
+    
+    // Botón "Siguiente"
+    if($page < $npaginas):
+        $url = "index.php?view=inventary&limit=$limit&page=".($page + 1);
+        if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
+            $url .= "&category_id=".$_GET['category_id'];
+        }
+        if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
+            $url .= "&date_filter=".$_GET['date_filter'];
+        }
+    ?>
+    <a class="btn btn-sm btn-default" href="<?php echo $url; ?>">Siguiente <i class="glyphicon glyphicon-chevron-right"></i></a>
+    <?php endif; ?>
+</div>
 
 				<?php
 			}else{
@@ -778,10 +867,10 @@ if($selected_category_name == "Jersey") {
 
 			?>
                 </div>
-		</div>
-</div>
-	</div>
-</div>
+		 </div>
+           </div>
+	      </div>
+        </div>
 
 <!-- Agregar los scripts de Bootstrap antes del cierre del body -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -2808,6 +2897,60 @@ document.addEventListener('DOMContentLoaded', function() {
     opacity: 1 !important;
 }
 </style>
+// ... existing code ...
+
+<style>
+/* Estilos para la paginación */
+.pagination-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 15px 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.pagination-container .btn {
+    margin: 2px;
+    min-width: 35px;
+    height: 35px;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Asegurar que los botones de navegación (Anterior/Siguiente) tengan un ancho mínimo */
+.pagination-container .btn-default {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.pagination-container .btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: white;
+}
+
+/* Estilo para el contenedor principal de la tabla */
+.card-body {
+    overflow-x: hidden;
+}
+
+/* Asegurar que la tabla tenga scroll horizontal si es necesario */
+.table-responsive {
+    overflow-x: auto;
+    margin-bottom: 1rem;
+}
+</style>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+    // ... existing table code ...
+    </table>
+</div>
+
+
 // ... existing code ...
 
 

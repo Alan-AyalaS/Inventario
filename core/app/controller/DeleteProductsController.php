@@ -23,16 +23,43 @@ class DeleteProductsController {
                     throw new Exception('Formato de IDs inválido');
                 }
 
-                foreach ($product_ids as $id) {
-                    $product = ProductData::getById($id);
+                // Eliminar cada producto
+                foreach ($product_ids as $product_id) {
+                    $product = ProductData::getById($product_id);
                     if ($product) {
-                        // Primero eliminar todas las operaciones asociadas
-                        $sql = "DELETE FROM operation WHERE product_id = $id";
+                        // Obtener todos los productos del mismo grupo
+                        $sql = "SELECT * FROM product WHERE name = '$product->name' AND category_id = $product->category_id";
+                        if ($product->jersey_type) {
+                            $sql .= " AND jersey_type = '$product->jersey_type'";
+                        }
+                        $query = Executor::doit($sql);
+                        $group_products = Model::many($query[0], new ProductData());
+                        
+                        // Primero eliminar todas las operaciones asociadas al producto
+                        $sql = "DELETE FROM operation WHERE product_id = $product_id";
                         Executor::doit($sql);
                         
                         // Luego eliminar el producto
-                        $sql = "DELETE FROM product WHERE id = $id";
-                        Executor::doit($sql);
+                        $product->del();
+                        
+                        // Si hay más de un producto en el grupo
+                        if (count($group_products) > 1) {
+                            // Calcular el nuevo total sumando la disponibilidad de los productos restantes
+                            $total_availability = 0;
+                            foreach ($group_products as $group_product) {
+                                if ($group_product->id != $product_id) { // Excluir el producto que se está eliminando
+                                    $total_availability += $group_product->availability;
+                                }
+                            }
+                            
+                            // Actualizar el total en todos los productos del grupo
+                            foreach ($group_products as $group_product) {
+                                if ($group_product->id != $product_id) { // Excluir el producto que se está eliminando
+                                    $group_product->total = $total_availability;
+                                    $group_product->update();
+                                }
+                            }
+                        }
                     }
                 }
 

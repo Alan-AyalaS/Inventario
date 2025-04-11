@@ -610,13 +610,17 @@ if($selected_category_name == "Jersey") {
                                 <th style="width: 150px;">Nombre</th>
 						<th style="width: 80px;">Talla</th>
                                 <th style="width: 120px;">Categoría</th>
+                                <?php if(isset($_SESSION["is_admin"]) && $_SESSION["is_admin"] == "1"): ?>
                                 <th style="width: 100px;">Precio de Entrada</th>
+                                <?php endif; ?>
                                 <th style="width: 100px;">Precio de Salida</th>
                                 <th style="width: 80px;">Unidad</th>
                                 <th style="width: 100px;">Mínima en Inventario</th>
                                 <th style="width: 50px;">Disponible</th>
                                 <th style="width: 60px;">Total</th>
+                                <?php if(isset($_SESSION["is_admin"]) && $_SESSION["is_admin"] == "1"): ?>
                                 <th style="width: 180px;">Acciones</th>
+                                <?php endif; ?>
 					</tr>
 				</thead>
 				<tbody>
@@ -700,7 +704,9 @@ if($selected_category_name == "Jersey") {
 								</span>
 							<?php endif; ?>
 						</td>
+						<?php if(isset($_SESSION["is_admin"]) && $_SESSION["is_admin"] == "1"): ?>
 						<td><?php echo $product->price_in; ?></td>
+						<?php endif; ?>
 						<td><?php echo $product->price_out; ?></td>
 						<td><?php echo $product->unit; ?></td>
                         <td><?php echo $product->inventary_min; ?></td>
@@ -756,22 +762,24 @@ if($selected_category_name == "Jersey") {
                                     <?php echo $product->total; ?>
 						</td>
                         <?php endif; ?>
+                        <?php if(isset($_SESSION["is_admin"]) && $_SESSION["is_admin"] == "1"): ?>
                         <td class="actions-cell">
                             <div class="btn-group">
                                 <button type="button" class="btn btn-sm btn-success adjust-stock-btn" data-product-id="<?php echo $product->id; ?>" data-operation="add">
-                                    <i class="bi bi-plus-circle"></i>
-                                </button>
+								<i class="bi bi-plus-circle"></i>
+							</button>
                                 <button type="button" class="btn btn-sm btn-danger adjust-stock-btn" data-product-id="<?php echo $product->id; ?>" data-operation="subtract">
-                                    <i class="bi bi-dash-circle"></i>
-                                </button>
-                                <a href="index.php?view=editproduct&id=<?php echo $product->id; ?>" class="btn btn-sm btn-warning">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
+								<i class="bi bi-dash-circle"></i>
+							</button>
+							<a href="index.php?view=editproduct&id=<?php echo $product->id; ?>" class="btn btn-sm btn-warning">
+								<i class="bi bi-pencil"></i>
+							</a>
                                 <button type="button" class="btn btn-sm btn-danger delete-product-btn" data-product-id="<?php echo $product->id; ?>" data-product-name="<?php echo addslashes($product->name); ?>">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+								<i class="bi bi-trash"></i>
+							</button>
                             </div>
-                        </td>
+						</td>
+                        <?php endif; ?>
 					</tr>
                             <?php endforeach; ?>
 				</tbody>
@@ -1244,7 +1252,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function showDeleteModal(productId, productName) {
     document.getElementById('productNameToDelete').textContent = productName;
-    document.getElementById('confirmDeleteBtn').href = 'index.php?view=delproduct&id=' + productId;
+    
+    // Construir la URL base
+    let url = 'index.php?view=delproduct&id=' + productId;
+    
+    // Agregar todos los parámetros de filtro si existen
+    const filterParams = [
+        'category_id', 'availability', 'size', 'date_filter',
+        'search', 'limit', 'jerseyType', 'page'
+    ];
+    
+    filterParams.forEach(param => {
+        const value = document.getElementById(param)?.value;
+        if (value) {
+            url += `&${param}=${encodeURIComponent(value)}`;
+        }
+    });
+    
+    // Establecer la URL en el botón de confirmación
+    document.getElementById('confirmDeleteBtn').href = url;
+    
+    // Mostrar el modal
     var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
     modal.show();
 }

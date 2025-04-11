@@ -326,7 +326,10 @@ if($selected_category_name == "Jersey") {
     <div class="col-md-12">
         <?php if(isset($_SESSION["is_admin"]) && $_SESSION["is_admin"] == "1"): ?>
         <button type="button" class="btn btn-danger" id="deleteSelected" disabled style="margin-bottom: 15px;">
-            <i class="fas fa-trash"></i> Eliminar seleccionados
+            <i class="bi bi-trash"></i> Eliminar seleccionados
+        </button>
+        <button type="button" class="btn btn-warning" id="editSelected" disabled style="margin-bottom: 15px; margin-left: 10px;">
+            <i class="bi bi-pencil"></i> Editar seleccionados
         </button>
         <?php endif; ?>
     </div>
@@ -452,6 +455,96 @@ if($selected_category_name == "Jersey") {
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar productos seleccionados -->
+<div class="modal fade" id="editSelectedModal" tabindex="-1" aria-labelledby="editSelectedModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editSelectedModalLabel">Editar Productos Seleccionados</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editSelectedForm" method="post" action="index.php?view=updateproducts" enctype="multipart/form-data">
+                    <input type="hidden" name="product_ids" id="selectedProductIds">
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="editPrice_in" class="form-label">Precio de Entrada</label>
+                                <input type="number" step="0.01" class="form-control" id="editPrice_in" name="price_in">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="editPrice_out" class="form-label">Precio de Salida</label>
+                                <input type="number" step="0.01" class="form-control" id="editPrice_out" name="price_out">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="editCategory_id" class="form-label">Categoría</label>
+                                <select class="form-control" id="editCategory_id" name="category_id">
+                                    <option value="">-- NINGUNA --</option>
+                                    <?php foreach(CategoryData::getAll() as $category): ?>
+                                        <option value="<?php echo $category->id; ?>"><?php echo $category->name; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="editInventary_min" class="form-label">Mínimo en Inventario</label>
+                                <input type="number" class="form-control" id="editInventary_min" name="inventary_min">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="editUnit" class="form-label">Unidad</label>
+                                <input type="text" class="form-control" id="editUnit" name="unit">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="editTipo_jersey" class="form-label">Tipo de Jersey</label>
+                                <select class="form-control" id="editTipo_jersey" name="tipo_jersey">
+                                    <option value="">-- SELECCIONE --</option>
+                                    <option value="adulto">Adulto</option>
+                                    <option value="niño">Niño</option>
+                                    <option value="dama">Dama</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editImage" class="form-label">Imagen</label>
+                        <input type="file" class="form-control" id="editImage" name="image">
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="editIs_active" name="is_active" value="1">
+                        <label class="form-check-label" for="editIs_active">Activo</label>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <small>Los campos vacíos no se actualizarán. Solo se modificarán los campos que contengan valores.</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="editSelectedForm" class="btn btn-primary">Guardar cambios</button>
             </div>
         </div>
     </div>
@@ -1086,6 +1179,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
+
+        // Event listener para el botón de editar seleccionados
+        const editSelectedBtn = document.getElementById('editSelected');
+        if (editSelectedBtn) {
+            editSelectedBtn.addEventListener('click', function() {
+                const selectedProducts = Array.from(document.querySelectorAll('.product-checkbox:checked'))
+                    .map(cb => cb.value);
+                
+                if (selectedProducts.length > 0) {
+                    // Establecer los IDs de los productos seleccionados
+                    document.getElementById('selectedProductIds').value = JSON.stringify(selectedProducts);
+                    
+                    // Mostrar el modal de edición
+                    const modal = new bootstrap.Modal(document.getElementById('editSelectedModal'));
+                    modal.show();
+                }
+            });
+        }
+
+        // Actualizar el estado del botón de editar seleccionados junto con el de eliminar
+        function updateButtons() {
+            const selectedCount = document.querySelectorAll('.product-checkbox:checked').length;
+            if (deleteSelectedBtn) deleteSelectedBtn.disabled = selectedCount === 0;
+            if (editSelectedBtn) editSelectedBtn.disabled = selectedCount === 0;
+        }
+
+        // Actualizar los event listeners existentes
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', function() {
+                productCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateButtons();
+            });
+        }
+
+        productCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateButtons);
+        });
     }
 });
 

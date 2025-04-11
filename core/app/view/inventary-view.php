@@ -1319,19 +1319,11 @@ function updateClearFiltersButton() {
 
 // Función para limpiar filtros
 function clearFilters() {
-    const url = new URL(window.location.href);
-    const params = new URLSearchParams(url.search);
+    // Obtener el valor actual del límite
+    const currentLimit = document.getElementById('limit').value;
     
-    // Mantener solo los parámetros necesarios
-    const keepParams = ['view', 'limit'];
-    for (const [key] of params.entries()) {
-        if (!keepParams.includes(key)) {
-            params.delete(key);
-        }
-    }
-    
-    url.search = params.toString();
-    window.location.href = url.toString();
+    // Redirigir a la URL base manteniendo el límite actual
+    window.location.href = `index.php?view=inventary&limit=${currentLimit}`;
 }
 
 // Función para filtrar productos
@@ -2285,19 +2277,11 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 // Función para limpiar filtros
 function clearFilters() {
-    const url = new URL(window.location.href);
-    const params = new URLSearchParams(url.search);
+    // Obtener el valor actual del límite
+    const currentLimit = document.getElementById('limit').value;
     
-    // Mantener solo los parámetros necesarios
-    const keepParams = ['view', 'limit'];
-    for (const [key] of params.entries()) {
-        if (!keepParams.includes(key)) {
-            params.delete(key);
-        }
-    }
-    
-    url.search = params.toString();
-    window.location.href = url.toString();
+    // Redirigir a la URL base manteniendo el límite actual
+    window.location.href = `index.php?view=inventary&limit=${currentLimit}`;
 }
 
 // Función para aplicar el filtro de límite

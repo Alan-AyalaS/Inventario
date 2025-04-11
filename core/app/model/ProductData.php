@@ -76,7 +76,22 @@ class ProductData {
 	}
 
 	public function update(){
-		$sql = "update ".self::$tablename." set barcode=\"$this->barcode\",name=\"$this->name\",price_in=\"$this->price_in\",price_out=\"$this->price_out\",unit=\"$this->unit\",presentation=\"$this->presentation\",category_id=$this->category_id,inventary_min=$this->inventary_min,size=\"$this->size\",total=$this->total,availability=$this->availability where id=$this->id";
+		$sql = "update ".self::$tablename." set 
+			barcode=\"$this->barcode\",
+			name=\"$this->name\",
+			price_in=\"$this->price_in\",
+			price_out=\"$this->price_out\",
+			unit=\"$this->unit\",
+			presentation=\"$this->presentation\",
+			category_id=$this->category_id,
+			inventary_min=$this->inventary_min,
+			size=\"$this->size\",
+			total=$this->total,
+			availability=$this->availability,
+			description=\"$this->description\",
+			jersey_type=\"$this->jersey_type\",
+			is_active=$this->is_active
+		where id=$this->id";
 		return Executor::doit($sql);
 	}
 

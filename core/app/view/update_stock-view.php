@@ -49,11 +49,46 @@ try {
         exit;
     }
 
-    // Actualizar el stock
+    // Actualizar tanto la disponibilidad como el total
     $product->availability = $new_stock;
+    $product->total = $new_stock;
+    
+    // Asegurarse de que todos los campos necesarios estén establecidos
+    if (!isset($product->description)) $product->description = "";
+    if (!isset($product->jersey_type)) $product->jersey_type = "";
+    if (!isset($product->is_active)) $product->is_active = 1;
+    
     $result = $product->update();
 
     if ($result) {
+        // Obtener la categoría del producto
+        $category = $product->getCategory();
+        $category_name = $category ? strtolower(trim($category->name)) : '';
+
+        // Obtener todos los productos del mismo grupo
+        if ($category_name === 'jersey') {
+            // Para jerseys, agrupar por nombre, categoría y tipo de jersey
+            $sql = "SELECT * FROM product WHERE name = \"$product->name\" AND category_id = $product->category_id AND jersey_type = \"$product->jersey_type\"";
+        } else {
+            // Para otras categorías, agrupar solo por nombre y categoría
+            $sql = "SELECT * FROM product WHERE name = \"$product->name\" AND category_id = $product->category_id";
+        }
+        
+        $query = Executor::doit($sql);
+        $group_products = Model::many($query[0], new ProductData());
+        
+        // Calcular el nuevo total del grupo
+        $group_total = 0;
+        foreach ($group_products as $group_product) {
+            $group_total += $group_product->availability;
+        }
+        
+        // Actualizar el total en todos los productos del grupo
+        foreach ($group_products as $group_product) {
+            $group_product->total = $group_total;
+            $group_product->update();
+        }
+
         // Registrar la operación en el historial
         $op = new OperationData();
         $op->product_id = $product_id;
@@ -66,7 +101,14 @@ try {
         echo json_encode([
             'success' => true, 
             'message' => 'Stock actualizado correctamente',
-            'new_stock' => $new_stock
+            'new_stock' => $new_stock,
+            'group_total' => $group_total,
+            'debug' => [
+                'availability' => $product->availability,
+                'total' => $product->total,
+                'group_products_count' => count($group_products),
+                'category' => $category_name
+            ]
         ]);
     } else {
         ob_end_clean();

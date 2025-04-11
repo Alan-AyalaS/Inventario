@@ -651,7 +651,7 @@ if($selected_category_name == "Jersey") {
                         $rowspan = count($current_group);
                         
                         // Determinar si es la primera fila del grupo
-                        $is_first_in_group = $product === reset($current_group);
+                        $is_first_in_group = $current_group !== null && $product === reset($current_group);
                     ?>
                     <tr data-product-id="<?php echo $product->id; ?>" data-group-name="<?php echo htmlspecialchars($product->name); ?>" class="product-row">
                                 <td>
@@ -892,8 +892,82 @@ document.addEventListener('DOMContentLoaded', function() {
                 showDeleteModal(productId, productName);
             });
         });
+
+        // Event listener para el botón de búsqueda
+        document.getElementById('searchButton').addEventListener('click', function() {
+            applyFilters();
+        });
+
+        // Event listener para el campo de búsqueda (Enter)
+        document.getElementById('search').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                applyFilters();
+            }
+        });
+
+        // Event listeners para los selectores
+        document.getElementById('category_id').addEventListener('change', applyFilters);
+        document.getElementById('availability').addEventListener('change', applyFilters);
+        document.getElementById('size').addEventListener('change', applyFilters);
+        document.getElementById('date_filter').addEventListener('change', applyFilters);
+        document.getElementById('jerseyType').addEventListener('change', applyFilters);
     }
 });
+
+// Función para aplicar los filtros
+function applyFilters() {
+    const categoryId = document.getElementById('category_id').value;
+    const availability = document.getElementById('availability').value;
+    const size = document.getElementById('size').value;
+    const dateFilter = document.getElementById('date_filter').value;
+    const search = document.getElementById('search').value;
+    const jerseyType = document.getElementById('jerseyType').value;
+    const limit = document.getElementById('limit').value;
+    
+    let url = 'index.php?view=inventary';
+    
+    if (categoryId) url += `&category_id=${categoryId}`;
+    if (availability) url += `&availability=${availability}`;
+    if (size) url += `&size=${size}`;
+    if (dateFilter) url += `&date_filter=${dateFilter}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    if (jerseyType) url += `&jerseyType=${jerseyType}`;
+    if (limit) url += `&limit=${limit}`;
+
+    window.location.href = url;
+}
+
+// Función para limpiar los filtros
+function clearFilters() {
+    window.location.href = 'index.php?view=inventary';
+}
+
+// Función para aplicar el límite de productos a mostrar
+function applyLimitFilter() {
+    const limit = document.getElementById('limit').value;
+    if (limit && limit > 0) {
+        let url = 'index.php?view=inventary';
+        
+        // Mantener los filtros existentes
+        const categoryId = document.getElementById('category_id').value;
+        const availability = document.getElementById('availability').value;
+        const size = document.getElementById('size').value;
+        const dateFilter = document.getElementById('date_filter').value;
+        const search = document.getElementById('search').value;
+        const jerseyType = document.getElementById('jerseyType').value;
+        
+        if (categoryId) url += `&category_id=${categoryId}`;
+        if (availability) url += `&availability=${availability}`;
+        if (size) url += `&size=${size}`;
+        if (dateFilter) url += `&date_filter=${dateFilter}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        if (jerseyType) url += `&jerseyType=${jerseyType}`;
+        
+        url += `&limit=${limit}`;
+        
+        window.location.href = url;
+    }
+}
 
 // Función para mostrar el modal de ajuste
 function showAdjustModal(productId, operationType) {
@@ -986,7 +1060,89 @@ function submitAdjustForm(event) {
     
     return false;
 }
+
+// Función para obtener el tipo de jersey y nombre de un producto
+function getProductInfo(row) {
+    const nameCell = row.querySelector('td:nth-child(3)');
+    const categoryCell = row.querySelector('td:nth-child(4)');
+    const name = nameCell ? nameCell.textContent.trim() : '';
+    let jerseyType = '';
+    
+    if (categoryCell) {
+        const badges = categoryCell.querySelectorAll('.badge');
+        if (badges.length > 1) {
+            jerseyType = badges[1].textContent.trim().toLowerCase();
+        }
+    }
+    
+    return { name, jerseyType };
+}
+
+// Función para resaltar el grupo
+function highlightGroup(row) {
+    const { name, jerseyType } = getProductInfo(row);
+    
+    // Resaltar todas las filas que coincidan con el nombre y tipo de jersey
+    document.querySelectorAll('tr.product-row').forEach(otherRow => {
+        const otherInfo = getProductInfo(otherRow);
+        
+        if (otherInfo.name === name && otherInfo.jerseyType === jerseyType) {
+            otherRow.classList.add('highlighted');
+            otherRow.querySelectorAll('td').forEach(cell => {
+                cell.classList.add('highlighted');
+            });
+        }
+    });
+}
+
+// Función para quitar el resaltado
+function unhighlightGroup(row) {
+    const { name, jerseyType } = getProductInfo(row);
+    
+    document.querySelectorAll('tr.product-row').forEach(otherRow => {
+        const otherInfo = getProductInfo(otherRow);
+        
+        if (otherInfo.name === name && otherInfo.jerseyType === jerseyType) {
+            otherRow.classList.remove('highlighted');
+            otherRow.querySelectorAll('td').forEach(cell => {
+                cell.classList.remove('highlighted');
+            });
+        }
+    });
+}
+
+// Inicializar los eventos cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('tr.product-row').forEach(row => {
+        row.addEventListener('mouseenter', () => {
+            highlightGroup(row);
+        });
+        
+        row.addEventListener('mouseleave', () => {
+            unhighlightGroup(row);
+        });
+    });
+});
 </script>
+
+<style>
+.highlighted {
+    background-color: #e9ecef !important;
+    transition: background-color 0.3s ease;
+}
+
+.highlighted td {
+    background-color: #e9ecef !important;
+}
+
+.highlighted .badge {
+    opacity: 1 !important;
+}
+
+.highlighted .btn {
+    opacity: 1 !important;
+}
+</style>
 </body>
 </html>
 

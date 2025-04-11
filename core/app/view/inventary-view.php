@@ -422,6 +422,41 @@ if($selected_category_name == "Jersey") {
     </div>
 </div>
 
+<!-- Modal para detalles del producto -->
+<div class="modal fade" id="productDetailsModal" tabindex="-1" aria-labelledby="productDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productDetailsModalLabel">Detalles del Producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <img id="productImage" src="" alt="Imagen del producto" class="img-fluid mb-3" style="max-height: 300px; width: auto;">
+                    </div>
+                    <div class="col-md-6">
+                        <h4 id="productName"></h4>
+                        <p><strong>Código:</strong> <span id="productCode"></span></p>
+                        <p><strong>Categoría:</strong> <span id="productCategory"></span></p>
+                        <p><strong>Talla:</strong> <span id="productSize"></span></p>
+                        <p><strong>Disponible:</strong> <span id="productAvailability"></span></p>
+                        <p><strong>Precio de Salida:</strong> $<span id="productPriceOut"></span></p>
+                        <?php if(isset($_SESSION["is_admin"]) && $_SESSION["is_admin"] == "1"): ?>
+                        <p><strong>Precio de Entrada:</strong> $<span id="productPriceIn"></span></p>
+                        <?php endif; ?>
+                        <p><strong>Unidad:</strong> <span id="productUnit"></span></p>
+                        <p><strong>Mínima en Inventario:</strong> <span id="productMinInventory"></span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card">
 	<div class="card-header">INVENTARIO
 	</div>
@@ -665,7 +700,21 @@ if($selected_category_name == "Jersey") {
                                     <input type="checkbox" class="product-checkbox" value="<?php echo $product->id; ?>">
 						</td>
 						<td><?php echo $product->id; ?></td>
-                                <td><?php echo $product->name; ?></td>
+                                <td class="product-name" style="cursor: pointer;" 
+                                    data-product-id="<?php echo $product->id; ?>"
+                                    data-product-name="<?php echo htmlspecialchars($product->name); ?>"
+                                    data-product-size="<?php echo htmlspecialchars($product->size); ?>"
+                                    data-product-category="<?php 
+                                        $category = CategoryData::getById($product->category_id);
+                                        echo htmlspecialchars($category ? $category->name : 'Sin categoría');
+                                    ?>"
+                                    data-product-price-in="<?php echo $product->price_in; ?>"
+                                    data-product-price-out="<?php echo $product->price_out; ?>"
+                                    data-product-unit="<?php echo htmlspecialchars($product->unit); ?>"
+                                    data-product-min-inventory="<?php echo $product->inventary_min; ?>"
+                                    data-product-availability="<?php echo $product->availability; ?>"
+                                    data-product-image="<?php echo $product->image ? 'storage/products/'.$product->image : 'storage/products/no-image.png'; ?>"
+                                    ><?php echo $product->name; ?></td>
                         <td><?php echo $product->size; ?></td>
 						<td>
 							<?php 
@@ -1279,6 +1328,49 @@ function showDeleteModal(productId, productName) {
     var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
     modal.show();
 }
+
+// Función para mostrar el modal de detalles del producto
+function showProductDetails(productElement) {
+    const modal = new bootstrap.Modal(document.getElementById('productDetailsModal'));
+    
+    // Obtener los datos del producto
+    const productData = productElement.dataset;
+    
+    // Actualizar el contenido del modal
+    document.getElementById('productName').textContent = productData.productName;
+    document.getElementById('productCode').textContent = productData.productId;
+    document.getElementById('productCategory').textContent = productData.productCategory;
+    document.getElementById('productSize').textContent = productData.productSize;
+    document.getElementById('productAvailability').textContent = productData.productAvailability;
+    document.getElementById('productPriceOut').textContent = productData.productPriceOut;
+    if (document.getElementById('productPriceIn')) {
+        document.getElementById('productPriceIn').textContent = productData.productPriceIn;
+    }
+    document.getElementById('productUnit').textContent = productData.productUnit;
+    document.getElementById('productMinInventory').textContent = productData.productMinInventory;
+    
+    // Actualizar la imagen
+    const productImage = document.getElementById('productImage');
+    productImage.src = productData.productImage;
+    productImage.onerror = function() {
+        this.src = 'storage/products/no-image.png';
+    };
+    
+    // Mostrar el modal
+    modal.show();
+}
+
+// Agregar event listeners para los nombres de productos
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing code ...
+    
+    // Event listener para los nombres de productos
+    document.querySelectorAll('.product-name').forEach(productElement => {
+        productElement.addEventListener('click', function() {
+            showProductDetails(this);
+        });
+    });
+});
 </script>
 
 <style>
@@ -1297,6 +1389,11 @@ function showDeleteModal(productId, productName) {
 
 .highlighted .btn {
     opacity: 1 !important;
+}
+
+.product-name:hover {
+    color: #0d6efd;
+    text-decoration: underline;
 }
 </style>
 </body>

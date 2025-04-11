@@ -1,18 +1,12 @@
 <?php
-// Evitar cualquier output antes del JSON
-ob_start();
-
 // Incluir las clases necesarias
 require_once 'core/app/model/ProductData.php';
 require_once 'core/app/model/OperationData.php';
 
-// Establecer el tipo de contenido como JSON
-header('Content-Type: application/json');
-
 // Verificar que todos los datos requeridos estén presentes
 if (!isset($_POST['product_id']) || !isset($_POST['quantity']) || !isset($_POST['operation_type'])) {
-    ob_end_clean();
-    echo json_encode(['success' => false, 'message' => 'Faltan datos requeridos']);
+    setcookie("stock_error", "Faltan datos requeridos", time() + 3600, "/");
+    header("Location: index.php?view=inventary");
     exit;
 }
 
@@ -23,16 +17,16 @@ try {
 
     // Validar que la cantidad sea positiva
     if ($quantity <= 0) {
-        ob_end_clean();
-        echo json_encode(['success' => false, 'message' => 'La cantidad debe ser mayor que 0']);
+        setcookie("stock_error", "La cantidad debe ser mayor que 0", time() + 3600, "/");
+        header("Location: index.php?view=inventary");
         exit;
     }
 
     // Obtener el producto
     $product = ProductData::getById($product_id);
     if (!$product) {
-        ob_end_clean();
-        echo json_encode(['success' => false, 'message' => 'Producto no encontrado']);
+        setcookie("stock_error", "Producto no encontrado", time() + 3600, "/");
+        header("Location: index.php?view=inventary");
         exit;
     }
 
@@ -44,8 +38,8 @@ try {
 
     // Validar que el stock no sea negativo
     if ($new_stock < 0) {
-        ob_end_clean();
-        echo json_encode(['success' => false, 'message' => 'No hay suficiente stock disponible']);
+        setcookie("stock_error", "No hay suficiente stock disponible", time() + 3600, "/");
+        header("Location: index.php?view=inventary");
         exit;
     }
 
@@ -97,28 +91,40 @@ try {
         $op->operation_type = $operation_type;
         $op->add();
 
-        ob_end_clean();
-        echo json_encode([
-            'success' => true, 
-            'message' => 'Stock actualizado correctamente',
-            'new_stock' => $new_stock,
-            'group_total' => $group_total,
-            'debug' => [
-                'availability' => $product->availability,
-                'total' => $product->total,
-                'group_products_count' => count($group_products),
-                'category' => $category_name
-            ]
-        ]);
+        // Establecer mensaje de éxito personalizado
+        $message = sprintf(
+            "%s %d unidad(es) %s al producto %s talla %s", 
+            $operation_type === 'add' ? "Se agregaron" : "Se restaron",
+            $quantity,
+            $operation_type === 'add' ? "a" : "de",
+            $product->name,
+            $product->size
+        );
+        
+        setcookie("stock_updated", $message, time() + 3600, "/");
+        setcookie("stock_operation", $operation_type, time() + 3600, "/");
+
+        // Construir URL de redirección con parámetros existentes
+        $redirect_url = "index.php?view=inventary";
+        if(isset($_POST['category_id'])) $redirect_url .= "&category_id=" . $_POST['category_id'];
+        if(isset($_POST['availability'])) $redirect_url .= "&availability=" . $_POST['availability'];
+        if(isset($_POST['size'])) $redirect_url .= "&size=" . $_POST['size'];
+        if(isset($_POST['date_filter'])) $redirect_url .= "&date_filter=" . $_POST['date_filter'];
+        if(isset($_POST['search'])) $redirect_url .= "&search=" . $_POST['search'];
+        if(isset($_POST['limit'])) $redirect_url .= "&limit=" . $_POST['limit'];
+        if(isset($_POST['jerseyType'])) $redirect_url .= "&jerseyType=" . $_POST['jerseyType'];
+        if(isset($_POST['page'])) $redirect_url .= "&page=" . $_POST['page'];
+
+        header("Location: " . $redirect_url);
+        exit;
     } else {
-        ob_end_clean();
-        echo json_encode(['success' => false, 'message' => 'Error al actualizar el stock en la base de datos']);
+        setcookie("stock_error", "Error al actualizar el stock en la base de datos", time() + 3600, "/");
+        header("Location: index.php?view=inventary");
+        exit;
     }
 } catch (Exception $e) {
-    ob_end_clean();
-    echo json_encode([
-        'success' => false, 
-        'message' => 'Error: ' . $e->getMessage()
-    ]);
+    setcookie("stock_error", "Error: " . $e->getMessage(), time() + 3600, "/");
+    header("Location: index.php?view=inventary");
+    exit;
 }
 ?> 

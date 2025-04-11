@@ -139,24 +139,7 @@ if($selected_category_name == "Jersey") {
 				(<?php echo count($products); ?> productos registrados)
 			</small>
 		</h1>
-		<?php if(isset($_COOKIE["prdupd"])):?>
-			<div class="alert alert-success alert-dismissible fade show" role="alert" id="successAlert">
-				<strong>¡Éxito!</strong> El producto se ha actualizado correctamente.
-				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="closeAlert()"></button>
-			</div>
-			<script>
-				function closeAlert() {
-					document.getElementById('successAlert').style.transition = 'opacity 0.5s';
-					document.getElementById('successAlert').style.opacity = '0';
-					setTimeout(function() {
-						document.getElementById('successAlert').style.display = 'none';
-					}, 500);
-				}
-				
-				// Cierre automático después de 5 segundos
-				setTimeout(closeAlert, 5000);
-			</script>
-		<?php setcookie("prdupd","",time()-18600); endif; ?>
+		
 
 		<?php if(isset($_COOKIE["prdadd"])):?>
 			<div class="alert alert-success alert-dismissible fade show" role="alert" id="addAlert">
@@ -209,6 +192,8 @@ if($selected_category_name == "Jersey") {
 			setcookie("prddel", "", time()-3600, "/");
 			?>
 		<?php endif; ?>
+
+		
 <div class="row">
     <div class="col-md-12">
         <!-- ===== INICIO DE SECCIÓN PROTEGIDA - NO MODIFICAR ===== -->
@@ -659,7 +644,42 @@ if($selected_category_name == "Jersey") {
 				}
 
 				?>
+                    <?php if(isset($_COOKIE['stock_updated'])): ?>
+			<div class="alert alert-<?php echo isset($_COOKIE['stock_operation']) && $_COOKIE['stock_operation'] === 'add' ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
+				<?php echo $_COOKIE['stock_updated']; ?>
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			</div>
+			<?php 
+			setcookie('stock_updated', '', time() - 3600, '/');
+			setcookie('stock_operation', '', time() - 3600, '/');
+			?>
+		<?php endif; ?>
 
+		<?php if(isset($_COOKIE['stock_error'])): ?>
+			<div class="alert alert-danger alert-dismissible fade show" role="alert">
+				<?php echo $_COOKIE['stock_error']; ?>
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			</div>
+			<?php setcookie('stock_error', '', time() - 3600, '/'); ?>
+		<?php endif; ?>
+        <?php if(isset($_COOKIE["prdupd"])):?>
+			<div class="alert alert-success alert-dismissible fade show" role="alert" id="successAlert">
+				<strong>¡Éxito!</strong> El producto se ha actualizado correctamente.
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="closeAlert()"></button>
+			</div>
+			<script>
+				function closeAlert() {
+					document.getElementById('successAlert').style.transition = 'opacity 0.5s';
+					document.getElementById('successAlert').style.opacity = '0';
+					setTimeout(function() {
+						document.getElementById('successAlert').style.display = 'none';
+					}, 500);
+				}
+				
+				// Cierre automático después de 5 segundos
+				setTimeout(closeAlert, 5000);
+			</script>
+		<?php setcookie("prdupd","",time()-18600); endif; ?>
 				<h3>Pagina <?php echo $page." de ".$npaginas; ?></h3>
                 <div class="pagination-container">
     <?php
@@ -1328,45 +1348,14 @@ function submitAdjustForm(event) {
         return false;
     }
 
-    // Crear los datos del formulario
-    const formData = new FormData();
-    formData.append('product_id', productId);
-    formData.append('quantity', quantity);
-    formData.append('operation_type', operationType);
-    
-    // Enviar la solicitud al servidor
-    fetch('index.php?view=update_stock', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Error en la respuesta del servidor');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            // Cerrar el modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('adjustModal'));
-            if (modal) {
-                modal.hide();
-            }
-            
-            // Mostrar mensaje de éxito
-            alert(data.message);
-            
-            // Recargar la página para actualizar todos los datos
-            window.location.reload();
-        } else {
-            alert(data.message || 'Error al actualizar el stock');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        // Si el stock se actualizó pero hubo un error en la respuesta, recargar la página
-        window.location.reload();
-    });
+    // Cerrar el modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('adjustModal'));
+    if (modal) {
+        modal.hide();
+    }
+
+    // Enviar el formulario
+    form.submit();
     
     return false;
 }

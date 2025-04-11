@@ -911,6 +911,13 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('size').addEventListener('change', applyFilters);
         document.getElementById('date_filter').addEventListener('change', applyFilters);
         document.getElementById('jerseyType').addEventListener('change', applyFilters);
+
+        // Event listener para el campo de límite (Enter)
+        document.getElementById('limit').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                applyLimitFilter();
+            }
+        });
     }
 });
 
@@ -939,7 +946,10 @@ function applyFilters() {
 
 // Función para limpiar los filtros
 function clearFilters() {
-    window.location.href = 'index.php?view=inventary';
+    const limit = document.getElementById('limit').value;
+    let url = 'index.php?view=inventary';
+    if (limit) url += `&limit=${limit}`;
+    window.location.href = url;
 }
 
 // Función para aplicar el límite de productos a mostrar

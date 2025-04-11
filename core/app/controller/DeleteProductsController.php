@@ -7,6 +7,7 @@ while (ob_get_level()) {
 // Asegurarnos de que los archivos requeridos se carguen correctamente
 require_once(__DIR__ . "/../model/ProductData.php");
 require_once(__DIR__ . "/../model/OperationData.php");
+require_once(__DIR__ . "/../../controller/Executor.php");
 
 class DeleteProductsController {
     public function index() {
@@ -40,10 +41,26 @@ class DeleteProductsController {
             }
         } catch (Exception $e) {
             error_log("Error al eliminar productos: " . $e->getMessage());
+            setcookie("prddel", "Error al eliminar productos: " . $e->getMessage(), time()+3600, "/");
         }
         
-        // Redirigir a la vista de inventario
-        header("Location: index.php?view=inventary");
+        // Construir URL de redirección con los filtros actuales
+        $redirect_url = 'index.php?view=inventary';
+        
+        // Parámetros de filtro a mantener
+        $filter_params = [
+            'category_id', 'availability', 'size', 'date_filter', 
+            'search', 'limit', 'jerseyType', 'page'
+        ];
+        
+        // Agregar cada parámetro de filtro que exista
+        foreach ($filter_params as $param) {
+            if (isset($_POST[$param]) && $_POST[$param] !== '') {
+                $redirect_url .= '&' . $param . '=' . urlencode($_POST[$param]);
+            }
+        }
+        
+        header("Location: " . $redirect_url);
         exit;
     }
 } 

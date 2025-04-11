@@ -976,9 +976,24 @@ document.addEventListener('DOMContentLoaded', function() {
                         input.type = 'hidden';
                         input.name = 'product_ids';
                         input.value = JSON.stringify(selectedProducts);
-                        
-                        // Agregar el campo al formulario
                         form.appendChild(input);
+                        
+                        // Agregar los parámetros de filtro actuales
+                        const filterParams = [
+                            'category_id', 'availability', 'size', 'date_filter',
+                            'search', 'limit', 'jerseyType', 'page'
+                        ];
+                        
+                        filterParams.forEach(param => {
+                            const value = document.getElementById(param)?.value;
+                            if (value) {
+                                const filterInput = document.createElement('input');
+                                filterInput.type = 'hidden';
+                                filterInput.name = param;
+                                filterInput.value = value;
+                                form.appendChild(filterInput);
+                            }
+                        });
                         
                         // Agregar el formulario al documento y enviarlo
                         document.body.appendChild(form);

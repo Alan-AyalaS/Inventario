@@ -323,9 +323,11 @@ if($selected_category_name == "Jersey") {
                 </select>
             </div>
     <div class="col-md-12">
+        <?php if(isset($_SESSION["is_admin"]) && $_SESSION["is_admin"] == "1"): ?>
         <button type="button" class="btn btn-danger" id="deleteSelected" disabled style="margin-bottom: 15px;">
             <i class="fas fa-trash"></i> Eliminar seleccionados
         </button>
+        <?php endif; ?>
     </div>
 </div>
 

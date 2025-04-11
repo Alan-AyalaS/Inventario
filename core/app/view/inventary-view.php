@@ -216,14 +216,14 @@ if($selected_category_name == "Jersey") {
             <a href="index.php?view=newproduct" class="btn btn-primary">
                 <i class="bi bi-plus-circle"></i> Agregar Producto
             </a>
-                <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow: none !important;">
-                    <i class="fa fa-download"></i> Descargar <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end" style="background-color: #28a745; border: none;">
-                    <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-excel" style="background-color: transparent !important; transition: color 0.3s ease;">Excel (.xlsx)</a></li>
-                    <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-pdf" style="background-color: transparent !important; transition: color 0.3s ease;">PDF (.pdf)</a></li>
-                </ul>
-            </div>
+            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow: none !important;">
+                <i class="fa fa-download"></i> Descargar <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" style="background-color: #28a745; border: none;">
+                <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-excel" style="background-color: transparent !important; transition: color 0.3s ease;">Excel (.xlsx)</a></li>
+                <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-pdf" style="background-color: transparent !important; transition: color 0.3s ease;">PDF (.pdf)</a></li>
+            </ul>
+        </div>
         <!-- ===== FIN DE SECCIÓN PROTEGIDA ===== -->
 
         <!-- ===== INICIO DE SECCIÓN PROTEGIDA - NO MODIFICAR ===== -->
@@ -231,178 +231,84 @@ if($selected_category_name == "Jersey") {
         <div class="form-inline d-flex flex-wrap align-items-end gap-2">
             <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
                 <label for="category_id" class="me-2">Categoría:</label>
-                <div class="custom-select-wrapper">
-                    <div class="custom-select" id="customCategorySelect">
-                        <div class="custom-select__trigger">
-                            <?php
-                            $selectedCategoryName = 'Todas las categorías';
-                            if (isset($_GET["category_id"]) && $_GET["category_id"] != "") {
-                                foreach ($categories as $category) {
-                                    if ($category->id == $_GET["category_id"]) {
-                                        $selectedCategoryName = htmlspecialchars($category->name);
-                                        break;
-                                    }
-                                }
-                            }
-                            ?>
-                            <span><?php echo $selectedCategoryName; ?></span>
-                            <div class="arrow"></div>
-                        </div>
-                        <div class="custom-options">
-                            <div class="custom-option" data-value="" data-color="#6c757d">Todas las categorías</div>
-                            <?php foreach($categories as $category): 
-                                $categoryColor = isset($_COOKIE['category_color_' . $category->id]) 
-                                    ? $_COOKIE['category_color_' . $category->id] 
-                                    : '#28a745';
-                            ?>
-                                <div class="custom-option" data-value="<?php echo $category->id; ?>" data-color="<?php echo $categoryColor; ?>">
-                                    <?php echo htmlspecialchars($category->name); ?>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                    <select id="category_id" name="category_id" style="display: none;">
-                        <option value="">Todas las categorías</option>
-                        <?php foreach($categories as $category): ?>
-                            <option value="<?php echo $category->id; ?>" <?php echo (isset($_GET["category_id"]) && $_GET["category_id"] == $category->id) ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($category->name); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+                <select id="category_id" name="category_id" class="form-control">
+                    <option value="">Todas las categorías</option>
+                    <?php foreach($categories as $category): ?>
+                        <option value="<?php echo $category->id; ?>" <?php echo (isset($_GET["category_id"]) && $_GET["category_id"] == $category->id) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($category->name); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
             
             <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
                 <label for="availability" class="me-2">Disponibilidad:</label>
-                <div class="custom-select-wrapper">
-                    <div class="custom-select" id="customAvailabilitySelect">
-                        <div class="custom-select__trigger">
-                            <?php
-                            $availabilityOptions = [
-                                ['value' => '', 'text' => 'Todas las cantidades'],
-                                ['value' => '0', 'text' => 'Sin stock (0)'],
-                                ['value' => '1-10', 'text' => 'Stock bajo (1-10)'],
-                                ['value' => '11-50', 'text' => 'Stock medio (11-50)'],
-                                ['value' => '51-100', 'text' => 'Stock alto (51-100)'],
-                                ['value' => '100+', 'text' => 'Stock muy alto (100+)']
-                            ];
-                            
-                            $selectedText = 'Todas las cantidades';
-                            if (isset($_GET["availability"])) {
-                                foreach ($availabilityOptions as $option) {
-                                    if ($option['value'] === $_GET["availability"]) {
-                                        $selectedText = $option['text'];
-                                        break;
-                                    }
-                                }
-                            }
-                            ?>
-                            <span><?php echo htmlspecialchars($selectedText); ?></span>
-                            <div class="arrow"></div>
-                        </div>
-                        <div class="custom-options">
-                            <?php foreach($availabilityOptions as $option): ?>
-                                <div class="custom-option" data-value="<?php echo $option['value']; ?>">
-                                    <?php echo htmlspecialchars($option['text']); ?>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                    <select id="availability" name="availability" style="display: none;">
-                        <?php foreach($availabilityOptions as $option): ?>
-                            <option value="<?php echo $option['value']; ?>" <?php echo (isset($_GET["availability"]) && $_GET["availability"] === $option['value']) ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($option['text']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+                <select id="availability" name="availability" class="form-control">
+                    <option value="">Todas las cantidades</option>
+                    <option value="0" <?php echo (isset($_GET["availability"]) && $_GET["availability"] === "0") ? 'selected' : ''; ?>>Sin stock (0)</option>
+                    <option value="1-10" <?php echo (isset($_GET["availability"]) && $_GET["availability"] === "1-10") ? 'selected' : ''; ?>>Stock bajo (1-10)</option>
+                    <option value="11-50" <?php echo (isset($_GET["availability"]) && $_GET["availability"] === "11-50") ? 'selected' : ''; ?>>Stock medio (11-50)</option>
+                    <option value="51-100" <?php echo (isset($_GET["availability"]) && $_GET["availability"] === "51-100") ? 'selected' : ''; ?>>Stock alto (51-100)</option>
+                    <option value="100+" <?php echo (isset($_GET["availability"]) && $_GET["availability"] === "100+") ? 'selected' : ''; ?>>Stock muy alto (100+)</option>
+                </select>
             </div>
+
+            <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
+                <label for="size" class="me-2">Talla:</label>
+                <select id="size" name="size" class="form-control">
+                    <option value="">Todas las tallas</option>
+                    <?php
+                    if(isset($available_sizes)) {
+                        foreach($available_sizes as $type => $sizes) {
+                            foreach($sizes as $size) {
+                                echo '<option value="' . $size . '"';
+                                if(isset($_GET["size"]) && $_GET["size"] == $size) {
+                                    echo ' selected';
+                                }
+                                echo '>' . $size . '</option>';
+                            }
+                        }
+                    }
+                    ?>
+                </select>
+            </div>
+
+            <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
+                <label for="date_filter" class="me-2">Fecha:</label>
+                <select id="date_filter" name="date_filter" class="form-control">
+                    <option value="">Todas las fechas</option>
+                    <option value="today" <?php echo (isset($_GET["date_filter"]) && $_GET["date_filter"] === "today") ? 'selected' : ''; ?>>Hoy</option>
+                    <option value="week" <?php echo (isset($_GET["date_filter"]) && $_GET["date_filter"] === "week") ? 'selected' : ''; ?>>Esta semana</option>
+                    <option value="month" <?php echo (isset($_GET["date_filter"]) && $_GET["date_filter"] === "month") ? 'selected' : ''; ?>>Este mes</option>
+                </select>
+            </div>
+
             <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
                 <label for="search" class="me-2">Buscar:</label>
                 <div class="input-group">
-                    <input type="text" name="search" id="search" class="form-control" value="<?php echo isset($_GET["search"]) ? $_GET["search"] : ''; ?>" placeholder="Buscar productos...">
-                    <button class="btn btn-primary" type="button" id="searchBtn">
+                    <input type="text" id="search" name="search" class="form-control" placeholder="Buscar productos..." value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
+                    <button class="btn btn-primary" type="button" id="searchButton">
                         <i class="bi bi-search"></i>
                     </button>
                 </div>
             </div>
+
             <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
-                <label for="size" class="me-2">Talla:</label>
-                <div class="custom-select-wrapper" id="sizeWrapper">
-                    <div class="custom-select" id="customSizeSelect">
-                        <div class="custom-select__trigger">
-                            <?php
-                            $selectedSize = isset($_GET["size"]) ? $_GET["size"] : "";
-                            $selectedSizeText = $selectedSize ? $selectedSize : "Todas las tallas";
-                            ?>
-                            <span><?php echo $selectedSizeText; ?></span>
-                            <div class="arrow"></div>
-                        </div>
-                        <div class="custom-options">
-                            <div class="custom-option" data-value="">Todas las tallas</div>
-                            <?php if(is_array($available_sizes) && !empty($available_sizes)): ?>
-                                <?php foreach($available_sizes as $grupo => $tallas): ?>
-                                    <div class="custom-option-group">
-                                        <div class="custom-option-header"><?php echo ucfirst($grupo); ?></div>
-                                        <?php foreach($tallas as $talla): ?>
-                                            <div class="custom-option" data-value="<?php echo $talla; ?>"><?php echo $talla; ?></div>
-                                        <?php endforeach; ?>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                    <select id="size" name="size" style="display: none;">
-                        <option value="">Todas las tallas</option>
-                        <?php if(is_array($available_sizes) && !empty($available_sizes)): ?>
-                            <?php foreach($available_sizes as $grupo => $tallas): ?>
-                                <?php if(is_array($tallas)): ?>
-                                    <?php foreach($tallas as $talla): ?>
-                                        <option value="<?php echo $talla; ?>" <?php echo (isset($_GET["size"]) && $_GET["size"] == $talla) ? 'selected' : ''; ?>><?php echo $talla; ?></option>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </select>
-                </div>
-            </div>
-            <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
-                <label for="date_filter" class="me-2">Fecha:</label>
-                <select name="date_filter" id="date_filter" class="form-control" onchange="filterProducts()">
-                    <option value="">Todas las fechas</option>
-                    <option value="this_week" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_week"){ echo "selected"; } ?>>Esta semana</option>
-                    <option value="this_month" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_month"){ echo "selected"; } ?>>Este mes</option>
-                    <option value="last_3_months" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="last_3_months"){ echo "selected"; } ?>>Últimos 3 meses</option>
-                    <option value="last_6_months" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="last_6_months"){ echo "selected"; } ?>>Últimos 6 meses</option>
-                    <option value="this_year" <?php if(isset($_GET["date_filter"]) && $_GET["date_filter"]=="this_year"){ echo "selected"; } ?>>Este año</option>
-                </select>
-            </div>
-            <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
-                <label for="limit" class="me-2">Mostrar:</label>
-                <div class="input-group">
-                    <input type="number" class="form-control" id="limit" name="limit" min="1" value="<?php echo isset($_GET['limit']) ? $_GET['limit'] : 100; ?>" style="width: 80px;">
-                    <button class="btn btn-primary" type="button" onclick="applyLimitFilter()">
-                        <i class="bi bi-filter"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="d-flex gap-2">
-                <button type="button" class="btn btn-secondary" id="clearFiltersBtn" onclick="clearFilters()">Limpiar filtros</button>
-            <div class="ms-auto">
-                <a href="index.php?view=inventary&order=<?php echo $order == 'desc' ? 'asc' : 'desc'; ?><?php 
-if(isset($_GET["category_id"])) echo "&category_id=".$_GET["category_id"];
-if(isset($_GET["search"])) echo "&search=".$_GET["search"];
-if(isset($_GET["availability"])) echo "&availability=".$_GET["availability"];
-if(isset($_GET["date_filter"])) echo "&date_filter=".$_GET["date_filter"];
-if(isset($_GET["limit"])) echo "&limit=".$_GET["limit"];
-if(isset($_GET["size"])) echo "&size=".$_GET["size"];
-                ?>" class="btn btn-secondary">
-                    <i class="bi bi-sort-<?php echo $order == 'desc' ? 'down' : 'up'; ?>"></i> 
-        <?php echo $order == 'desc' ? 'Ascendente' : 'Descendente'; ?>
-                </a>
-                </div>
-        </div>
+    <label for="limit" class="me-2">Mostrar:</label>
+    <div class="input-group">
+        <input type="number" class="form-control" id="limit" name="limit" min="1" value="<?php echo isset($_GET['limit']) ? $_GET['limit'] : 100; ?>" style="width: 80px;">
+        <button class="btn btn-primary" type="button" onclick="applyLimitFilter()">
+            <i class="bi bi-filter"></i>
+        </button>
     </div>
+</div>
+
+            <div class="form-group">
+                <button type="button" class="btn btn-secondary" onclick="clearFilters()">
+                    <i class="bi bi-x-circle"></i> Limpiar
+                </button>
+            </div>
+        </div>
         <!-- ===== FIN DE SECCIÓN PROTEGIDA ===== -->
 
 <!-- Botón para eliminar seleccionados -->
@@ -1413,24 +1319,18 @@ function updateClearFiltersButton() {
 
 // Función para limpiar filtros
 function clearFilters() {
-    // Obtener el valor actual del filtro "Mostrar"
-    const currentLimit = document.getElementById('limit').value;
-    
-    // Limpiar todos los filtros excepto el de "Mostrar"
     const url = new URL(window.location.href);
-    url.searchParams.delete('category_id');
-    url.searchParams.delete('size');
-    url.searchParams.delete('availability');
-    url.searchParams.delete('date_filter');
-    url.searchParams.delete('search');
-    url.searchParams.delete('page');
-    url.searchParams.delete('jerseyType'); // Agregar esta línea para limpiar el tipo de jersey
+    const params = new URLSearchParams(url.search);
     
-    // Mantener el filtro "Mostrar"
-    if (currentLimit) {
-        url.searchParams.set('limit', currentLimit);
+    // Mantener solo los parámetros necesarios
+    const keepParams = ['view', 'limit'];
+    for (const [key] of params.entries()) {
+        if (!keepParams.includes(key)) {
+            params.delete(key);
+        }
     }
     
+    url.search = params.toString();
     window.location.href = url.toString();
 }
 
@@ -1604,43 +1504,15 @@ function applySearch() {
     window.location.href = url.toString();
 }
 
-// Inicializar todos los select personalizados cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
-    // ... existing code ...
+// Evento para el botón de búsqueda
+document.getElementById('searchButton').addEventListener('click', applySearch);
 
-    // Evento para el botón de búsqueda
-    const searchBtn = document.getElementById('searchBtn');
-    if (searchBtn) {
-        searchBtn.addEventListener('click', applySearch);
+// Evento para el input de búsqueda al presionar Enter
+document.getElementById('search').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        applySearch();
     }
-
-    // Evento para el input de búsqueda al presionar Enter
-    const searchInput = document.getElementById('search');
-    if (searchInput) {
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                applySearch();
-            }
-        });
-
-        // Evento para actualizar el botón de limpiar filtros mientras se escribe
-        searchInput.addEventListener('input', function() {
-            updateClearFiltersButton();
-        });
-    }
-
-    // Evento para los select de filtros
-    const filterSelects = document.querySelectorAll('select[id="category_id"], select[id="availability"], select[id="size"], select[id="date_filter"]');
-    filterSelects.forEach(select => {
-        select.addEventListener('change', function() {
-            updateClearFiltersButton();
-        });
-    });
-
-    // Inicializar el botón de limpiar filtros
-    updateClearFiltersButton();
-
-    // ... rest of existing code ...
 });
 
 // ... existing code ...
@@ -1999,7 +1871,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Función para actualizar la URL con el nuevo filtro
+    // Función para actualizar la URL con el nuevo filtro updateUrlWithFilter Duplicado 1
     function updateUrlWithFilter(selectId, value) {
         const url = new URL(window.location.href);
         const params = new URLSearchParams(url.search);
@@ -2398,4 +2270,69 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
+
+<style>
+/* Estilos básicos para los filtros */
+.form-group {
+    margin-bottom: 1rem;
+}
+.form-control {
+    width: 100%;
+}
+</style>
+
+<script>
+// Función para limpiar filtros
+function clearFilters() {
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.search);
+    
+    // Mantener solo los parámetros necesarios
+    const keepParams = ['view', 'limit'];
+    for (const [key] of params.entries()) {
+        if (!keepParams.includes(key)) {
+            params.delete(key);
+        }
+    }
+    
+    url.search = params.toString();
+    window.location.href = url.toString();
+}
+
+// Función para aplicar el filtro de límite
+function applyLimitFilter() {
+    const limit = document.getElementById('limit').value;
+    const url = new URL(window.location.href);
+    url.searchParams.set('limit', limit);
+    window.location.href = url.toString();
+}
+
+// Evento para el input de búsqueda al presionar Enter
+document.getElementById('search').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        const searchTerm = document.getElementById('search').value;
+        const url = new URL(window.location.href);
+        url.searchParams.set('search', searchTerm);
+        window.location.href = url.toString();
+    }
+});
+
+// Evento para el input de límite al presionar Enter
+document.getElementById('limit').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        applyLimitFilter();
+    }
+});
+
+// Evento para los select de filtros
+document.querySelectorAll('select[id="category_id"], select[id="availability"], select[id="size"], select[id="date_filter"], select[id="jerseyType"]').forEach(select => {
+    select.addEventListener('change', function() {
+        const url = new URL(window.location.href);
+        url.searchParams.set(this.id, this.value);
+        window.location.href = url.toString();
+    });
+});
+</script>
+
+
 

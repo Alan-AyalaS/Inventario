@@ -315,7 +315,7 @@ if($selected_category_name == "Jersey") {
 <div class="row mt-3">
 <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
                 <label for="jerseyType" class="d-block">Tipo de Jersey:</label>
-                <select id="jerseyType" name="jerseyType" class="form-control">
+                <select id="jerseyType" name="jerseyType" class="form-control" style="width: 150px; margin-bottom: 10px;">
                     <option value="" <?php echo (!isset($_GET["jerseyType"]) || $_GET["jerseyType"] == "") ? 'selected' : ''; ?>>Todos</option>
                     <option value="adulto" <?php echo (isset($_GET["jerseyType"]) && $_GET["jerseyType"] == "adulto") ? 'selected' : ''; ?>>Adulto</option>
                     <option value="niño" <?php echo (isset($_GET["jerseyType"]) && $_GET["jerseyType"] == "niño") ? 'selected' : ''; ?>>Niño</option>

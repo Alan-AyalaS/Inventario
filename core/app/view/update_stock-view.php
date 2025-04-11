@@ -106,14 +106,25 @@ try {
 
         // Construir URL de redirección con parámetros existentes
         $redirect_url = "index.php?view=inventary";
-        if(isset($_POST['category_id'])) $redirect_url .= "&category_id=" . $_POST['category_id'];
-        if(isset($_POST['availability'])) $redirect_url .= "&availability=" . $_POST['availability'];
-        if(isset($_POST['size'])) $redirect_url .= "&size=" . $_POST['size'];
-        if(isset($_POST['date_filter'])) $redirect_url .= "&date_filter=" . $_POST['date_filter'];
-        if(isset($_POST['search'])) $redirect_url .= "&search=" . $_POST['search'];
-        if(isset($_POST['limit'])) $redirect_url .= "&limit=" . $_POST['limit'];
-        if(isset($_POST['jerseyType'])) $redirect_url .= "&jerseyType=" . $_POST['jerseyType'];
-        if(isset($_POST['page'])) $redirect_url .= "&page=" . $_POST['page'];
+        
+        // Parámetros de filtro a mantener
+        $filter_params = [
+            'category_id',
+            'availability',
+            'size',
+            'date_filter',
+            'search',
+            'limit',
+            'jerseyType',
+            'page'
+        ];
+        
+        // Agregar cada parámetro de filtro si existe
+        foreach ($filter_params as $param) {
+            if (isset($_POST[$param]) && $_POST[$param] !== '') {
+                $redirect_url .= "&" . $param . "=" . urlencode($_POST[$param]);
+            }
+        }
 
         header("Location: " . $redirect_url);
         exit;

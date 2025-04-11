@@ -1348,6 +1348,31 @@ function submitAdjustForm(event) {
         return false;
     }
 
+    // Obtener los parámetros de filtro de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Agregar los parámetros de filtro al formulario
+    const filterParams = [
+        'category_id',
+        'availability',
+        'size',
+        'date_filter',
+        'search',
+        'limit',
+        'jerseyType',
+        'page'
+    ];
+    
+    filterParams.forEach(param => {
+        if (urlParams.has(param)) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = param;
+            input.value = urlParams.get(param);
+            form.appendChild(input);
+        }
+    });
+
     // Cerrar el modal
     const modal = bootstrap.Modal.getInstance(document.getElementById('adjustModal'));
     if (modal) {

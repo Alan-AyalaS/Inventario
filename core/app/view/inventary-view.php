@@ -941,8 +941,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Event listener para los checkboxes individuales
+        let lastChecked = null;
         productCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
+            checkbox.addEventListener('click', function(e) {
+                // Si se presionó la tecla Shift
+                if (e.shiftKey && lastChecked) {
+                    let start = Array.from(productCheckboxes).indexOf(lastChecked);
+                    let end = Array.from(productCheckboxes).indexOf(this);
+                    
+                    // Determinar el rango de checkboxes a seleccionar
+                    let startIndex = Math.min(start, end);
+                    let endIndex = Math.max(start, end);
+                    
+                    // Seleccionar todos los checkboxes en el rango
+                    for (let i = startIndex; i <= endIndex; i++) {
+                        productCheckboxes[i].checked = this.checked;
+                    }
+                }
+                
+                // Actualizar el último checkbox seleccionado
+                lastChecked = this;
+                
                 // Verificar si todos los checkboxes están seleccionados
                 const allChecked = Array.from(productCheckboxes).every(cb => cb.checked);
                 if (selectAllCheckbox) {

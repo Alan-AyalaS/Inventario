@@ -1,5 +1,6 @@
 <?php
 // Inicializar variables al principio
+header('Content-Type: text/html; charset=utf-8');
 $order = isset($_GET["order"]) ? $_GET["order"] : "desc";
 $products = ProductData::getAll($order);
 $categories = CategoryData::getAll();

@@ -24,9 +24,18 @@ class DeleteProductsController {
                 }
 
                 // Eliminar cada producto
+                $deleted_products = [];
                 foreach ($product_ids as $product_id) {
                     $product = ProductData::getById($product_id);
                     if ($product) {
+                        // Guardar detalles del producto antes de eliminarlo
+                        $deleted_products[] = [
+                            'name' => $product->name,
+                            'category' => CategoryData::getById($product->category_id)->name,
+                            'jersey_type' => $product->jersey_type,
+                            'size' => $product->size
+                        ];
+
                         // Obtener todos los productos del mismo grupo
                         $sql = "SELECT * FROM product WHERE name = '$product->name' AND category_id = $product->category_id";
                         if ($product->jersey_type) {
@@ -63,8 +72,25 @@ class DeleteProductsController {
                     }
                 }
 
+                // Construir el mensaje de alerta
+                $count = count($deleted_products);
+                $message = "¡Eliminado! Se eliminaron correctamente $count producto" . ($count > 1 ? 's' : '');
+                
+                // Si son menos de 5 productos, mostrar detalles
+                if ($count <= 5) {
+                    $message .= "<br><br>Productos eliminados:<br>";
+                    foreach ($deleted_products as $product) {
+                        $message .= "- " . $product['name'];
+                        $message .= " (" . $product['category'];
+                        if ($product['jersey_type']) {
+                            $message .= " - " . $product['jersey_type'];
+                        }
+                        $message .= " - Talla: " . $product['size'] . ")<br>";
+                    }
+                }
+
                 // Establecer cookie de éxito
-                setcookie("prddel", "Productos eliminados exitosamente", time()+3600, "/");
+                setcookie("prddel", $message, time()+3600, "/");
             }
         } catch (Exception $e) {
             error_log("Error al eliminar productos: " . $e->getMessage());

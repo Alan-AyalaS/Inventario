@@ -185,7 +185,7 @@ if($selected_category_name == "Jersey") {
 
 		<?php if(isset($_COOKIE["prddel"])):?>
 			<div class="alert alert-danger alert-dismissible fade show" role="alert" id="deleteAlert">
-				<strong>¡Eliminado!</strong> El producto "<?php echo $_COOKIE["prddel"]; ?>" ha sido eliminado correctamente.
+				<strong>¡Eliminado!</strong> <span id="deleteMessage"><?php echo $_COOKIE["prddel"]; ?></span>
 				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="closeDeleteAlert()"></button>
 			</div>
 			<script>

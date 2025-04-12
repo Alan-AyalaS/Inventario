@@ -435,6 +435,14 @@ if($selected_category_name == "Jersey") {
                         <?php endif; ?>
                         <p><strong>Unidad:</strong> <span id="productUnit"></span></p>
                         <p><strong>Mínima en Inventario:</strong> <span id="productMinInventory"></span></p>
+                        
+                        <!-- Nueva sección para mostrar todas las tallas disponibles -->
+                        <div class="mt-4">
+                            <h5>Tallas Disponibles:</h5>
+                            <div id="availableSizes" class="d-flex flex-wrap gap-2">
+                                <!-- Las tallas se insertarán aquí dinámicamente -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1589,11 +1597,14 @@ function showProductDetails(productElement) {
     
     // Obtener los datos del producto
     const productData = productElement.dataset;
+    const productName = productData.productName;
+    const productCategory = productData.productCategory;
+    const jerseyType = productElement.closest('tr').querySelector('td:nth-child(5) .badge:nth-child(2)')?.textContent.trim().toLowerCase();
     
-    // Actualizar el contenido del modal
-    document.getElementById('productName').textContent = productData.productName;
+    // Actualizar el contenido básico del modal
+    document.getElementById('productName').textContent = productName;
     document.getElementById('productCode').textContent = productData.productId;
-    document.getElementById('productCategory').textContent = productData.productCategory;
+    document.getElementById('productCategory').textContent = productCategory;
     document.getElementById('productSize').textContent = productData.productSize;
     document.getElementById('productAvailability').textContent = productData.productAvailability;
     document.getElementById('productPriceOut').textContent = productData.productPriceOut;
@@ -1609,6 +1620,41 @@ function showProductDetails(productElement) {
     productImage.onerror = function() {
         this.src = 'storage/products/no-image.png';
     };
+    
+    // Obtener y mostrar todas las tallas disponibles
+    const availableSizesContainer = document.getElementById('availableSizes');
+    availableSizesContainer.innerHTML = ''; // Limpiar el contenedor
+    
+    // Buscar todas las filas que coincidan con el nombre y categoría
+    document.querySelectorAll('tr.product-row').forEach(row => {
+        const rowName = row.querySelector('td:nth-child(3)').textContent.trim();
+        const rowCategory = row.querySelector('td:nth-child(5) .badge:first-child').textContent.trim();
+        const rowJerseyType = row.querySelector('td:nth-child(5) .badge:nth-child(2)')?.textContent.trim().toLowerCase();
+        const rowSize = row.querySelector('td:nth-child(4)').textContent.trim();
+        const rowAvailability = row.querySelector('td:nth-child(9) .badge').textContent.trim();
+        
+        // Verificar si es el mismo producto (nombre y categoría)
+        if (rowName === productName && rowCategory === productCategory) {
+            // Para jerseys, verificar también el tipo
+            if (productCategory === 'Jersey') {
+                if (rowJerseyType === jerseyType) {
+                    addSizeBadge(rowSize, rowAvailability);
+                }
+            } else {
+                addSizeBadge(rowSize, rowAvailability);
+            }
+        }
+    });
+    
+    // Función auxiliar para agregar un badge de talla
+    function addSizeBadge(size, availability) {
+        const badge = document.createElement('span');
+        badge.className = 'badge bg-secondary';
+        badge.style.fontSize = '0.9em';
+        badge.style.padding = '8px 12px';
+        badge.innerHTML = `${size} <small>(${availability})</small>`;
+        availableSizesContainer.appendChild(badge);
+    }
     
     // Mostrar el modal
     modal.show();
@@ -1703,6 +1749,15 @@ function submitEditSelectedForm(event) {
 .product-name:hover {
     color: #0d6efd;
     text-decoration: underline;
+}
+
+#availableSizes .badge {
+    transition: all 0.3s ease;
+}
+
+#availableSizes .badge:hover {
+    transform: scale(1.1);
+    cursor: default;
 }
 </style>
 </body>

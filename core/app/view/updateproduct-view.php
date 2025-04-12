@@ -24,15 +24,23 @@ if(count($_POST)>0){
 	// Manejar tipo_jersey con valor por defecto
 	$product->jersey_type = isset($_POST["tipo_jersey"]) ? $_POST["tipo_jersey"] : "";
 
-	// Validar si es un jersey y verificar duplicados
+	// Validar duplicados según la categoría
 	$category = CategoryData::getById($category_id);
 	$categoryName = $category ? strtolower(trim($category->name)) : '';
 	
 	if($categoryName === 'jersey' && !empty($product->jersey_type)) {
-		// Verificar si ya existe otro producto con el mismo nombre y tipo de jersey
-		$existing_product = ProductData::existsByNameAndJerseyType($product->name, $product->jersey_type);
+		// Para jerseys, verificar nombre, categoría y tipo de jersey
+		$existing_product = ProductData::existsByNameAndCategory($product->name, $category_id, $product->jersey_type);
 		if($existing_product && $existing_product->id != $product->id) {
 			setcookie("prdupd_error", "Ya existe un jersey de tipo '{$product->jersey_type}' con el nombre '{$product->name}'", time() + 3600, "/");
+			header("Location: index.php?view=editproduct&id=".$product->id);
+			exit;
+		}
+	} else if($category_id != "NULL") {
+		// Para otras categorías, verificar solo nombre y categoría
+		$existing_product = ProductData::existsByNameAndCategory($product->name, $category_id);
+		if($existing_product && $existing_product->id != $product->id) {
+			setcookie("prdupd_error", "Ya existe un producto con el nombre '{$product->name}' en la categoría '$categoryName'", time() + 3600, "/");
 			header("Location: index.php?view=editproduct&id=".$product->id);
 			exit;
 		}

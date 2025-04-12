@@ -153,14 +153,11 @@ class ProductData {
 		return $result['total'] ?? 0;
 	}
 
-	public static function getByCategoryId($category_id){
-		$sql = "select * from ".self::$tablename." where category_id=$category_id";
-		$query = Executor::doit($sql);
-		return Model::many($query[0],new ProductData());
-	}
-
-	public static function existsByNameAndJerseyType($name, $jersey_type) {
-		$sql = "select * from ".self::$tablename." where name=\"$name\" and jersey_type=\"$jersey_type\"";
+	public static function existsByNameAndCategory($name, $category_id, $jersey_type = null) {
+		$sql = "select * from ".self::$tablename." where name=\"$name\" and category_id=$category_id";
+		if($jersey_type !== null) {
+			$sql .= " and jersey_type=\"$jersey_type\"";
+		}
 		$query = Executor::doit($sql);
 		return Model::one($query[0],new ProductData()) != null;
 	}

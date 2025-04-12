@@ -1135,6 +1135,12 @@ document.addEventListener('DOMContentLoaded', function() {
             selectAllCheckbox.addEventListener('change', function() {
                 productCheckboxes.forEach(checkbox => {
                     checkbox.checked = this.checked;
+                    const row = checkbox.closest('tr');
+                    if (this.checked) {
+                        row.classList.add('highlighted');
+                    } else {
+                        row.classList.remove('highlighted');
+                    }
                 });
                 updateSelection();
             });
@@ -1143,7 +1149,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Event listener para los checkboxes individuales
         let lastChecked = null;
         productCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('click', function(e) {
+            checkbox.addEventListener('change', function(e) {
                 // Si se presionó la tecla Shift
                 if (e.shiftKey && lastChecked) {
                     let start = Array.from(productCheckboxes).indexOf(lastChecked);
@@ -1156,6 +1162,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Seleccionar todos los checkboxes en el rango
                     for (let i = startIndex; i <= endIndex; i++) {
                         productCheckboxes[i].checked = this.checked;
+                        const row = productCheckboxes[i].closest('tr');
+                        if (this.checked) {
+                            row.classList.add('highlighted');
+                            row.classList.remove('hover-highlighted');
+                        } else {
+                            row.classList.remove('highlighted');
+                        }
+                    }
+                } else {
+                    // Para selección individual
+                    const row = this.closest('tr');
+                    if (this.checked) {
+                        row.classList.add('highlighted');
+                        row.classList.remove('hover-highlighted');
+                    } else {
+                        row.classList.remove('highlighted');
                     }
                 }
                 
@@ -1170,6 +1192,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 updateSelection();
             });
+
+            // Aplicar resaltado inicial si el checkbox está marcado
+            if (checkbox.checked) {
+                checkbox.closest('tr').classList.add('highlighted');
+            }
         });
 
         // Event listener para el botón de eliminar seleccionados
@@ -1438,10 +1465,10 @@ function highlightGroup(row) {
         const otherInfo = getProductInfo(otherRow);
         
         if (otherInfo.name === name && otherInfo.jerseyType === jerseyType) {
-            otherRow.classList.add('highlighted');
-            otherRow.querySelectorAll('td').forEach(cell => {
-                cell.classList.add('highlighted');
-            });
+            // Solo aplicar el resaltado por hover si la fila no está seleccionada
+            if (!otherRow.classList.contains('highlighted')) {
+                otherRow.classList.add('hover-highlighted');
+            }
         }
     });
 }
@@ -1454,10 +1481,7 @@ function unhighlightGroup(row) {
         const otherInfo = getProductInfo(otherRow);
         
         if (otherInfo.name === name && otherInfo.jerseyType === jerseyType) {
-            otherRow.classList.remove('highlighted');
-            otherRow.querySelectorAll('td').forEach(cell => {
-                cell.classList.remove('highlighted');
-            });
+            otherRow.classList.remove('hover-highlighted');
         }
     });
 }
@@ -1597,11 +1621,18 @@ function submitEditSelectedForm(event) {
 <style>
 .highlighted {
     background-color: #e9ecef !important;
-    transition: background-color 0.3s ease;
 }
 
 .highlighted td {
     background-color: #e9ecef !important;
+}
+
+.hover-highlighted {
+    background-color: #f8f9fa !important;
+}
+
+.hover-highlighted td {
+    background-color: #f8f9fa !important;
 }
 
 .highlighted .badge {

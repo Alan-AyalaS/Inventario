@@ -161,5 +161,11 @@ class ProductData {
 		$query = Executor::doit($sql);
 		return Model::one($query[0],new ProductData()) != null;
 	}
+
+	public static function getByNameCategoryTypeAndSize($name, $category_id, $jersey_type, $size){
+		$sql = "select * from ".self::$tablename." where name=\"$name\" and category_id=$category_id and jersey_type=\"$jersey_type\" and size=\"$size\"";
+		$query = Executor::doit($sql);
+		return Model::one($query[0], new ProductData());
+	}
 }
 ?>

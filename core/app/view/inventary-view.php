@@ -412,7 +412,7 @@ if($selected_category_name == "Jersey") {
 
 <!-- Modal para detalles del producto -->
 <div class="modal fade" id="productDetailsModal" tabindex="-1" aria-labelledby="productDetailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="productDetailsModalLabel">Detalles del Producto</h5>
@@ -420,10 +420,10 @@ if($selected_category_name == "Jersey") {
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-5">
                         <img id="productImage" src="" alt="Imagen del producto" class="img-fluid mb-3" style="max-height: 300px; width: auto;">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-7">
                         <h4 id="productName"></h4>
                         <p><strong>Código:</strong> <span id="productCode"></span></p>
                         <p><strong>Categoría:</strong> <span id="productCategory"></span></p>
@@ -436,11 +436,45 @@ if($selected_category_name == "Jersey") {
                         <p><strong>Unidad:</strong> <span id="productUnit"></span></p>
                         <p><strong>Mínima en Inventario:</strong> <span id="productMinInventory"></span></p>
                         
-                        <!-- Nueva sección para mostrar todas las tallas disponibles -->
+                        <!-- Sección de tallas disponibles -->
                         <div class="mt-4">
-                            <h5>Tallas Disponibles:</h5>
-                            <div id="availableSizes" class="d-flex flex-wrap gap-2">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">Tallas Disponibles:</h5>
+                                <button type="button" class="btn btn-primary btn-sm" id="addSizeBtn">
+                                    <i class="bi bi-plus-circle"></i> Agregar Talla
+                                </button>
+                            </div>
+                            <div id="availableSizes" class="d-flex flex-wrap gap-2 mb-3">
                                 <!-- Las tallas se insertarán aquí dinámicamente -->
+                            </div>
+                            
+                            <!-- Formulario para agregar talla -->
+                            <div id="addSizeForm" class="card p-3 mt-3" style="display: none;">
+                                <h6 class="mb-3">Agregar Nueva Talla</h6>
+                                <form id="newSizeForm" class="row g-3">
+                                    <input type="hidden" id="newSizeProductId">
+                                    <input type="hidden" id="newSizeProductName">
+                                    <input type="hidden" id="newSizeCategory">
+                                    <input type="hidden" id="newSizeJerseyType">
+                                    <div class="col-md-6">
+                                        <label for="newSizeSelect" class="form-label">Talla:</label>
+                                        <select class="form-control" id="newSizeSelect" required>
+                                            <!-- Las opciones se cargarán dinámicamente -->
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="newSizeQuantity" class="form-label">Cantidad:</label>
+                                        <input type="number" class="form-control" id="newSizeQuantity" min="1" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="bi bi-check-circle"></i> Guardar
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="toggleAddSizeForm(false)">
+                                            <i class="bi bi-x-circle"></i> Cancelar
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -1600,6 +1634,13 @@ function showProductDetails(productElement) {
     const productName = productData.productName;
     const productCategory = productData.productCategory;
     const jerseyType = productElement.closest('tr').querySelector('td:nth-child(5) .badge:nth-child(2)')?.textContent.trim().toLowerCase();
+    const productId = productData.productId;
+    
+    // Guardar datos para el formulario de nueva talla
+    document.getElementById('newSizeProductId').value = productId;
+    document.getElementById('newSizeProductName').value = productName;
+    document.getElementById('newSizeCategory').value = productCategory;
+    document.getElementById('newSizeJerseyType').value = jerseyType || '';
     
     // Actualizar el contenido básico del modal
     document.getElementById('productName').textContent = productName;
@@ -1625,6 +1666,21 @@ function showProductDetails(productElement) {
     const availableSizesContainer = document.getElementById('availableSizes');
     availableSizesContainer.innerHTML = ''; // Limpiar el contenedor
     
+    // Arrays para almacenar las tallas disponibles y todas las tallas posibles
+    let availableSizes = new Set();
+    let allSizes = new Set();
+    
+    // Definir las tallas según la categoría y tipo
+    if (productCategory === 'Jersey') {
+        if (jerseyType === 'adulto') {
+            allSizes = new Set(['S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '6XL', '8XL']);
+        } else if (jerseyType === 'niño') {
+            allSizes = new Set(['16', '18', '20', '22', '24', '26', '28']);
+        } else if (jerseyType === 'dama') {
+            allSizes = new Set(['S', 'M', 'L', 'XL', 'XXL']);
+        }
+    }
+    
     // Buscar todas las filas que coincidan con el nombre y categoría
     document.querySelectorAll('tr.product-row').forEach(row => {
         const rowName = row.querySelector('td:nth-child(3)').textContent.trim();
@@ -1633,44 +1689,147 @@ function showProductDetails(productElement) {
         const rowSize = row.querySelector('td:nth-child(4)').textContent.trim();
         const rowAvailability = row.querySelector('td:nth-child(9) .badge').textContent.trim();
         
-        // Verificar si es el mismo producto (nombre y categoría)
+        // Verificar si es el mismo producto
         if (rowName === productName && rowCategory === productCategory) {
-            // Para jerseys, verificar también el tipo
             if (productCategory === 'Jersey') {
                 if (rowJerseyType === jerseyType) {
                     addSizeBadge(rowSize, rowAvailability);
+                    availableSizes.add(rowSize);
                 }
             } else {
                 addSizeBadge(rowSize, rowAvailability);
+                availableSizes.add(rowSize);
             }
         }
     });
     
-    // Función auxiliar para agregar un badge de talla
-    function addSizeBadge(size, availability) {
-        const badge = document.createElement('span');
-        badge.className = 'badge bg-secondary';
-        badge.style.fontSize = '0.9em';
-        badge.style.padding = '8px 12px';
-        badge.innerHTML = `${size} <small>(${availability})</small>`;
-        availableSizesContainer.appendChild(badge);
-    }
+    // Actualizar el select de tallas disponibles
+    const newSizeSelect = document.getElementById('newSizeSelect');
+    newSizeSelect.innerHTML = '<option value="">Seleccione una talla</option>';
+    
+    // Agregar solo las tallas que no están disponibles
+    allSizes.forEach(size => {
+        if (!availableSizes.has(size)) {
+            const option = document.createElement('option');
+            option.value = size;
+            option.textContent = size;
+            newSizeSelect.appendChild(option);
+        }
+    });
+    
+    // Mostrar u ocultar el botón de agregar talla según si hay tallas disponibles para agregar
+    const addSizeBtn = document.getElementById('addSizeBtn');
+    addSizeBtn.style.display = newSizeSelect.options.length > 1 ? '' : 'none';
+    
+    // Ocultar el formulario de agregar talla
+    toggleAddSizeForm(false);
     
     // Mostrar el modal
     modal.show();
 }
 
-// Agregar event listeners para los nombres de productos
+// Función para mostrar/ocultar el formulario de agregar talla
+function toggleAddSizeForm(show) {
+    const form = document.getElementById('addSizeForm');
+    form.style.display = show ? 'block' : 'none';
+    if (!show) {
+        document.getElementById('newSizeForm').reset();
+    }
+}
+
+// Event listener para el botón de agregar talla
 document.addEventListener('DOMContentLoaded', function() {
-    // ... existing code ...
-    
     // Event listener para los nombres de productos
     document.querySelectorAll('.product-name').forEach(productElement => {
         productElement.addEventListener('click', function() {
             showProductDetails(this);
         });
     });
+
+    // Event listener para el botón de agregar talla
+    const addSizeBtn = document.getElementById('addSizeBtn');
+    if (addSizeBtn) {
+        addSizeBtn.addEventListener('click', () => toggleAddSizeForm(true));
+    }
+    
+    // Event listener para el formulario de nueva talla
+    const newSizeForm = document.getElementById('newSizeForm');
+    if (newSizeForm) {
+        newSizeForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const productId = document.getElementById('newSizeProductId').value;
+            const size = document.getElementById('newSizeSelect').value;
+            const quantity = document.getElementById('newSizeQuantity').value;
+
+            try {
+                // Mostrar indicador de carga
+                const submitButton = this.querySelector('button[type="submit"]');
+                submitButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando...';
+                submitButton.disabled = true;
+
+                // Crear un objeto FormData solo con los datos necesarios
+                const formData = new FormData();
+                formData.append('original_product_id', productId);
+                formData.append('size', size);
+                formData.append('quantity', quantity);
+                formData.append('action', 'add_size');
+
+                // Enviar la petición al servidor
+                const response = await fetch('index.php?view=add_product_size', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                let result;
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    result = await response.json();
+                } else {
+                    throw new Error("La respuesta del servidor no es JSON válido");
+                }
+
+                if (result.success) {
+                    // Mostrar mensaje de éxito
+                    alert(`Talla ${size} agregada correctamente para el producto "${result.product_name}"`);
+                    
+                    // Cerrar el formulario y el modal
+                    toggleAddSizeForm(false);
+                    bootstrap.Modal.getInstance(document.getElementById('productDetailsModal')).hide();
+                    
+                    // Recargar la página para mostrar el nuevo producto
+                    window.location.reload();
+                } else {
+                    // Mostrar mensaje de error específico
+                    alert(result.error || 'Error al agregar la talla');
+                }
+            } catch (error) {
+                console.error('Error detallado:', error);
+                
+                // Verificar si el producto se creó a pesar del error
+                const checkProduct = confirm('Hubo un error en la comunicación con el servidor, pero es posible que el producto se haya creado. ¿Desea recargar la página para verificar?');
+                if (checkProduct) {
+                    window.location.reload();
+                }
+            } finally {
+                // Restaurar el botón
+                const submitButton = this.querySelector('button[type="submit"]');
+                submitButton.innerHTML = '<i class="bi bi-check-circle"></i> Guardar';
+                submitButton.disabled = false;
+            }
+        });
+    }
 });
+
+// Función auxiliar para agregar un badge de talla
+function addSizeBadge(size, availability) {
+    const badge = document.createElement('span');
+    badge.className = 'badge bg-secondary';
+    badge.style.fontSize = '0.9em';
+    badge.style.padding = '8px 12px';
+    badge.innerHTML = `${size} <small>(${availability})</small>`;
+    document.getElementById('availableSizes').appendChild(badge);
+}
 
 function submitEditSelectedForm(event) {
     event.preventDefault();
@@ -1758,6 +1917,20 @@ function submitEditSelectedForm(event) {
 #availableSizes .badge:hover {
     transform: scale(1.1);
     cursor: default;
+}
+
+#addSizeForm {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#addSizeForm .form-control {
+    border-radius: 4px;
+}
+
+#addSizeForm .btn {
+    margin-right: 8px;
 }
 </style>
 </body>

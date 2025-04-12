@@ -74,7 +74,8 @@ if(count($_POST)>0){
   } elseif(in_array($categoryName, ['gorras', 'gorra', 'variado', 'balón', 'balon'])) {
     $tallas = ['unitalla' => $_POST["inventario_inicial"]];
   } else {
-    $tallas = ['unitalla' => $_POST["q"]];
+    // Para cualquier otra categoría, usar inventario_inicial
+    $tallas = ['unitalla' => isset($_POST["inventario_inicial"]) ? $_POST["inventario_inicial"] : 0];
   }
 
   // Crear un producto para cada talla con cantidad mayor a 0

@@ -59,40 +59,16 @@
 </div>
 <br>
 
-<!-- Modal de confirmación para eliminación -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title" id="deleteModalLabel">Confirmar eliminación</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p class="mb-0">¿Está seguro que desea eliminar la categoría <strong id="categoryNameToDelete"></strong>?</p>
-        <p class="text-danger mt-3 mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Esta acción no se puede deshacer. Los productos asociados a esta categoría quedarán sin categorización.</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <a href="#" id="confirmDeleteBtn" class="btn btn-danger">Eliminar categoría</a>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="card">
 	<div class="card-header">
 		CATEGORÍAS
 	</div>
 		<div class="card-body">
 
-
 		<?php
-
 		$categories = CategoryData::getAll();
 		if(count($categories)>0){
-			// si hay usuarios
 			?>
-
 			<table class="table table-bordered table-hover">
 			<thead>
 			<th>Nombre</th>
@@ -116,28 +92,18 @@
 				<td style="width:200px;">
 					<a href="index.php?view=editcategory&id=<?php echo $category->id;?>" class="btn btn-warning btn-sm">
 						<i class="bi bi-pencil"></i> Editar
-					</a> 
-					<button type="button" class="btn btn-danger btn-sm" onclick="showDeleteModal(<?php echo $category->id; ?>, '<?php echo addslashes($category->name); ?>')">
-						<i class="bi bi-trash"></i> Eliminar
-					</button>
+					</a>
 				</td>
 				</tr>
 				<?php
-
 			}
 			echo "</table>";
-
-
-
-		}else{
+		} else {
 			echo "<p class='alert alert-danger'>No hay Categorías</p>";
 		}
-
-
 		?>
 		</div>
 </div>
-
 
 	</div>
 </div>
@@ -148,13 +114,6 @@ function closeAlert(alertId) {
     setTimeout(function() {
         document.getElementById(alertId).style.display = 'none';
     }, 150);
-}
-
-function showDeleteModal(categoryId, categoryName) {
-    document.getElementById('categoryNameToDelete').textContent = categoryName;
-    document.getElementById('confirmDeleteBtn').href = 'index.php?view=delcategory&id=' + categoryId;
-    var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-    modal.show();
 }
 
 function openColorPicker(categoryId, categoryName) {

@@ -801,15 +801,24 @@ if($selected_category_name == "Jersey") {
 				<tbody>
                     <?php
                     $current_name = null;
+                    $current_category = null;
+                    $current_jersey_type = null;
                     $rowspan = 1;
                     $products_count = count($curr_products);
                     $group_id = 0;
                     $total_groups = [];
                     
-                    // Primero, agrupar los productos por nombre
+                    // Primero, agrupar los productos por nombre, categoría y tipo de jersey
                     foreach($curr_products as $index => $product) {
-                        if($current_name !== $product->name) {
+                        $category = CategoryData::getById($product->category_id);
+                        $categoryName = $category ? $category->name : '';
+                        
+                        if($current_name !== $product->name || 
+                           $current_category !== $categoryName ||
+                           ($categoryName === 'Jersey' && $current_jersey_type !== $product->jersey_type)) {
                             $current_name = $product->name;
+                            $current_category = $categoryName;
+                            $current_jersey_type = $product->jersey_type;
                             $group_id++;
                         }
                         $total_groups[$group_id][] = $product;
@@ -1472,45 +1481,63 @@ function submitAdjustForm(event) {
 // Función para obtener el tipo de jersey y nombre de un producto
 function getProductInfo(row) {
     const nameCell = row.querySelector('td:nth-child(3)');
-    const categoryCell = row.querySelector('td:nth-child(4)');
+    const categoryCell = row.querySelector('td:nth-child(5)');
     const name = nameCell ? nameCell.textContent.trim() : '';
     let jerseyType = '';
+    let categoryId = '';
     
     if (categoryCell) {
         const badges = categoryCell.querySelectorAll('.badge');
-        if (badges.length > 1) {
-            jerseyType = badges[1].textContent.trim().toLowerCase();
+        if (badges.length > 0) {
+            categoryId = badges[0].dataset.categoryId;
+            // Si es categoría Jersey (ID 1), obtener el tipo del segundo badge
+            if (categoryId === '1' && badges.length > 1) {
+                const typeText = badges[1].textContent.trim().toLowerCase();
+                jerseyType = typeText === 'niño' ? 'niño' : typeText; // Normalizar 'niño'
+            }
         }
     }
     
-    return { name, jerseyType };
+    return { name, categoryId, jerseyType };
 }
 
 // Función para resaltar el grupo
 function highlightGroup(row) {
-    const { name, jerseyType } = getProductInfo(row);
+    const info = getProductInfo(row);
     
-    // Resaltar todas las filas que coincidan con el nombre y tipo de jersey
     document.querySelectorAll('tr.product-row').forEach(otherRow => {
         const otherInfo = getProductInfo(otherRow);
         
-        if (otherInfo.name === name && otherInfo.jerseyType === jerseyType) {
-            // Solo aplicar el resaltado por hover si la fila no está seleccionada
-            if (!otherRow.classList.contains('highlighted')) {
-                otherRow.classList.add('hover-highlighted');
-            }
+        // Verificar si coinciden nombre y categoría
+        let shouldHighlight = otherInfo.name === info.name && otherInfo.categoryId === info.categoryId;
+        
+        // Para jerseys (categoría ID 1), verificar también que coincida el tipo exactamente
+        if (info.categoryId === '1') {
+            shouldHighlight = shouldHighlight && otherInfo.jerseyType === info.jerseyType;
+        }
+        
+        if (shouldHighlight && !otherRow.classList.contains('highlighted')) {
+            otherRow.classList.add('hover-highlighted');
         }
     });
 }
 
 // Función para quitar el resaltado
 function unhighlightGroup(row) {
-    const { name, jerseyType } = getProductInfo(row);
+    const info = getProductInfo(row);
     
     document.querySelectorAll('tr.product-row').forEach(otherRow => {
         const otherInfo = getProductInfo(otherRow);
         
-        if (otherInfo.name === name && otherInfo.jerseyType === jerseyType) {
+        // Verificar si coinciden nombre y categoría
+        let shouldUnhighlight = otherInfo.name === info.name && otherInfo.categoryId === info.categoryId;
+        
+        // Para jerseys (categoría ID 1), verificar también que coincida el tipo exactamente
+        if (info.categoryId === '1') {
+            shouldUnhighlight = shouldUnhighlight && otherInfo.jerseyType === info.jerseyType;
+        }
+        
+        if (shouldUnhighlight) {
             otherRow.classList.remove('hover-highlighted');
         }
     });

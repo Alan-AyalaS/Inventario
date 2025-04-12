@@ -64,6 +64,19 @@
 		CATEGORÍAS
 	</div>
 		<div class="card-body">
+		<?php if(isset($_SESSION["is_admin"]) && $_SESSION["is_admin"] == 1): ?>
+		<div class="alert alert-warning" role="alert">
+			<h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Advertencia para Administradores</h5>
+			<p class="mb-0">Editar el nombre de una categoría que está siendo utilizada por productos puede causar:</p>
+			<ul class="mb-0">
+				<li>Inconsistencias en reportes históricos</li>
+				<li>Problemas con filtros y agrupaciones de productos</li>
+				<li>Afectación en la visualización de tipos de productos</li>
+			</ul>
+			<hr>
+			<p class="mb-0">Por favor, edite las categorías solo cuando sea absolutamente necesario y asegúrese de documentar los cambios.</p>
+		</div>
+		<?php endif; ?>
 
 		<?php
 		$categories = CategoryData::getAll();
@@ -73,7 +86,9 @@
 			<thead>
 			<th>Nombre</th>
 			<th>Color</th>
+			<?php if(isset($_SESSION["is_admin"]) && $_SESSION["is_admin"] == 1): ?>
 			<th>Acciones</th>
+			<?php endif; ?>
 			</thead>
 			<?php
 			foreach($categories as $category){
@@ -89,11 +104,13 @@
 					</div>
 					<input type="color" id="color_picker_<?php echo $category->id; ?>" class="color-picker-input" style="position: absolute; visibility: hidden;">
 				</td>
+				<?php if(isset($_SESSION["is_admin"]) && $_SESSION["is_admin"] == 1): ?>
 				<td style="width:200px;">
 					<a href="index.php?view=editcategory&id=<?php echo $category->id;?>" class="btn btn-warning btn-sm">
 						<i class="bi bi-pencil"></i> Editar
 					</a>
 				</td>
+				<?php endif; ?>
 				</tr>
 				<?php
 			}

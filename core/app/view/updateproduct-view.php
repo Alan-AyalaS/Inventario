@@ -53,8 +53,18 @@ if(count($_POST)>0){
 
 	setcookie("prdupd","true");
 	
-	// Redirigir a la vista de inventario
-	header("Location: index.php?view=inventary");
+	// Construir la URL de redirección con los parámetros de filtro
+	$redirect_url = "index.php?view=inventary";
+	$filter_params = array("category_id", "availability", "size", "date_filter", "search", "limit", "jerseyType", "page");
+
+	foreach($filter_params as $param) {
+		if(isset($_GET[$param]) && $_GET[$param] != "") {
+			$redirect_url .= "&" . $param . "=" . urlencode($_GET[$param]);
+		}
+	}
+
+	// Redirigir con mensaje de éxito
+	header("Location: " . $redirect_url);
 	exit;
 }
 

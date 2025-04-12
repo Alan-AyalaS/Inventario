@@ -18,7 +18,14 @@ if($product!=null):
     <div class="card-body">
 
 
-		<form class="form-horizontal" method="post" id="addproduct" enctype="multipart/form-data" action="index.php?view=updateproduct" role="form">
+		<form class="form-horizontal" method="post" id="addproduct" enctype="multipart/form-data" action="index.php?view=updateproduct<?php 
+            $filter_params = array("category_id", "availability", "size", "date_filter", "search", "limit", "jerseyType", "page");
+            foreach($filter_params as $param) {
+                if(isset($_GET[$param]) && $_GET[$param] != "") {
+                    echo "&" . $param . "=" . urlencode($_GET[$param]);
+                }
+            }
+        ?>" role="form">
 
   <div class="form-group">
     <label for="inputEmail1" class="col-lg-3 control-label">Imagen*</label>
@@ -31,6 +38,16 @@ if($product!=null):
 <?php endif;?>
     </div>
   </div>
+
+  <?php
+  // Agregar campos ocultos para los parámetros de filtro
+  $filter_params = array("category_id", "availability", "size", "date_filter", "search", "limit", "jerseyType", "page");
+  foreach($filter_params as $param) {
+      if(isset($_GET[$param]) && $_GET[$param] != "") {
+          echo '<input type="hidden" name="' . $param . '" value="' . htmlspecialchars($_GET[$param]) . '">';
+      }
+  }
+  ?>
 
   <div class="form-group">
     <label for="inputEmail1" class="col-lg-3 control-label">Codigo de barras*</label>

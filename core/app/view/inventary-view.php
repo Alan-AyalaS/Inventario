@@ -457,6 +457,16 @@ if($selected_category_name == "Jersey") {
                 <form id="editSelectedForm" method="post" action="index.php?view=updateproducts" enctype="multipart/form-data">
                     <input type="hidden" name="product_ids" id="selectedProductIds">
                     
+                    <?php
+                    // Agregar campos ocultos para los parámetros de filtro
+                    $filter_params = array("category_id", "availability", "size", "date_filter", "search", "limit", "jerseyType", "page");
+                    foreach($filter_params as $param) {
+                        if(isset($_GET[$param]) && $_GET[$param] != "") {
+                            echo '<input type="hidden" name="' . $param . '" value="' . htmlspecialchars($_GET[$param]) . '">';
+                        }
+                    }
+                    ?>
+                    
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -758,14 +768,13 @@ if($selected_category_name == "Jersey") {
 							<input type="checkbox" id="selectAll" class="form-check-input">
 						</th>
                                 <th style="width: 80px;">Codigo</th>
-                                <th style="width: 150px;">Nombre</th>
+                                <th style="width: 200px;">Nombre</th>
 						<th style="width: 80px;">Talla</th>
                                 <th style="width: 120px;">Categoría</th>
                                 <?php if(isset($_SESSION["is_admin"]) && $_SESSION["is_admin"] == "1"): ?>
                                 <th style="width: 100px;">Precio de Entrada</th>
                                 <?php endif; ?>
                                 <th style="width: 100px;">Precio de Salida</th>
-                                <th style="width: 80px;">Unidad</th>
                                 <th style="width: 100px;">Mínima en Inventario</th>
                                 <th style="width: 50px;">Disponible</th>
                                 <th style="width: 60px;">Total</th>
@@ -827,7 +836,7 @@ if($selected_category_name == "Jersey") {
                                     data-product-min-inventory="<?php echo $product->inventary_min; ?>"
                                     data-product-availability="<?php echo $product->availability; ?>"
                                     data-product-image="<?php echo $product->image ? 'storage/products/'.$product->image : 'storage/products/no-image.png'; ?>"
-                                    ><?php echo $product->name; ?></td>
+                                    ><?php echo $product->name; ?><?php if($product->image): ?><i class="bi bi-camera text-muted ms-1" style="font-size: 0.8em;"></i><?php endif; ?></td>
                         <td><?php echo $product->size; ?></td>
 						<td>
 							<?php 
@@ -873,7 +882,6 @@ if($selected_category_name == "Jersey") {
 						<td><?php echo $product->price_in; ?></td>
 						<?php endif; ?>
 						<td><?php echo $product->price_out; ?></td>
-						<td><?php echo $product->unit; ?></td>
                         <td><?php echo $product->inventary_min; ?></td>
                                 <td class="text-center">
 							<?php 
@@ -936,7 +944,14 @@ if($selected_category_name == "Jersey") {
                                 <button type="button" class="btn btn-sm btn-danger adjust-stock-btn" data-product-id="<?php echo $product->id; ?>" data-operation="subtract">
 								<i class="bi bi-dash-circle"></i>
 							</button>
-							<a href="index.php?view=editproduct&id=<?php echo $product->id; ?>" class="btn btn-sm btn-warning">
+							<a href="index.php?view=editproduct&id=<?php echo $product->id; ?><?php 
+                                $filter_params = array("category_id", "availability", "size", "date_filter", "search", "limit", "jerseyType", "page");
+                                foreach($filter_params as $param) {
+                                    if(isset($_GET[$param]) && $_GET[$param] != "") {
+                                        echo "&" . $param . "=" . urlencode($_GET[$param]);
+                                    }
+                                }
+                            ?>" class="btn btn-sm btn-warning">
 								<i class="bi bi-pencil"></i>
 							</a>
                                 <button type="button" class="btn btn-sm btn-danger delete-product-btn" data-product-id="<?php echo $product->id; ?>" data-product-name="<?php echo addslashes($product->name); ?>">
@@ -1096,11 +1111,23 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectAllCheckbox = document.getElementById('selectAll');
         const productCheckboxes = document.querySelectorAll('.product-checkbox');
         const deleteSelectedBtn = document.getElementById('deleteSelected');
+        const editSelectedBtn = document.getElementById('editSelected');
         
-        // Función para actualizar el estado del botón de eliminar seleccionados
-        function updateDeleteButton() {
+        // Función para actualizar el estado de los botones y el resaltado
+        function updateSelection() {
             const selectedCount = document.querySelectorAll('.product-checkbox:checked').length;
-            deleteSelectedBtn.disabled = selectedCount === 0;
+            if (deleteSelectedBtn) deleteSelectedBtn.disabled = selectedCount === 0;
+            if (editSelectedBtn) editSelectedBtn.disabled = selectedCount === 0;
+            
+            // Actualizar el resaltado de las filas
+            productCheckboxes.forEach(checkbox => {
+                const row = checkbox.closest('tr');
+                if (checkbox.checked) {
+                    row.classList.add('highlighted');
+                } else {
+                    row.classList.remove('highlighted');
+                }
+            });
         }
         
         // Event listener para el checkbox "Seleccionar todos"
@@ -1109,7 +1136,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 productCheckboxes.forEach(checkbox => {
                     checkbox.checked = this.checked;
                 });
-                updateDeleteButton();
+                updateSelection();
             });
         }
         
@@ -1140,10 +1167,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (selectAllCheckbox) {
                     selectAllCheckbox.checked = allChecked;
                 }
-                updateDeleteButton();
+                
+                updateSelection();
             });
         });
-        
+
         // Event listener para el botón de eliminar seleccionados
         if (deleteSelectedBtn) {
             deleteSelectedBtn.addEventListener('click', function() {
@@ -1201,7 +1229,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Event listener para el botón de editar seleccionados
-        const editSelectedBtn = document.getElementById('editSelected');
         if (editSelectedBtn) {
             editSelectedBtn.addEventListener('click', function() {
                 const selectedProducts = Array.from(document.querySelectorAll('.product-checkbox:checked'))
@@ -1517,6 +1544,54 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+function submitEditSelectedForm(event) {
+    event.preventDefault();
+    
+    const form = document.getElementById('editSelectedForm');
+    const productIds = document.getElementById('selectedProductIds').value;
+    
+    if (!productIds) {
+        alert('Por favor seleccione al menos un producto');
+        return false;
+    }
+
+    // Obtener los parámetros de filtro de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Agregar los parámetros de filtro al formulario
+    const filterParams = [
+        'category_id',
+        'availability',
+        'size',
+        'date_filter',
+        'search',
+        'limit',
+        'jerseyType',
+        'page'
+    ];
+    
+    filterParams.forEach(param => {
+        if (urlParams.has(param)) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = param;
+            input.value = urlParams.get(param);
+            form.appendChild(input);
+        }
+    });
+
+    // Cerrar el modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('editSelectedModal'));
+    if (modal) {
+        modal.hide();
+    }
+
+    // Enviar el formulario
+    form.submit();
+    
+    return false;
+}
 </script>
 
 <style>

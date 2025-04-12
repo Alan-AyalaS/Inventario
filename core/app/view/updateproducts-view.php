@@ -77,15 +77,17 @@ if(count($_POST) > 0) {
         setcookie("prdupd_error", "Hubo errores al actualizar los productos", time()+3600, "/");
     }
 
-    // Mantener los filtros en la redirección
+    // Construir la URL de redirección con los parámetros de filtro
     $redirect_url = "index.php?view=inventary";
     $filter_params = array("category_id", "availability", "size", "date_filter", "search", "limit", "jerseyType", "page");
+
     foreach($filter_params as $param) {
         if(isset($_POST[$param]) && $_POST[$param] != "") {
             $redirect_url .= "&" . $param . "=" . urlencode($_POST[$param]);
         }
     }
 
+    // Redirigir con mensaje de éxito
     header("Location: " . $redirect_url);
     exit;
 }

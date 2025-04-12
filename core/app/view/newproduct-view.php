@@ -1,6 +1,6 @@
-    <?php 
+<?php 
 $categories = CategoryData::getAll();
-    ?>
+?>
 <div class="row">
 	<div class="col-md-12">
 	<h1>Nuevo Producto</h1>
@@ -11,6 +11,11 @@ $categories = CategoryData::getAll();
   </div>
     <div class="card-body">
 
+    <?php if(isset($_COOKIE["product_error"])):?>
+        <div class="alert alert-danger">
+            <?php echo $_COOKIE["product_error"]; ?>
+        </div>
+        <?php setcookie("product_error","",time()-18600); endif; ?>
 
 		<form class="form-horizontal" method="post" enctype="multipart/form-data" id="addproduct" action="index.php?view=addproduct" role="form">
 

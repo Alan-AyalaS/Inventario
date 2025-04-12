@@ -152,5 +152,17 @@ class ProductData {
 		$result = $query[0]->fetch_assoc();
 		return $result['total'] ?? 0;
 	}
+
+	public static function getByCategoryId($category_id){
+		$sql = "select * from ".self::$tablename." where category_id=$category_id";
+		$query = Executor::doit($sql);
+		return Model::many($query[0],new ProductData());
+	}
+
+	public static function existsByNameAndJerseyType($name, $jersey_type) {
+		$sql = "select * from ".self::$tablename." where name=\"$name\" and jersey_type=\"$jersey_type\"";
+		$query = Executor::doit($sql);
+		return Model::one($query[0],new ProductData()) != null;
+	}
 }
 ?>

@@ -22,6 +22,19 @@ if(count($_POST)>0){
   $category = CategoryData::getById($category_id);
   $categoryName = $category ? strtolower(trim($category->name)) : '';
 
+  // Validar si es un jersey y verificar duplicados
+  if($categoryName === 'jersey') {
+    $tipoJersey = $_POST["tipo_jersey"];
+    $product->jersey_type = $tipoJersey;
+    
+    // Verificar si ya existe un producto con el mismo nombre y tipo de jersey
+    if(ProductData::existsByNameAndJerseyType($product->name, $tipoJersey)) {
+      setcookie("product_error", "Ya existe un jersey de tipo '$tipoJersey' con el nombre '$product->name'", time() + 3600, "/");
+      header("Location: index.php?view=newproduct");
+      exit;
+    }
+  }
+
   // Manejar las tallas según la categoría
   $total_quantity = 0;
   $created_products = [];
@@ -59,7 +72,6 @@ if(count($_POST)>0){
         '28' => $_POST["talla_28"]
       ];
     }
-    $product->jersey_type = $tipoJersey;
   } elseif($categoryName === 'tenis') {
     $tallas = [
       '23.5' => $_POST["talla_23_5"],

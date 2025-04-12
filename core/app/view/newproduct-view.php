@@ -256,8 +256,8 @@ $categories = CategoryData::getAll();
     </div>
   </div>
 
-  <!-- Campo de inventario inicial para Gorras, Variado y Balón -->
-  <div id="inventarioInicialContainer" class="form-group" style="display: none;">
+  <!-- Campo de inventario inicial -->
+  <div id="inventarioInicialContainer" class="form-group">
     <label for="inventario_inicial" class="col-lg-2 control-label">Inventario Inicial*</label>
     <div class="col-md-6">
       <input type="number" name="inventario_inicial" class="form-control" id="inventario_inicial" placeholder="Cantidad inicial de unidades" min="1" value="1" required>
@@ -283,37 +283,34 @@ $(document).ready(function(){
         var selectedCategory = $(this).find('option:selected').text().trim().toLowerCase();
         console.log('Categoría seleccionada:', selectedCategory); // Para depuración
         
+        // Ocultar todos los contenedores de tallas primero
+        $('#tallasContainer, #tipoJersey, #tallasAdulto, #tallasNino, #tallasTenis, #tallaUnica, #tallasDama').hide();
+        
+        // Mostrar el inventario inicial por defecto
+        $('#inventarioInicialContainer').show();
+        
         if(selectedCategory === 'jersey') {
             $('#tallasContainer').show();
             $('#tipoJersey').show();
             $('#tallasAdulto').show();
-            $('#tallasNino, #tallasTenis, #tallaUnica, #tallasDama').hide();
             $('#inventarioInicialContainer').hide();
         } else if(selectedCategory === 'tenis') {
             $('#tallasContainer').show();
-            $('#tipoJersey').hide();
             $('#tallasTenis').show();
-            $('#tallasAdulto, #tallasNino, #tallaUnica, #tallasDama').hide();
             $('#inventarioInicialContainer').hide();
-        } else if(selectedCategory === 'gorra' || selectedCategory === 'gorras' || selectedCategory === 'variado' || selectedCategory === 'balón' || selectedCategory === 'balon') {
-            $('#tallasContainer').hide();
-            $('#tipoJersey, #tallasAdulto, #tallasNino, #tallasTenis, #tallaUnica, #tallasDama').hide();
-            $('#inventarioInicialContainer').show();
         }
     });
 
     // Función para manejar el cambio de tipo de jersey
     $('#tipoJersey').change(function(){
         var tipo = $(this).val();
+        $('#tallasAdulto, #tallasNino, #tallasDama').hide();
         if(tipo === 'adulto') {
             $('#tallasAdulto').show();
-            $('#tallasNino, #tallasDama').hide();
         } else if(tipo === 'dama') {
             $('#tallasDama').show();
-            $('#tallasAdulto, #tallasNino').hide();
         } else {
             $('#tallasNino').show();
-            $('#tallasAdulto, #tallasDama').hide();
         }
     });
 
@@ -325,15 +322,5 @@ $(document).ready(function(){
             console.log(e.which);
         }
     });
-
-    // Ocultar el texto de 'Tipo de Jersey' para la categoría 'Tenis'
-    $('#categorySelect').change(function() {
-        var selectedCategory = $(this).find('option:selected').text().trim().toLowerCase();
-        if (selectedCategory === 'tenis') {
-            $('#tipoJersey').closest('.form-group').hide();
-        } else {
-            $('#tipoJersey').closest('.form-group').show();
-        }
-    }).trigger('change');
 });
 </script>

@@ -1230,7 +1230,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Event listener para los checkboxes individuales
         let lastChecked = null;
         productCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function(e) {
+            checkbox.addEventListener('click', function(e) { // Cambiado de 'change' a 'click'
                 // Si se presionó la tecla Shift
                 if (e.shiftKey && lastChecked) {
                     let start = Array.from(productCheckboxes).indexOf(lastChecked);
@@ -1251,33 +1251,22 @@ document.addEventListener('DOMContentLoaded', function() {
                             row.classList.remove('highlighted');
                         }
                     }
+                }
+                
+                // Actualizar el estilo de la fila actual
+                const row = this.closest('tr');
+                if (this.checked) {
+                    row.classList.add('highlighted');
+                    row.classList.remove('hover-highlighted');
                 } else {
-                    // Para selección individual
-                    const row = this.closest('tr');
-                    if (this.checked) {
-                        row.classList.add('highlighted');
-                        row.classList.remove('hover-highlighted');
-                    } else {
-                        row.classList.remove('highlighted');
-                    }
+                    row.classList.remove('highlighted');
                 }
                 
                 // Actualizar el último checkbox seleccionado
                 lastChecked = this;
                 
-                // Verificar si todos los checkboxes están seleccionados
-                const allChecked = Array.from(productCheckboxes).every(cb => cb.checked);
-                if (selectAllCheckbox) {
-                    selectAllCheckbox.checked = allChecked;
-                }
-                
                 updateSelection();
             });
-
-            // Aplicar resaltado inicial si el checkbox está marcado
-            if (checkbox.checked) {
-                checkbox.closest('tr').classList.add('highlighted');
-            }
         });
 
         // Event listener para el botón de eliminar seleccionados

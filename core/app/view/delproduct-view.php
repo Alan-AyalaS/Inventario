@@ -3,8 +3,19 @@
 $product = ProductData::getById($_GET["id"]);
 $product_name = $product->name; // Guardar el nombre del producto antes de eliminarlo
 
-// Obtener todos los productos con el mismo nombre
-$sql = "SELECT * FROM product WHERE name = '$product->name'";
+// Obtener la categoría del producto
+$category = $product->getCategory();
+$category_name = $category ? strtolower(trim($category->name)) : '';
+
+// Obtener todos los productos del mismo grupo antes de eliminar
+if ($category_name === 'jersey') {
+	// Para jerseys, obtener productos del mismo nombre, categoría y tipo
+	$sql = "SELECT * FROM product WHERE name = \"$product->name\" AND category_id = $product->category_id AND jersey_type = \"$product->jersey_type\"";
+} else {
+	// Para otros productos, obtener productos del mismo nombre y categoría
+	$sql = "SELECT * FROM product WHERE name = \"$product->name\" AND category_id = $product->category_id";
+}
+
 $query = Executor::doit($sql);
 $related_products = Model::many($query[0], new ProductData());
 
@@ -51,10 +62,21 @@ if (isset($_GET["date_filter"])) {
 if (isset($_GET["limit"])) {
     $redirectUrl .= "&limit=" . $_GET["limit"];
 }
+if (isset($_GET["jerseyType"])) {
+    $redirectUrl .= "&jerseyType=" . $_GET["jerseyType"];
+}
+if (isset($_GET["availability"])) {
+    $redirectUrl .= "&availability=" . $_GET["availability"];
+}
+if (isset($_GET["size"])) {
+    $redirectUrl .= "&size=" . $_GET["size"];
+}
+if (isset($_GET["search"])) {
+    $redirectUrl .= "&search=" . urlencode($_GET["search"]);
+}
 if (isset($_GET["page"])) {
     $redirectUrl .= "&page=" . $_GET["page"];
 }
 
-// Redirigir a la página de inventario con los filtros
-Core::redir($redirectUrl);
+header("Location: " . $redirectUrl);
 ?>

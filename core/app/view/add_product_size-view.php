@@ -88,6 +88,30 @@ try {
         throw new Exception('Error al registrar la operación de entrada');
     }
 
+    // Actualizar los totales del grupo
+    if ($category && strtolower($category->name) === 'jersey') {
+        // Para jerseys, obtener productos del mismo nombre, categoría y tipo
+        $sql = "SELECT * FROM product WHERE name = \"$product->name\" AND category_id = $product->category_id AND jersey_type = \"$product->jersey_type\"";
+    } else {
+        // Para otros productos, obtener productos del mismo nombre y categoría
+        $sql = "SELECT * FROM product WHERE name = \"$product->name\" AND category_id = $product->category_id";
+    }
+    
+    $query = Executor::doit($sql);
+    $group_products = Model::many($query[0], new ProductData());
+    
+    // Calcular el total del grupo
+    $group_total = 0;
+    foreach ($group_products as $group_product) {
+        $group_total += $group_product->availability;
+    }
+    
+    // Actualizar el total en todos los productos del grupo
+    foreach ($group_products as $group_product) {
+        $group_product->total = $group_total;
+        $group_product->update();
+    }
+
     // Establecer cookie para mostrar mensaje de éxito
     setcookie("prdadd", $product->name, time()+3600, "/");
 

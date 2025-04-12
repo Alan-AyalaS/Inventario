@@ -1721,6 +1721,14 @@ class Upload {
     var $lang;
 
     /**
+     * File max size raw value from php.ini
+     *
+     * @access public
+     * @var string
+     */
+    var $file_max_size_raw;
+
+    /**
      * Init or re-init all the processing variables to their default values
      *
      * This function is called in the constructor, and after each call of {@link process}
@@ -2786,7 +2794,7 @@ class Upload {
         // remove illegal file system characters
         $filename = str_replace(array_map('chr', range(0, 31)), '', $filename);
         // remove dangerous characters for file names
-        $chars = array("?", "[", "]", "/", "\\", "=", "<", ">", ":", ";", ",", "'", "\"", "&", "’", "%20",
+        $chars = array("?", "[", "]", "/", "\\", "=", "<", ">", ":", ";", ",", "'", "\"", "&", "\'", "%20",
                        "+", "$", "#", "*", "(", ")", "|", "~", "`", "!", "{", "}", "%", "+", "^", chr(0));
         $filename = str_replace($chars, '-', $filename);
         // remove break/tabs/return carriage

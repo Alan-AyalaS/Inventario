@@ -11,6 +11,7 @@ class OperationData {
 	public $is_oficial;
 	public $sell_id;
 	public $created_at;
+	public $talla;
 
 	public function OperationData(){
 		$this->name = "";

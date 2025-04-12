@@ -696,11 +696,12 @@ if($selected_category_name == "Jersey") {
     $px = $page-1;
     if($px > 0):
         $url = "index.php?view=inventary&limit=$limit&page=".($px);
-        if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-            $url .= "&category_id=".$_GET['category_id'];
-        }
-        if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-            $url .= "&date_filter=".$_GET['date_filter'];
+        // Agregar todos los parámetros de filtro
+        $filter_params = array("category_id", "availability", "size", "date_filter", "search", "limit", "jerseyType");
+        foreach($filter_params as $param) {
+            if(isset($_GET[$param]) && $_GET[$param] != "") {
+                $url .= "&" . $param . "=" . urlencode($_GET[$param]);
+            }
         }
     ?>
     <a class="btn btn-sm btn-default" href="<?php echo $url; ?>"><i class="glyphicon glyphicon-chevron-left"></i> Atras </a>
@@ -719,7 +720,14 @@ if($selected_category_name == "Jersey") {
     
     // Mostrar primera página y "..." si es necesario
     if ($startPage > 1) {
-        echo "<a href='index.php?view=inventary&limit=$limit&page=1' class='btn btn-sm btn-default'>1</a>";
+        $url = "index.php?view=inventary&limit=$limit&page=1";
+        // Agregar todos los parámetros de filtro
+        foreach($filter_params as $param) {
+            if(isset($_GET[$param]) && $_GET[$param] != "") {
+                $url .= "&" . $param . "=" . urlencode($_GET[$param]);
+            }
+        }
+        echo "<a href='$url' class='btn btn-sm btn-default'>1</a>";
         if ($startPage > 2) {
             echo "<span class='btn btn-sm btn-default disabled'>...</span>";
         }
@@ -728,11 +736,11 @@ if($selected_category_name == "Jersey") {
     // Mostrar el rango de páginas
     for($i = $startPage; $i <= $endPage; $i++) {
         $url = "index.php?view=inventary&limit=$limit&page=$i";
-        if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-            $url .= "&category_id=".$_GET['category_id'];
-        }
-        if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-            $url .= "&date_filter=".$_GET['date_filter'];
+        // Agregar todos los parámetros de filtro
+        foreach($filter_params as $param) {
+            if(isset($_GET[$param]) && $_GET[$param] != "") {
+                $url .= "&" . $param . "=" . urlencode($_GET[$param]);
+            }
         }
         
         $active_class = ($page == $i) ? 'btn-primary' : 'btn-default';
@@ -744,17 +752,24 @@ if($selected_category_name == "Jersey") {
         if ($endPage < $npaginas - 1) {
             echo "<span class='btn btn-sm btn-default disabled'>...</span>";
         }
-        echo "<a href='index.php?view=inventary&limit=$limit&page=$npaginas' class='btn btn-sm btn-default'>$npaginas</a>";
+        $url = "index.php?view=inventary&limit=$limit&page=$npaginas";
+        // Agregar todos los parámetros de filtro
+        foreach($filter_params as $param) {
+            if(isset($_GET[$param]) && $_GET[$param] != "") {
+                $url .= "&" . $param . "=" . urlencode($_GET[$param]);
+            }
+        }
+        echo "<a href='$url' class='btn btn-sm btn-default'>$npaginas</a>";
     }
     
     // Botón "Siguiente"
     if($page < $npaginas):
         $url = "index.php?view=inventary&limit=$limit&page=".($page + 1);
-        if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-            $url .= "&category_id=".$_GET['category_id'];
-        }
-        if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-            $url .= "&date_filter=".$_GET['date_filter'];
+        // Agregar todos los parámetros de filtro
+        foreach($filter_params as $param) {
+            if(isset($_GET[$param]) && $_GET[$param] != "") {
+                $url .= "&" . $param . "=" . urlencode($_GET[$param]);
+            }
         }
     ?>
     <a class="btn btn-sm btn-default" href="<?php echo $url; ?>">Siguiente <i class="glyphicon glyphicon-chevron-right"></i></a>
@@ -970,11 +985,12 @@ if($selected_category_name == "Jersey") {
     $px = $page-1;
     if($px > 0):
         $url = "index.php?view=inventary&limit=$limit&page=".($px);
-        if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-            $url .= "&category_id=".$_GET['category_id'];
-        }
-        if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-            $url .= "&date_filter=".$_GET['date_filter'];
+        // Agregar todos los parámetros de filtro
+        $filter_params = array("category_id", "availability", "size", "date_filter", "search", "limit", "jerseyType");
+        foreach($filter_params as $param) {
+            if(isset($_GET[$param]) && $_GET[$param] != "") {
+                $url .= "&" . $param . "=" . urlencode($_GET[$param]);
+            }
         }
     ?>
     <a class="btn btn-sm btn-default" href="<?php echo $url; ?>"><i class="glyphicon glyphicon-chevron-left"></i> Atras </a>
@@ -993,7 +1009,14 @@ if($selected_category_name == "Jersey") {
     
     // Mostrar primera página y "..." si es necesario
     if ($startPage > 1) {
-        echo "<a href='index.php?view=inventary&limit=$limit&page=1' class='btn btn-sm btn-default'>1</a>";
+        $url = "index.php?view=inventary&limit=$limit&page=1";
+        // Agregar todos los parámetros de filtro
+        foreach($filter_params as $param) {
+            if(isset($_GET[$param]) && $_GET[$param] != "") {
+                $url .= "&" . $param . "=" . urlencode($_GET[$param]);
+            }
+        }
+        echo "<a href='$url' class='btn btn-sm btn-default'>1</a>";
         if ($startPage > 2) {
             echo "<span class='btn btn-sm btn-default disabled'>...</span>";
         }
@@ -1002,11 +1025,11 @@ if($selected_category_name == "Jersey") {
     // Mostrar el rango de páginas
     for($i = $startPage; $i <= $endPage; $i++) {
         $url = "index.php?view=inventary&limit=$limit&page=$i";
-        if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-            $url .= "&category_id=".$_GET['category_id'];
-        }
-        if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-            $url .= "&date_filter=".$_GET['date_filter'];
+        // Agregar todos los parámetros de filtro
+        foreach($filter_params as $param) {
+            if(isset($_GET[$param]) && $_GET[$param] != "") {
+                $url .= "&" . $param . "=" . urlencode($_GET[$param]);
+            }
         }
         
         $active_class = ($page == $i) ? 'btn-primary' : 'btn-default';
@@ -1018,17 +1041,24 @@ if($selected_category_name == "Jersey") {
         if ($endPage < $npaginas - 1) {
             echo "<span class='btn btn-sm btn-default disabled'>...</span>";
         }
-        echo "<a href='index.php?view=inventary&limit=$limit&page=$npaginas' class='btn btn-sm btn-default'>$npaginas</a>";
+        $url = "index.php?view=inventary&limit=$limit&page=$npaginas";
+        // Agregar todos los parámetros de filtro
+        foreach($filter_params as $param) {
+            if(isset($_GET[$param]) && $_GET[$param] != "") {
+                $url .= "&" . $param . "=" . urlencode($_GET[$param]);
+            }
+        }
+        echo "<a href='$url' class='btn btn-sm btn-default'>$npaginas</a>";
     }
     
     // Botón "Siguiente"
     if($page < $npaginas):
         $url = "index.php?view=inventary&limit=$limit&page=".($page + 1);
-        if(isset($_GET['category_id']) && $_GET['category_id'] != "") {
-            $url .= "&category_id=".$_GET['category_id'];
-        }
-        if(isset($_GET['date_filter']) && $_GET['date_filter'] != "") {
-            $url .= "&date_filter=".$_GET['date_filter'];
+        // Agregar todos los parámetros de filtro
+        foreach($filter_params as $param) {
+            if(isset($_GET[$param]) && $_GET[$param] != "") {
+                $url .= "&" . $param . "=" . urlencode($_GET[$param]);
+            }
         }
     ?>
     <a class="btn btn-sm btn-default" href="<?php echo $url; ?>">Siguiente <i class="glyphicon glyphicon-chevron-right"></i></a>

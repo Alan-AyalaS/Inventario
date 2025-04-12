@@ -1632,7 +1632,7 @@ function submitEditSelectedForm(event) {
 }
 
 .hover-highlighted td {
-    background-color: #f8f9fa !important;
+    background-color:rgb(214, 217, 221)!important;
 }
 
 .highlighted .badge {

@@ -1869,7 +1869,48 @@ function toggleAddSizeForm(show) {
 document.addEventListener('DOMContentLoaded', function() {
     const addSizeBtn = document.getElementById('addSizeBtn');
     if (addSizeBtn) {
-        addSizeBtn.addEventListener('click', () => toggleAddSizeForm(true));
+        addSizeBtn.addEventListener('click', async () => {
+            // Obtener el ID del producto
+            const productId = document.getElementById('newSizeProductId').value;
+            
+            try {
+                // Obtener las tallas disponibles
+                const response = await fetch(`ajax/get_available_sizes_to_add.php?product_id=${productId}`);
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.error || 'Error al obtener las tallas disponibles');
+                }
+                
+                // Actualizar el select con las tallas disponibles
+                const sizeSelect = document.getElementById('newSizeSelect');
+                sizeSelect.innerHTML = '<option value="">Seleccione una talla</option>';
+                
+                if (data.sizes && data.sizes.length > 0) {
+                    data.sizes.forEach(size => {
+                        const option = document.createElement('option');
+                        option.value = size;
+                        option.textContent = size;
+                        sizeSelect.appendChild(option);
+                    });
+                } else {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'No hay tallas disponibles para agregar';
+                    option.disabled = true;
+                    sizeSelect.appendChild(option);
+                }
+                
+                // Mostrar el formulario
+                toggleAddSizeForm(true);
+            } catch (error) {
+                console.error('Error al obtener tallas:', error);
+                alert('Error al cargar las tallas disponibles: ' + error.message);
+            }
+        });
     }
 
     // Event listener para el formulario de nueva talla

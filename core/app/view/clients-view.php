@@ -177,9 +177,10 @@ foreach($configs as $conf) {
 			showPagination($page, $total_pages, $limit);
 
 			if(count($users)>0){
-				// si hay usuarios
+				// Mostrar mensaje de resultados
+				$plural = $total_users == 1 ? 'cliente coincide' : 'clientes coinciden';
+				echo "<p class='text-muted mb-3'>Se encontraron $total_users $plural con los filtros aplicados.</p>";
 				?>
-
 				<table class="table table-bordered table-hover">
 				<thead>
 				<th>Nombre completo</th>

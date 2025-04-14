@@ -24,9 +24,9 @@
     </div>
   </div>
   <div class="form-group">
-    <label for="inputEmail1" class="col-lg-2 control-label">Dirección*</label>
+    <label for="inputEmail1" class="col-lg-2 control-label">Dirección</label>
     <div class="col-md-6">
-      <input type="text" name="address1" class="form-control" required id="address1" placeholder="Dirección">
+      <input type="text" name="address1" class="form-control" id="address1" placeholder="Dirección">
     </div>
   </div>
   <div class="form-group">
@@ -42,9 +42,9 @@
     </div>
   </div>
   <div class="form-group">
-    <label for="inputEmail1" class="col-lg-2 control-label">Código Postal*</label>
+    <label for="inputEmail1" class="col-lg-2 control-label">Código Postal</label>
     <div class="col-md-6">
-      <input type="text" name="zip_code" class="form-control" required id="zip_code" placeholder="Código Postal">
+      <input type="text" name="zip_code" class="form-control" id="zip_code" placeholder="Código Postal">
     </div>
   </div>
   <div class="form-group">

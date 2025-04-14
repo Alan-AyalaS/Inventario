@@ -53,9 +53,12 @@ foreach($configs as $conf) {
 			<table class="table table-bordered table-hover">
 			<thead>
 			<th>Nombre completo</th>
-			<th>Direccion</th>
+			<th>Dirección</th>
+			<th>Ciudad/Municipio</th>
+			<th>Estado</th>
+			<th>Código Postal</th>
 			<th>Email</th>
-			<th>Telefono</th>
+			<th>Teléfono</th>
 			<th></th>
 			</thead>
 			<?php
@@ -64,6 +67,9 @@ foreach($configs as $conf) {
 				<tr>
 				<td><?php echo $user->name." ".$user->lastname; ?></td>
 				<td><?php echo $user->address1; ?></td>
+				<td><?php echo $user->city; ?></td>
+				<td><?php echo $user->state; ?></td>
+				<td><?php echo $user->zip_code; ?></td>
 				<td><?php echo $user->email1; ?></td>
 				<td><?php echo $user->phone1; ?></td>
 				<td style="width:130px;">

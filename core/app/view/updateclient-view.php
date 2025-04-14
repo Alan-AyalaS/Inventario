@@ -5,15 +5,16 @@ if(count($_POST)>0){
 	$user->name = $_POST["name"];
 	$user->lastname = $_POST["lastname"];
 	$user->address1 = $_POST["address1"];
+	$user->city = $_POST["city"];
+	$user->state = $_POST["state"];
+	$user->zip_code = $_POST["zip_code"];
 	$user->email1 = $_POST["email1"];
 	$user->phone1 = $_POST["phone1"];
 	$user->update_client();
-
 
 print "<script>window.location='index.php?view=clients';</script>";
 
 
 }
-
 
 ?>

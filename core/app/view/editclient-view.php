@@ -26,15 +26,33 @@
     </div>
   </div>
   <div class="form-group">
-    <label for="inputEmail1" class="col-lg-2 control-label">Direccion*</label>
+    <label for="inputEmail1" class="col-lg-2 control-label">Dirección*</label>
     <div class="col-md-6">
-      <input type="text" name="address1" value="<?php echo $user->address1;?>" class="form-control" required id="username" placeholder="Direccion">
+      <input type="text" name="address1" value="<?php echo $user->address1;?>" class="form-control" required id="address1" placeholder="Dirección">
     </div>
   </div>
   <div class="form-group">
-    <label for="inputEmail1" class="col-lg-2 control-label">Email*</label>
+    <label for="inputEmail1" class="col-lg-2 control-label">Ciudad/Municipio*</label>
     <div class="col-md-6">
-      <input type="text" name="email1" value="<?php echo $user->email1;?>" class="form-control" id="email" placeholder="Email">
+      <input type="text" name="city" value="<?php echo $user->city;?>" class="form-control" required id="city" placeholder="Ciudad o Municipio">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="inputEmail1" class="col-lg-2 control-label">Estado*</label>
+    <div class="col-md-6">
+      <input type="text" name="state" value="<?php echo $user->state;?>" class="form-control" required id="state" placeholder="Estado">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="inputEmail1" class="col-lg-2 control-label">Código Postal*</label>
+    <div class="col-md-6">
+      <input type="text" name="zip_code" value="<?php echo $user->zip_code;?>" class="form-control" required id="zip_code" placeholder="Código Postal">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="inputEmail1" class="col-lg-2 control-label">Email</label>
+    <div class="col-md-6">
+      <input type="text" name="email1" value="<?php echo $user->email1;?>" class="form-control" id="email1" placeholder="Email">
     </div>
   </div>
 

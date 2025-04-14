@@ -18,19 +18,37 @@
     </div>
   </div>
   <div class="form-group">
-    <label for="inputEmail1" class="col-lg-2 control-label">Apellido*</label>
+    <label for="inputEmail1" class="col-lg-2 control-label">Apellidos*</label>
     <div class="col-md-6">
       <input type="text" name="lastname" required class="form-control" id="lastname" placeholder="Apellido">
     </div>
   </div>
   <div class="form-group">
-    <label for="inputEmail1" class="col-lg-2 control-label">Direccion*</label>
+    <label for="inputEmail1" class="col-lg-2 control-label">Dirección*</label>
     <div class="col-md-6">
-      <input type="text" name="address1" class="form-control" required id="address1" placeholder="Direccion">
+      <input type="text" name="address1" class="form-control" required id="address1" placeholder="Dirección">
     </div>
   </div>
   <div class="form-group">
-    <label for="inputEmail1" class="col-lg-2 control-label">Email*</label>
+    <label for="inputEmail1" class="col-lg-2 control-label">Ciudad/Municipio*</label>
+    <div class="col-md-6">
+      <input type="text" name="city" class="form-control" required id="city" placeholder="Ciudad o Municipio">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="inputEmail1" class="col-lg-2 control-label">Estado*</label>
+    <div class="col-md-6">
+      <input type="text" name="state" class="form-control" required id="state" placeholder="Estado">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="inputEmail1" class="col-lg-2 control-label">Código Postal*</label>
+    <div class="col-md-6">
+      <input type="text" name="zip_code" class="form-control" required id="zip_code" placeholder="Código Postal">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="inputEmail1" class="col-lg-2 control-label">Email</label>
     <div class="col-md-6">
       <input type="text" name="email1" class="form-control" id="email1" placeholder="Email">
     </div>

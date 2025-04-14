@@ -1,0 +1,315 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Aguascalientes"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-102.35, 22.45], [-102.15, 22.45], [-102.15, 21.85], [-102.35, 21.85], [-102.35, 22.45]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Baja California"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-116.8, 32.7], [-114.7, 32.7], [-114.7, 28.0], [-116.8, 28.0], [-116.8, 32.7]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Baja California Sur"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-114.7, 28.0], [-109.4, 28.0], [-109.4, 22.8], [-114.7, 22.8], [-114.7, 28.0]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Campeche"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-92.4, 20.8], [-89.1, 20.8], [-89.1, 17.8], [-92.4, 17.8], [-92.4, 20.8]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Chiapas"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-94.1, 17.8], [-91.4, 17.8], [-91.4, 14.5], [-94.1, 14.5], [-94.1, 17.8]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Chihuahua"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-108.4, 31.8], [-103.3, 31.8], [-103.3, 26.8], [-108.4, 26.8], [-108.4, 31.8]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Coahuila"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-103.3, 29.8], [-100.0, 29.8], [-100.0, 24.5], [-103.3, 24.5], [-103.3, 29.8]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Colima"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-104.7, 19.5], [-103.5, 19.5], [-103.5, 18.7], [-104.7, 18.7], [-104.7, 19.5]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Durango"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-107.0, 26.8], [-102.9, 26.8], [-102.9, 22.8], [-107.0, 22.8], [-107.0, 26.8]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Estado de Mexico"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-100.5, 20.2], [-98.6, 20.2], [-98.6, 18.2], [-100.5, 18.2], [-100.5, 20.2]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Guanajuato"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-102.1, 21.8], [-99.7, 21.8], [-99.7, 19.9], [-102.1, 19.9], [-102.1, 21.8]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Guerrero"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-102.2, 18.9], [-98.0, 18.9], [-98.0, 16.3], [-102.2, 16.3], [-102.2, 18.9]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hidalgo"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-99.8, 21.2], [-97.9, 21.2], [-97.9, 19.6], [-99.8, 19.6], [-99.8, 21.2]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Jalisco"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-105.7, 22.8], [-101.5, 22.8], [-101.5, 18.9], [-105.7, 18.9], [-105.7, 22.8]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Michoacan"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-103.7, 20.4], [-100.0, 20.4], [-100.0, 17.9], [-103.7, 17.9], [-103.7, 20.4]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Morelos"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-99.5, 19.1], [-98.6, 19.1], [-98.6, 18.3], [-99.5, 18.3], [-99.5, 19.1]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Nayarit"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-106.7, 23.5], [-103.7, 23.5], [-103.7, 20.6], [-106.7, 20.6], [-106.7, 23.5]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Nuevo Leon"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-101.2, 27.8], [-98.4, 27.8], [-98.4, 23.2], [-101.2, 23.2], [-101.2, 27.8]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Oaxaca"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-98.6, 18.1], [-93.8, 18.1], [-93.8, 15.6], [-98.6, 15.6], [-98.6, 18.1]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Puebla"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-98.8, 20.8], [-96.7, 20.8], [-96.7, 17.6], [-98.8, 17.6], [-98.8, 20.8]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Queretaro"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-100.6, 21.6], [-99.0, 21.6], [-99.0, 20.0], [-100.6, 20.0], [-100.6, 21.6]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Quintana Roo"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-89.3, 21.6], [-86.7, 21.6], [-86.7, 17.8], [-89.3, 17.8], [-89.3, 21.6]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "San Luis Potosi"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-102.3, 24.5], [-98.3, 24.5], [-98.3, 21.1], [-102.3, 21.1], [-102.3, 24.5]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Sinaloa"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-109.4, 27.0], [-105.4, 27.0], [-105.4, 22.5], [-109.4, 22.5], [-109.4, 27.0]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Sonora"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-115.0, 32.5], [-108.4, 32.5], [-108.4, 26.3], [-115.0, 26.3], [-115.0, 32.5]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Tabasco"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-94.1, 18.7], [-90.9, 18.7], [-90.9, 17.2], [-94.1, 17.2], [-94.1, 18.7]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Tamaulipas"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-100.0, 27.7], [-97.1, 27.7], [-97.1, 22.2], [-100.0, 22.2], [-100.0, 27.7]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Tlaxcala"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-98.7, 19.7], [-97.6, 19.7], [-97.6, 19.1], [-98.7, 19.1], [-98.7, 19.7]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Veracruz"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-98.4, 22.4], [-93.6, 22.4], [-93.6, 17.2], [-98.4, 17.2], [-98.4, 22.4]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Yucatan"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-90.4, 21.6], [-87.3, 21.6], [-87.3, 19.5], [-90.4, 19.5], [-90.4, 21.6]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zacatecas"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-104.4, 24.9], [-100.7, 24.9], [-100.7, 21.0], [-104.4, 21.0], [-104.4, 24.9]]]
+      }
+    }
+  ]
+} 

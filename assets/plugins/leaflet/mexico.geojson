@@ -1,0 +1,357 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Aguascalientes",
+          "code": "AGS"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-102.5, 22.0], [-102.0, 22.0], [-102.0, 21.5], [-102.5, 21.5], [-102.5, 22.0]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Baja California",
+          "code": "BC"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-115.0, 32.0], [-114.5, 32.0], [-114.5, 31.5], [-115.0, 31.5], [-115.0, 32.0]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Baja California Sur",
+          "code": "BCS"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-112.0, 26.0], [-111.5, 26.0], [-111.5, 25.5], [-112.0, 25.5], [-112.0, 26.0]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Campeche",
+          "code": "CAMP"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-90.5, 19.0], [-90.0, 19.0], [-90.0, 18.5], [-90.5, 18.5], [-90.5, 19.0]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Chiapas",
+          "code": "CHIS"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-92.5, 17.0], [-92.0, 17.0], [-92.0, 16.5], [-92.5, 16.5], [-92.5, 17.0]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Chihuahua",
+          "code": "CHIH"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-106.5, 29.0], [-106.0, 29.0], [-106.0, 28.5], [-106.5, 28.5], [-106.5, 29.0]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Ciudad de México",
+          "code": "CDMX"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-99.2, 19.4], [-99.1, 19.4], [-99.1, 19.3], [-99.2, 19.3], [-99.2, 19.4]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Coahuila",
+          "code": "COAH"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-102.0, 27.0], [-101.5, 27.0], [-101.5, 26.5], [-102.0, 26.5], [-102.0, 27.0]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Colima",
+          "code": "COL"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-103.8, 19.2], [-103.7, 19.2], [-103.7, 19.1], [-103.8, 19.1], [-103.8, 19.2]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Durango",
+          "code": "DGO"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-104.5, 24.5], [-104.0, 24.5], [-104.0, 24.0], [-104.5, 24.0], [-104.5, 24.5]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Guanajuato",
+          "code": "GTO"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-101.5, 21.0], [-101.0, 21.0], [-101.0, 20.5], [-101.5, 20.5], [-101.5, 21.0]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Guerrero",
+          "code": "GRO"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-100.0, 17.5], [-99.5, 17.5], [-99.5, 17.0], [-100.0, 17.0], [-100.0, 17.5]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Hidalgo",
+          "code": "HGO"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-99.0, 20.5], [-98.5, 20.5], [-98.5, 20.0], [-99.0, 20.0], [-99.0, 20.5]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Jalisco",
+          "code": "JAL"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-103.5, 20.5], [-103.0, 20.5], [-103.0, 20.0], [-103.5, 20.0], [-103.5, 20.5]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "México",
+          "code": "MEX"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-99.5, 19.5], [-99.0, 19.5], [-99.0, 19.0], [-99.5, 19.0], [-99.5, 19.5]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Michoacán",
+          "code": "MICH"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-102.0, 19.5], [-101.5, 19.5], [-101.5, 19.0], [-102.0, 19.0], [-102.0, 19.5]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Morelos",
+          "code": "MOR"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-99.0, 18.8], [-98.8, 18.8], [-98.8, 18.6], [-99.0, 18.6], [-99.0, 18.8]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Nayarit",
+          "code": "NAY"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-105.0, 21.5], [-104.5, 21.5], [-104.5, 21.0], [-105.0, 21.0], [-105.0, 21.5]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Nuevo León",
+          "code": "NL"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-100.0, 25.5], [-99.5, 25.5], [-99.5, 25.0], [-100.0, 25.0], [-100.0, 25.5]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Oaxaca",
+          "code": "OAX"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-96.5, 17.0], [-96.0, 17.0], [-96.0, 16.5], [-96.5, 16.5], [-96.5, 17.0]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Puebla",
+          "code": "PUE"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-98.0, 19.0], [-97.5, 19.0], [-97.5, 18.5], [-98.0, 18.5], [-98.0, 19.0]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Querétaro",
+          "code": "QRO"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-100.2, 20.7], [-100.0, 20.7], [-100.0, 20.5], [-100.2, 20.5], [-100.2, 20.7]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Quintana Roo",
+          "code": "QROO"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-88.0, 20.5], [-87.5, 20.5], [-87.5, 20.0], [-88.0, 20.0], [-88.0, 20.5]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "San Luis Potosí",
+          "code": "SLP"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-101.0, 22.5], [-100.5, 22.5], [-100.5, 22.0], [-101.0, 22.0], [-101.0, 22.5]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Sinaloa",
+          "code": "SIN"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-107.5, 25.0], [-107.0, 25.0], [-107.0, 24.5], [-107.5, 24.5], [-107.5, 25.0]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Sonora",
+          "code": "SON"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-110.5, 30.0], [-110.0, 30.0], [-110.0, 29.5], [-110.5, 29.5], [-110.5, 30.0]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Tabasco",
+          "code": "TAB"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-92.5, 18.0], [-92.0, 18.0], [-92.0, 17.5], [-92.5, 17.5], [-92.5, 18.0]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Tamaulipas",
+          "code": "TAMPS"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-98.5, 24.0], [-98.0, 24.0], [-98.0, 23.5], [-98.5, 23.5], [-98.5, 24.0]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Tlaxcala",
+          "code": "TLAX"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-98.2, 19.4], [-98.0, 19.4], [-98.0, 19.2], [-98.2, 19.2], [-98.2, 19.4]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Veracruz",
+          "code": "VER"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-96.5, 19.5], [-96.0, 19.5], [-96.0, 19.0], [-96.5, 19.0], [-96.5, 19.5]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Yucatán",
+          "code": "YUC"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-89.0, 20.5], [-88.5, 20.5], [-88.5, 20.0], [-89.0, 20.0], [-89.0, 20.5]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Zacatecas",
+          "code": "ZAC"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-103.0, 23.0], [-102.5, 23.0], [-102.5, 22.5], [-103.0, 22.5], [-103.0, 23.0]]]
+        }
+      }
+    ]
+  }

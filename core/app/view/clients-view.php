@@ -180,6 +180,7 @@ foreach($configs as $conf) {
 				// Mostrar mensaje de resultados
 				$plural = $total_users == 1 ? 'cliente coincide' : 'clientes coinciden';
 				echo "<p class='text-muted mb-3'>Se encontraron $total_users $plural con los filtros aplicados.</p>";
+
 				?>
 				<table class="table table-bordered table-hover">
 				<thead>
@@ -220,6 +221,9 @@ foreach($configs as $conf) {
 
 			// Mostrar paginación abajo
 			showPagination($page, $total_pages, $limit);
+
+			// Incluir el componente del mapa
+			include('core/app/components/mexico-map.php');
 			?>
 		</div>
 </div>

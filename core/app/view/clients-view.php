@@ -100,12 +100,12 @@ foreach($configs as $conf) {
 						</div>
 
 						<div class="col-6 col-sm-3 col-md-1 d-flex align-items-end">
-							<div class="d-flex gap-2 w-100">
-								<button type="submit" class="btn btn-primary">Filtrar</button>
-								<a href="index.php?view=clients" class="btn btn-secondary">Limpiar</a>
-							</div>
+							<button type="submit" class="btn btn-primary">Filtrar</button>
 						</div>
 					</form>
+					<div class="col-12 text-end mt-2">
+						<a href="index.php?view=clients" class="btn btn-secondary">Limpiar filtros</a>
+					</div>
 				</div>
 			</div>
 

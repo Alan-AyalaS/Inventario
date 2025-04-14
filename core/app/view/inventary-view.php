@@ -84,9 +84,9 @@ if(isset($_GET["jerseyType"]) && $_GET["jerseyType"] != "") {
         }
         if($_GET["jerseyType"] == "" || $jerseyType == $_GET["jerseyType"]) {
             $filtered_products[] = $product;
-        }
-    }
-    $products = $filtered_products;
+		}
+	}
+	$products = $filtered_products;
 }
 
 // Obtener la categoría seleccionada
@@ -268,14 +268,14 @@ if($selected_category_name == "Jersey") {
             <a href="index.php?view=newproduct" class="btn btn-primary">
                 <i class="bi bi-plus-circle"></i> Agregar Producto
             </a>
-            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow: none !important;">
-                <i class="fa fa-download"></i> Descargar <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end" style="background-color: #28a745; border: none;">
-                <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-excel" style="background-color: transparent !important; transition: color 0.3s ease;">Excel (.xlsx)</a></li>
-                <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-pdf" style="background-color: transparent !important; transition: color 0.3s ease;">PDF (.pdf)</a></li>
-            </ul>
-        </div>
+                <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow: none !important;">
+                    <i class="fa fa-download"></i> Descargar <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" style="background-color: #28a745; border: none;">
+                    <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-excel" style="background-color: transparent !important; transition: color 0.3s ease;">Excel (.xlsx)</a></li>
+                    <li><a class="dropdown-item text-white" href="index.php?view=download-inventory-pdf" style="background-color: transparent !important; transition: color 0.3s ease;">PDF (.pdf)</a></li>
+                </ul>
+            </div>
         <!-- ===== FIN DE SECCIÓN PROTEGIDA ===== -->
 
         <!-- ===== INICIO DE SECCIÓN PROTEGIDA - NO MODIFICAR ===== -->
@@ -284,14 +284,14 @@ if($selected_category_name == "Jersey") {
             <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
                 <label for="category_id" class="me-2">Categoría:</label>
                 <select id="category_id" name="category_id" class="form-control">
-                    <option value="">Todas las categorías</option>
-                    <?php foreach($categories as $category): ?>
-                        <option value="<?php echo $category->id; ?>" <?php echo (isset($_GET["category_id"]) && $_GET["category_id"] == $category->id) ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($category->name); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+                        <option value="">Todas las categorías</option>
+                        <?php foreach($categories as $category): ?>
+                            <option value="<?php echo $category->id; ?>" <?php echo (isset($_GET["category_id"]) && $_GET["category_id"] == $category->id) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($category->name); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
             
             <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
                 <label for="availability" class="me-2">Disponibilidad:</label>
@@ -318,12 +318,12 @@ if($selected_category_name == "Jersey") {
                                     echo ' selected';
                                 }
                                 echo '>' . $size . '</option>';
+                                    }
+                                }
                             }
-                        }
-                    }
-                    ?>
+                            ?>
                 </select>
-            </div>
+                        </div>
 
             <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
                 <label for="date_filter" class="me-2">Fecha:</label>
@@ -332,8 +332,8 @@ if($selected_category_name == "Jersey") {
                     <option value="today" <?php echo (isset($_GET["date_filter"]) && $_GET["date_filter"] === "today") ? 'selected' : ''; ?>>Hoy</option>
                     <option value="week" <?php echo (isset($_GET["date_filter"]) && $_GET["date_filter"] === "week") ? 'selected' : ''; ?>>Esta semana</option>
                     <option value="month" <?php echo (isset($_GET["date_filter"]) && $_GET["date_filter"] === "month") ? 'selected' : ''; ?>>Este mes</option>
-                </select>
-            </div>
+                    </select>
+                </div>
 
             <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
                 <label for="search" class="me-2">Buscar:</label>
@@ -346,21 +346,21 @@ if($selected_category_name == "Jersey") {
             </div>
 
             <div class="form-group flex-grow-1 flex-md-grow-0 me-2">
-    <label for="limit" class="me-2">Mostrar:</label>
-    <div class="input-group">
-        <input type="number" class="form-control" id="limit" name="limit" min="1" value="<?php echo isset($_GET['limit']) ? $_GET['limit'] : 100; ?>" style="width: 80px;">
-        <button class="btn btn-primary" type="button" onclick="applyLimitFilter()">
-            <i class="bi bi-filter"></i>
-        </button>
-    </div>
-</div>
+                <label for="limit" class="me-2">Mostrar:</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" id="limit" name="limit" min="1" value="<?php echo isset($_GET['limit']) ? $_GET['limit'] : 100; ?>" style="width: 80px;">
+                    <button class="btn btn-primary" type="button" onclick="applyLimitFilter()">
+                        <i class="bi bi-filter"></i>
+                    </button>
+                </div>
+            </div>
 
             <div class="form-group">
                 <button type="button" class="btn btn-secondary" onclick="clearFilters()">
                     <i class="bi bi-x-circle"></i> Limpiar Filtros
                 </button>
-            </div>
         </div>
+    </div>
         <!-- ===== FIN DE SECCIÓN PROTEGIDA ===== -->
 
 <!-- Botón para eliminar seleccionados -->
@@ -387,29 +387,29 @@ if($selected_category_name == "Jersey") {
 </div>
 
 <!-- Modal para ajustar inventario -->
-<div class="modal fade" id="adjustModal" tabindex="-1" aria-labelledby="adjustModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="adjustModalLabel">Ajustar Inventario</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
+        <div class="modal fade" id="adjustModal" tabindex="-1" aria-labelledby="adjustModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+                        <h5 class="modal-title" id="adjustModalLabel">Ajustar Inventario</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
                 <form id="adjustForm" method="post" action="index.php?view=update_stock" onsubmit="return submitAdjustForm(event)">
-                    <input type="hidden" name="product_id" id="productId">
-                    <input type="hidden" name="operation_type" id="operationType">
-                    <div class="mb-3">
-                        <label for="quantity" class="form-label">Cantidad</label>
-                        <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
-                    </div>
+                            <input type="hidden" name="product_id" id="productId">
+                            <input type="hidden" name="operation_type" id="operationType">
+          <div class="mb-3">
+            <label for="quantity" class="form-label">Cantidad</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+          </div>
                     <div class="d-flex justify-content-end gap-2">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-primary">Ajustar</button>
                     </div>
                 </form>
-            </div>
-        </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Alerta dinámica -->
@@ -751,9 +751,9 @@ if($selected_category_name == "Jersey") {
 			$total_products = count($products);
 			$is_full_list = ($limit == $total_products);
 
-			// Obtener los productos para la página actual
-			$start_index = ($page - 1) * $limit;
-			$curr_products = array_slice($products, $start_index, $limit);
+				// Obtener los productos para la página actual
+				$start_index = ($page - 1) * $limit;
+				$curr_products = array_slice($products, $start_index, $limit);
 
 			if(count($products)>0){
 				// Calcular el número total de páginas
@@ -804,22 +804,22 @@ if($selected_category_name == "Jersey") {
 		<?php setcookie("prdupd","",time()-18600); endif; ?>
 				<h3>Pagina <?php echo $page." de ".$npaginas; ?></h3>
                 <div class="pagination-container">
-    <?php
+			<?php
     $px = $page-1;
     if($px > 0):
-        $url = "index.php?view=inventary&limit=$limit&page=".($px);
+			    $url = "index.php?view=inventary&limit=$limit&page=".($px);
         // Agregar todos los parámetros de filtro
         $filter_params = array("category_id", "availability", "size", "date_filter", "search", "limit", "jerseyType");
         foreach($filter_params as $param) {
             if(isset($_GET[$param]) && $_GET[$param] != "") {
                 $url .= "&" . $param . "=" . urlencode($_GET[$param]);
             }
-        }
-    ?>
-    <a class="btn btn-sm btn-default" href="<?php echo $url; ?>"><i class="glyphicon glyphicon-chevron-left"></i> Atras </a>
-    <?php endif; ?>
+			    }
+			?>
+			<a class="btn btn-sm btn-default" href="<?php echo $url; ?>"><i class="glyphicon glyphicon-chevron-left"></i> Atras </a>
+			<?php endif; ?>
 
-    <?php 
+			<?php 
     // Mostrar solo un rango de páginas si hay demasiadas
     $maxPagesToShow = 10;
     $startPage = max(1, $page - floor($maxPagesToShow / 2));
@@ -886,7 +886,7 @@ if($selected_category_name == "Jersey") {
     ?>
     <a class="btn btn-sm btn-default" href="<?php echo $url; ?>">Siguiente <i class="glyphicon glyphicon-chevron-right"></i></a>
     <?php endif; ?>
-</div>
+			</div>
 			<div class="table-responsive">
 				<table class="table table-bordered table-hover">
 				<thead>
@@ -902,7 +902,7 @@ if($selected_category_name == "Jersey") {
                                 <th style="width: 100px;">Precio de Entrada</th>
                                 <?php endif; ?>
                                 <th style="width: 100px;">Precio de Salida</th>
-                                <th style="width: 100px;">Mínima en Inventario</th>
+						<th style="width: 100px;">Mínima en Inventario</th>
                                 <th style="width: 50px;">Disponible</th>
                                 <th style="width: 60px;">Total</th>
                                 <?php if(isset($_SESSION["is_admin"]) && $_SESSION["is_admin"] == "1"): ?>
@@ -1102,7 +1102,7 @@ if($selected_category_name == "Jersey") {
 			</table>
 			</div>
 			<div class="pagination-container">
-    <?php
+			<?php
     $px = $page-1;
     if($px > 0):
         $url = "index.php?view=inventary&limit=$limit&page=".($px);
@@ -1184,7 +1184,7 @@ if($selected_category_name == "Jersey") {
     ?>
     <a class="btn btn-sm btn-default" href="<?php echo $url; ?>">Siguiente <i class="glyphicon glyphicon-chevron-right"></i></a>
     <?php endif; ?>
-</div>
+			</div>
 
 				<?php
 			}else{
@@ -1198,10 +1198,10 @@ if($selected_category_name == "Jersey") {
 
 			?>
                 </div>
-		 </div>
-           </div>
-	      </div>
-        </div>
+		</div>
+</div>
+	</div>
+</div>
 
 <!-- Agregar los scripts de Bootstrap antes del cierre del body -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -1218,7 +1218,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Verificar que Bootstrap esté cargado
     if (typeof bootstrap === 'undefined') {
         console.error('Bootstrap no está cargado');
-    } else {
+        } else {
         console.log('Bootstrap está cargado correctamente');
         
         // Event listener para botones de ajuste de stock
@@ -1292,7 +1292,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (selectAllCheckbox) {
             selectAllCheckbox.addEventListener('change', function() {
                 productCheckboxes.forEach(checkbox => {
-                    checkbox.checked = this.checked;
+                checkbox.checked = this.checked;
                     const row = checkbox.closest('tr');
                     if (this.checked) {
                         row.classList.add('highlighted');
@@ -1318,7 +1318,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     let endIndex = Math.max(start, end);
                     
                     // Seleccionar todos los checkboxes en el rango
-                    for (let i = startIndex; i <= endIndex; i++) {
+            for (let i = startIndex; i <= endIndex; i++) {
                         productCheckboxes[i].checked = this.checked;
                         const row = productCheckboxes[i].closest('tr');
                         if (this.checked) {
@@ -1347,8 +1347,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Event listener para el botón de eliminar seleccionados
-        if (deleteSelectedBtn) {
-            deleteSelectedBtn.addEventListener('click', function() {
+    if (deleteSelectedBtn) {
+        deleteSelectedBtn.addEventListener('click', function() {
                 const selectedProducts = Array.from(productCheckboxes)
                     .filter(cb => cb.checked)
                     .map(cb => cb.value);
@@ -1444,10 +1444,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Función para aplicar los filtros
 function applyFilters() {
-    const categoryId = document.getElementById('category_id').value;
-    const availability = document.getElementById('availability').value;
+        const categoryId = document.getElementById('category_id').value;
+        const availability = document.getElementById('availability').value;
     const size = document.getElementById('size').value;
-    const dateFilter = document.getElementById('date_filter').value;
+        const dateFilter = document.getElementById('date_filter').value;
     const search = document.getElementById('search').value;
     const jerseyType = document.getElementById('jerseyType').value;
     const limit = document.getElementById('limit').value;
@@ -1480,10 +1480,10 @@ function applyLimitFilter() {
         let url = 'index.php?view=inventary';
         
         // Mantener los filtros existentes
-        const categoryId = document.getElementById('category_id').value;
-        const availability = document.getElementById('availability').value;
-        const size = document.getElementById('size').value;
-        const dateFilter = document.getElementById('date_filter').value;
+    const categoryId = document.getElementById('category_id').value;
+    const availability = document.getElementById('availability').value;
+    const size = document.getElementById('size').value;
+    const dateFilter = document.getElementById('date_filter').value;
         const search = document.getElementById('search').value;
         const jerseyType = document.getElementById('jerseyType').value;
         
@@ -1496,8 +1496,8 @@ function applyLimitFilter() {
         
         url += `&limit=${limit}`;
         
-        window.location.href = url;
-    }
+    window.location.href = url;
+}
 }
 
 // Función para mostrar el modal de ajuste
@@ -1546,8 +1546,8 @@ function submitAdjustForm(event) {
     
     if (!quantity || quantity <= 0) {
         alert('La cantidad debe ser mayor que 0');
-        return false;
-    }
+    return false;
+}
 
     // Obtener los parámetros de filtro de la URL
     const urlParams = new URLSearchParams(window.location.search);

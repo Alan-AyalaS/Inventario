@@ -1,7 +1,14 @@
+<?php
+$users = PersonData::getClients();
+?>
 <div class="row">
 	<div class="col-md-12">
 
-		<h1>Directorio de Clientes</h1>
+		<h1>Directorio de Clientes 
+			<small class="text-muted">
+				(<?php echo count($users); ?> clientes registrados)
+			</small>
+		</h1>
 	<div class="">
 	<a href="index.php?view=newclient" class="btn btn-secondary"><i class='fa fa-smile-o'></i> Nuevo Cliente</a>
 <?php
@@ -45,7 +52,6 @@ foreach($configs as $conf) {
 
 		<?php
 
-		$users = PersonData::getClients();
 		if(count($users)>0){
 			// si hay usuarios
 			?>

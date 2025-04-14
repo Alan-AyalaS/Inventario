@@ -104,30 +104,96 @@ if($selected_category != "") {
 // Definir las tallas disponibles según la categoría
 $available_sizes = [];
 if($selected_category_name == "Jersey") {
+    // Obtener todas las tallas únicas de la tabla product para productos de la categoría Jersey
+    $sql = "SELECT DISTINCT p.size FROM product p 
+            WHERE p.category_id = $selected_category 
+            AND p.size IS NOT NULL 
+            AND p.size != '' 
+            ORDER BY p.size";
+    $query = Executor::doit($sql);
+    $tallas = Model::many($query[0], new ProductData());
+    
+    // Agrupar por tipo de jersey
     $available_sizes = [
-        "adulto" => ["S", "M", "L", "XL", "XXL", "3XL", "4XL", "6XL", "8XL"],
-        "niño" => ["16", "18", "20", "22", "24", "26", "28"]
+        "adulto" => [],
+        "niño" => []
     ];
+    
+    foreach($tallas as $talla) {
+        if(in_array($talla->size, ["S", "M", "L", "XL", "XXL", "3XL", "4XL", "6XL", "8XL"])) {
+            $available_sizes["adulto"][] = $talla->size;
+        } else if(in_array($talla->size, ["16", "18", "20", "22", "24", "26", "28"])) {
+            $available_sizes["niño"][] = $talla->size;
+        }
+    }
 } elseif($selected_category_name == "Tenis") {
+    // Obtener todas las tallas únicas de la tabla product para productos de la categoría Tenis
+    $sql = "SELECT DISTINCT p.size FROM product p 
+            WHERE p.category_id = $selected_category 
+            AND p.size IS NOT NULL 
+            AND p.size != '' 
+            ORDER BY p.size";
+    $query = Executor::doit($sql);
+    $tallas = Model::many($query[0], new ProductData());
+    
     $available_sizes = [
-        "tenis" => ["23.5", "24", "24.5", "25", "25.5", "26", "26.5", "27"]
+        "tenis" => []
     ];
+    
+    foreach($tallas as $talla) {
+        $available_sizes["tenis"][] = $talla->size;
+    }
 } elseif($selected_category_name == "Variado") {
-    // Para la categoría Variado, mostrar todas las tallas disponibles
+    // Obtener todas las tallas únicas de la tabla product para productos de la categoría Variado
+    $sql = "SELECT DISTINCT p.size FROM product p 
+            WHERE p.category_id = $selected_category 
+            AND p.size IS NOT NULL 
+            AND p.size != '' 
+            ORDER BY p.size";
+    $query = Executor::doit($sql);
+    $tallas = Model::many($query[0], new ProductData());
+    
     $available_sizes = [
-        "adulto" => ["S", "M", "L", "XL", "XXL"],
-        "niño" => ["16", "18", "20", "22", "24", "26", "28"],
-        "tenis" => ["6", "7", "8", "9"]
+        "adulto" => [],
+        "niño" => [],
+        "tenis" => []
     ];
+    
+    foreach($tallas as $talla) {
+        if(in_array($talla->size, ["S", "M", "L", "XL", "XXL"])) {
+            $available_sizes["adulto"][] = $talla->size;
+        } else if(in_array($talla->size, ["16", "18", "20", "22", "24", "26", "28"])) {
+            $available_sizes["niño"][] = $talla->size;
+        } else if(in_array($talla->size, ["6", "7", "8", "9"])) {
+            $available_sizes["tenis"][] = $talla->size;
+        }
+    }
 } elseif(in_array($selected_category_name, ["Gorras", "Balón"])) {
     $available_sizes = [];
 } else {
-    // Cuando no hay categoría seleccionada, mostrar todas las tallas agrupadas
+    // Obtener todas las tallas únicas de la tabla product
+    $sql = "SELECT DISTINCT p.size FROM product p 
+            WHERE p.size IS NOT NULL 
+            AND p.size != '' 
+            ORDER BY p.size";
+    $query = Executor::doit($sql);
+    $tallas = Model::many($query[0], new ProductData());
+    
     $available_sizes = [
-        "adulto" => ["S", "M", "L", "XL", "XXL", "3XL", "4XL", "6XL", "8XL"],
-        "niño" => ["16", "18", "20", "22", "24", "26", "28"],
-        "tenis" => ["23.5", "24", "24.5", "25", "25.5", "26", "26.5", "27"]
+        "adulto" => [],
+        "niño" => [],
+        "tenis" => []
     ];
+    
+    foreach($tallas as $talla) {
+        if(in_array($talla->size, ["S", "M", "L", "XL", "XXL", "3XL", "4XL", "6XL", "8XL"])) {
+            $available_sizes["adulto"][] = $talla->size;
+        } else if(in_array($talla->size, ["16", "18", "20", "22", "24", "26", "28"])) {
+            $available_sizes["niño"][] = $talla->size;
+        } else if(in_array($talla->size, ["23.5", "24", "24.5", "25", "25.5", "26", "26.5", "27"])) {
+            $available_sizes["tenis"][] = $talla->size;
+        }
+    }
 }
 ?>
 <div class="row">
@@ -436,17 +502,20 @@ if($selected_category_name == "Jersey") {
                         <p><strong>Unidad:</strong> <span id="productUnit"></span></p>
                         <p><strong>Mínima en Inventario:</strong> <span id="productMinInventory"></span></p>
                         
-                        <!-- Sección de tallas disponibles -->
+                        <!-- Sección de tallas disponibles - visible para todos los usuarios -->
                         <div class="mt-4">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5 class="mb-0">Tallas Disponibles:</h5>
-                                <button type="button" class="btn btn-primary btn-sm" id="addSizeBtn">
-                                    <i class="bi bi-plus-circle"></i> Agregar Talla
-                                </button>
-                            </div>
+                            <h5 class="mb-3">Tallas Disponibles:</h5>
                             <div id="availableSizes" class="d-flex flex-wrap gap-2 mb-3">
                                 <!-- Las tallas se insertarán aquí dinámicamente -->
                             </div>
+                        </div>
+                        
+                        <?php if(isset($_SESSION["is_admin"]) && $_SESSION["is_admin"] == "1"): ?>
+                        <!-- Sección de agregar talla - solo visible para administradores -->
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-primary btn-sm" id="addSizeBtn">
+                                <i class="bi bi-plus-circle"></i> Agregar Talla
+                            </button>
                             
                             <!-- Formulario para agregar talla -->
                             <div id="addSizeForm" class="card p-3 mt-3" style="display: none;">
@@ -477,6 +546,7 @@ if($selected_category_name == "Jersey") {
                                 </form>
                             </div>
                         </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -1138,6 +1208,13 @@ if($selected_category_name == "Jersey") {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Event listener para los nombres de productos
+    document.querySelectorAll('.product-name').forEach(productElement => {
+        productElement.addEventListener('click', function() {
+            showProductDetails(this);
+        });
+    });
+
     // Verificar que Bootstrap esté cargado
     if (typeof bootstrap === 'undefined') {
         console.error('Bootstrap no está cargado');
@@ -1624,21 +1701,21 @@ function showProductDetails(productElement) {
     const productCategory = productData.productCategory;
     const productId = productData.productId;
     
-    // Obtener el tipo de jersey de manera segura
+    // Obtener el tipo de jersey y categoría ID
     const categoryCell = productElement.closest('tr').querySelector('td:nth-child(5)');
-    let jerseyType = 'nene';
+    let jerseyType = '';
+    let categoryId = '';
+    
     if (categoryCell) {
-        const jerseyBadge = categoryCell.querySelector('.badge:nth-child(2)');
-        if (jerseyBadge) {
-            jerseyType = jerseyBadge.textContent.trim().toLowerCase();
+        const badges = categoryCell.querySelectorAll('.badge');
+        if (badges.length > 0) {
+            categoryId = badges[0].dataset.categoryId;
+            // Si es categoría Jersey (ID 1), obtener el tipo del segundo badge
+            if (categoryId === '1' && badges.length > 1) {
+                jerseyType = badges[1].textContent.trim().toLowerCase();
+            }
         }
     }
-    
-    // Guardar datos para el formulario de nueva talla
-    document.getElementById('newSizeProductId').value = productId;
-    document.getElementById('newSizeProductName').value = productName;
-    document.getElementById('newSizeCategory').value = productCategory;
-    document.getElementById('newSizeJerseyType').value = jerseyType;
     
     // Actualizar el contenido básico del modal
     document.getElementById('productName').textContent = productName;
@@ -1647,9 +1724,17 @@ function showProductDetails(productElement) {
     document.getElementById('productSize').textContent = productData.productSize;
     document.getElementById('productAvailability').textContent = productData.productAvailability;
     document.getElementById('productPriceOut').textContent = productData.productPriceOut;
-    if (document.getElementById('productPriceIn')) {
+    
+    // Solo actualizar campos de admin si existen
+    const isAdmin = document.getElementById('productPriceIn') !== null;
+    if (isAdmin) {
         document.getElementById('productPriceIn').textContent = productData.productPriceIn;
+        document.getElementById('newSizeProductId').value = productId;
+        document.getElementById('newSizeProductName').value = productName;
+        document.getElementById('newSizeCategory').value = productCategory;
+        document.getElementById('newSizeJerseyType').value = jerseyType;
     }
+    
     document.getElementById('productUnit').textContent = productData.productUnit;
     document.getElementById('productMinInventory').textContent = productData.productMinInventory;
     
@@ -1664,179 +1749,57 @@ function showProductDetails(productElement) {
     const availableSizesContainer = document.getElementById('availableSizes');
     availableSizesContainer.innerHTML = ''; // Limpiar el contenedor
     
-    // Arrays para almacenar las tallas disponibles y todas las tallas posibles
-    let availableSizes = new Set();
-    let allSizes = new Set();
-    
-    // Definir las tallas según la categoría y tipo
-    if (productCategory === 'Jersey') {
-        if (jerseyType === 'adulto') {
-            allSizes = new Set(['S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '6XL', '8XL']);
-        } else if (jerseyType === 'nene' || jerseyType === 'niño') {
-            allSizes = new Set(['16', '18', '20', '22', '24', '26', '28']);
-        } else if (jerseyType === 'dama') {
-            allSizes = new Set(['S', 'M', 'L', 'XL', 'XXL']);
-        }
-    }
-    
-    // Buscar todas las filas que coincidan con el nombre y categoría
-    document.querySelectorAll('tr.product-row').forEach(row => {
-        const nameCell = row.querySelector('td:nth-child(3)');
-        const categoryCell = row.querySelector('td:nth-child(5)');
-        const sizeCell = row.querySelector('td:nth-child(4)');
-        const availabilityCell = row.querySelector('td:nth-child(9)');
-        
-        if (nameCell && categoryCell && sizeCell && availabilityCell) {
-            const rowName = nameCell.textContent.trim();
-            const rowCategory = categoryCell.querySelector('.badge:first-child')?.textContent.trim() || '';
-            const rowSize = sizeCell.textContent.trim();
-            const rowAvailability = availabilityCell.querySelector('.badge')?.textContent.trim() || '0';
-            
-            // Obtener el tipo de jersey de la fila de manera segura
-            let rowJerseyType = 'nene';
-            const rowJerseyBadge = categoryCell.querySelector('.badge:nth-child(2)');
-            if (rowJerseyBadge) {
-                rowJerseyType = rowJerseyBadge.textContent.trim().toLowerCase();
+    // Hacer una petición AJAX para obtener las tallas disponibles
+    fetch(`ajax/get_available_sizes.php?product_id=${productId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.json().catch(error => {
+                throw new Error('Error al parsear la respuesta JSON');
+            });
+        })
+        .then(data => {
+            if (!data) {
+                throw new Error('No se recibieron datos del servidor');
             }
             
-            // Verificar si es el mismo producto
-            if (rowName === productName && rowCategory === productCategory) {
-                if (productCategory === 'Jersey') {
-                    if (rowJerseyType === jerseyType) {
-                        addSizeBadge(rowSize, rowAvailability);
-                        availableSizes.add(rowSize);
-                    }
-                } else {
-                    addSizeBadge(rowSize, rowAvailability);
-                    availableSizes.add(rowSize);
-                }
+            if (!data.success) {
+                throw new Error(data.error || 'Error desconocido');
             }
-        }
-    });
-    
-    // Actualizar el select de tallas disponibles
-    const newSizeSelect = document.getElementById('newSizeSelect');
-    newSizeSelect.innerHTML = '<option value="">Seleccione una talla</option>';
-    
-    // Agregar solo las tallas que no están disponibles
-    allSizes.forEach(size => {
-        if (!availableSizes.has(size)) {
-            const option = document.createElement('option');
-            option.value = size;
-            option.textContent = size;
-            newSizeSelect.appendChild(option);
-        }
-    });
-    
-    // Mostrar u ocultar el botón de agregar talla según si hay tallas disponibles para agregar y si es admin
-    const addSizeBtn = document.getElementById('addSizeBtn');
-    const isAdmin = document.getElementById('productPriceIn') !== null; // Verificar si es admin
-    addSizeBtn.style.display = (newSizeSelect.options.length > 1 && isAdmin) ? '' : 'none';
-    
-    // Ocultar el formulario de agregar talla
-    toggleAddSizeForm(false);
+            
+            if (data.success && Array.isArray(data.sizes) && data.sizes.length > 0) {
+                data.sizes.forEach(size => {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge bg-secondary me-2 mb-2';
+                    badge.style.fontSize = '0.9em';
+                    badge.style.padding = '8px 12px';
+                    badge.innerHTML = `${size.talla} <small>(${size.cantidad})</small>`;
+                    availableSizesContainer.appendChild(badge);
+                });
+            } else {
+                const noSizes = document.createElement('p');
+                noSizes.className = 'text-muted';
+                noSizes.textContent = 'No hay tallas adicionales disponibles';
+                availableSizesContainer.appendChild(noSizes);
+            }
+        })
+        .catch(error => {
+            console.error('Error al obtener tallas:', error);
+            const errorMsg = document.createElement('p');
+            errorMsg.className = 'text-danger';
+            errorMsg.textContent = `Error al cargar las tallas disponibles: ${error.message}`;
+            availableSizesContainer.appendChild(errorMsg);
+        });
     
     // Mostrar el modal
     modal.show();
 }
 
-// Función para mostrar/ocultar el formulario de agregar talla
-function toggleAddSizeForm(show) {
-    const form = document.getElementById('addSizeForm');
-    form.style.display = show ? 'block' : 'none';
-    if (!show) {
-        document.getElementById('newSizeForm').reset();
-    }
-}
-
-// Event listener para el botón de agregar talla
-document.addEventListener('DOMContentLoaded', function() {
-    // Event listener para los nombres de productos
-    document.querySelectorAll('.product-name').forEach(productElement => {
-        productElement.addEventListener('click', function() {
-            showProductDetails(this);
-        });
-    });
-
-    // Event listener para el botón de agregar talla
-    const addSizeBtn = document.getElementById('addSizeBtn');
-    if (addSizeBtn) {
-        addSizeBtn.addEventListener('click', () => toggleAddSizeForm(true));
-    }
-    
-    // Event listener para el formulario de nueva talla
-    const newSizeForm = document.getElementById('newSizeForm');
-    if (newSizeForm) {
-        newSizeForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const productId = document.getElementById('newSizeProductId').value;
-            const size = document.getElementById('newSizeSelect').value;
-            const quantity = document.getElementById('newSizeQuantity').value;
-
-            try {
-                // Mostrar indicador de carga
-                const submitButton = this.querySelector('button[type="submit"]');
-                submitButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando...';
-                submitButton.disabled = true;
-
-                // Crear un objeto FormData solo con los datos necesarios
-                const formData = new FormData();
-                formData.append('original_product_id', productId);
-                formData.append('size', size);
-                formData.append('quantity', quantity);
-                formData.append('action', 'add_size');
-
-                // Enviar la petición al servidor
-                const response = await fetch('index.php?view=add_product_size', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                let result;
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.indexOf("application/json") !== -1) {
-                    result = await response.json();
-                } else {
-                    throw new Error("La respuesta del servidor no es JSON válido");
-                }
-
-                if (result.success) {
-                    // Mostrar mensaje de éxito
-                    alert(`Talla ${size} agregada correctamente para el producto "${result.product_name}"`);
-                    
-                    // Cerrar el formulario y el modal
-                    toggleAddSizeForm(false);
-                    bootstrap.Modal.getInstance(document.getElementById('productDetailsModal')).hide();
-                    
-                    // Recargar la página para mostrar el nuevo producto
-                    window.location.reload();
-                } else {
-                    // Mostrar mensaje de error específico
-                    alert(result.error || 'Error al agregar la talla');
-                }
-            } catch (error) {
-                console.error('Error detallado:', error);
-                
-                // Verificar si el producto se creó a pesar del error
-                const checkProduct = confirm('Hubo un error en la comunicación con el servidor, pero es posible que el producto se haya creado. ¿Desea recargar la página para verificar?');
-                if (checkProduct) {
-                    window.location.reload();
-                }
-            } finally {
-                // Restaurar el botón
-                const submitButton = this.querySelector('button[type="submit"]');
-                submitButton.innerHTML = '<i class="bi bi-check-circle"></i> Guardar';
-                submitButton.disabled = false;
-            }
-        });
-    }
-});
-
 // Función auxiliar para agregar un badge de talla
 function addSizeBadge(size, availability) {
     const badge = document.createElement('span');
-    badge.className = 'badge bg-secondary';
+    badge.className = 'badge bg-secondary me-2 mb-2';
     badge.style.fontSize = '0.9em';
     badge.style.padding = '8px 12px';
     badge.innerHTML = `${size} <small>(${availability})</small>`;
@@ -1890,6 +1853,88 @@ function submitEditSelectedForm(event) {
     
     return false;
 }
+
+// Función para mostrar/ocultar el formulario de agregar talla
+function toggleAddSizeForm(show) {
+    const form = document.getElementById('addSizeForm');
+    if (form) {
+        form.style.display = show ? 'block' : 'none';
+        if (!show && document.getElementById('newSizeForm')) {
+            document.getElementById('newSizeForm').reset();
+        }
+    }
+}
+
+// Event listener para el botón de agregar talla
+document.addEventListener('DOMContentLoaded', function() {
+    const addSizeBtn = document.getElementById('addSizeBtn');
+    if (addSizeBtn) {
+        addSizeBtn.addEventListener('click', () => toggleAddSizeForm(true));
+    }
+
+    // Event listener para el formulario de nueva talla
+    const newSizeForm = document.getElementById('newSizeForm');
+    if (newSizeForm) {
+        newSizeForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const productId = document.getElementById('newSizeProductId').value;
+            const size = document.getElementById('newSizeSelect').value;
+            const quantity = document.getElementById('newSizeQuantity').value;
+
+            try {
+                // Mostrar indicador de carga
+                const submitButton = this.querySelector('button[type="submit"]');
+                submitButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando...';
+                submitButton.disabled = true;
+
+                // Crear un objeto FormData con los datos necesarios
+                const formData = new FormData();
+                formData.append('original_product_id', productId);
+                formData.append('size', size);
+                formData.append('quantity', quantity);
+                formData.append('action', 'add_size');
+
+                // Enviar la petición al servidor
+                const response = await fetch('index.php?view=add_product_size', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                let result;
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    result = await response.json();
+                } else {
+                    throw new Error("La respuesta del servidor no es JSON válido");
+                }
+
+                if (result.success) {
+                    // Mostrar mensaje de éxito
+                    alert(`Talla ${size} agregada correctamente para el producto "${result.product_name}"`);
+                    
+                    // Cerrar el formulario y el modal
+                    toggleAddSizeForm(false);
+                    bootstrap.Modal.getInstance(document.getElementById('productDetailsModal')).hide();
+                    
+                    // Recargar la página para mostrar el nuevo producto
+                    window.location.reload();
+                } else {
+                    // Mostrar mensaje de error específico
+                    alert(result.error || 'Error al agregar la talla');
+                }
+            } catch (error) {
+                console.error('Error detallado:', error);
+                alert('Hubo un error al procesar la solicitud. Por favor, inténtelo de nuevo.');
+            } finally {
+                // Restaurar el botón
+                const submitButton = this.querySelector('button[type="submit"]');
+                submitButton.innerHTML = '<i class="bi bi-check-circle"></i> Guardar';
+                submitButton.disabled = false;
+            }
+        });
+    }
+});
 </script>
 
 <style>

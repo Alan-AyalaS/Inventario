@@ -59,7 +59,7 @@ foreach($configs as $conf) {
 					<form method="get" class="row g-3">
 						<input type="hidden" name="view" value="clients">
 						
-						<div class="col-md-3">
+						<div class="col-12 col-sm-6 col-md-3">
 							<label for="city" class="form-label">Ciudad/Municipio:</label>
 							<select class="form-select" id="city" name="city">
 								<option value="">Todas las ciudades</option>
@@ -71,7 +71,7 @@ foreach($configs as $conf) {
 							</select>
 						</div>
 
-						<div class="col-md-3">
+						<div class="col-12 col-sm-6 col-md-3">
 							<label for="state" class="form-label">Estado:</label>
 							<select class="form-select" id="state" name="state">
 								<option value="">Todos los estados</option>
@@ -83,14 +83,27 @@ foreach($configs as $conf) {
 							</select>
 						</div>
 
-						<div class="col-md-3">
+						<div class="col-12 col-sm-6 col-md-3">
 							<label for="search" class="form-label">Buscar:</label>
 							<input type="text" class="form-control" id="search" name="search" placeholder="Buscar clientes..." value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
 						</div>
 
-						<div class="col-md-3 d-flex align-items-end">
-							<button type="submit" class="btn btn-primary me-2">Filtrar</button>
-							<a href="index.php?view=clients" class="btn btn-secondary">Limpiar</a>
+						<div class="col-6 col-sm-3 col-md-2">
+							<label for="limit" class="form-label">Mostrar:</label>
+							<select class="form-select" id="limit" name="limit">
+								<option value="10" <?php echo (isset($_GET['limit']) && $_GET['limit'] == 10) ? 'selected' : ''; ?>>10</option>
+								<option value="25" <?php echo (isset($_GET['limit']) && $_GET['limit'] == 25) ? 'selected' : ''; ?>>25</option>
+								<option value="50" <?php echo (isset($_GET['limit']) && $_GET['limit'] == 50) ? 'selected' : ''; ?>>50</option>
+								<option value="100" <?php echo (isset($_GET['limit']) && $_GET['limit'] == 100) ? 'selected' : ''; ?>>100</option>
+								<option value="all" <?php echo (isset($_GET['limit']) && $_GET['limit'] == 'all') ? 'selected' : ''; ?>>Todos</option>
+							</select>
+						</div>
+
+						<div class="col-6 col-sm-3 col-md-1 d-flex align-items-end">
+							<div class="d-flex gap-2 w-100">
+								<button type="submit" class="btn btn-primary">Filtrar</button>
+								<a href="index.php?view=clients" class="btn btn-secondary">Limpiar</a>
+							</div>
 						</div>
 					</form>
 				</div>
@@ -98,6 +111,8 @@ foreach($configs as $conf) {
 
 			<?php
 			// Aplicar filtros si existen
+			$all_users = $users;
+			
 			if(isset($_GET['city']) && !empty($_GET['city'])) {
 				$users = array_filter($users, function($user) {
 					return $user->city == $_GET['city'];
@@ -119,6 +134,47 @@ foreach($configs as $conf) {
 						   strpos(strtolower($user->phone1), $search) !== false;
 				});
 			}
+
+			// Configuración de paginación
+			$total_users = count($users);
+			$limit = isset($_GET['limit']) ? $_GET['limit'] : 10;
+			$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+			
+			if($limit !== 'all') {
+				$total_pages = ceil($total_users / $limit);
+				$offset = ($page - 1) * $limit;
+				$users = array_slice($users, $offset, $limit);
+			}
+
+			// Función para mostrar la paginación
+			function showPagination($page, $total_pages, $limit) {
+				if($limit !== 'all' && $total_pages > 1): ?>
+					<nav aria-label="Page navigation" class="my-3">
+						<ul class="pagination justify-content-center mb-0">
+							<?php if($page > 1): ?>
+								<li class="page-item">
+									<a class="page-link" href="?view=clients&page=<?php echo $page-1; ?>&city=<?php echo isset($_GET['city']) ? $_GET['city'] : ''; ?>&state=<?php echo isset($_GET['state']) ? $_GET['state'] : ''; ?>&search=<?php echo isset($_GET['search']) ? $_GET['search'] : ''; ?>&limit=<?php echo $limit; ?>">Anterior</a>
+								</li>
+							<?php endif; ?>
+
+							<?php for($i = 1; $i <= $total_pages; $i++): ?>
+								<li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
+									<a class="page-link" href="?view=clients&page=<?php echo $i; ?>&city=<?php echo isset($_GET['city']) ? $_GET['city'] : ''; ?>&state=<?php echo isset($_GET['state']) ? $_GET['state'] : ''; ?>&search=<?php echo isset($_GET['search']) ? $_GET['search'] : ''; ?>&limit=<?php echo $limit; ?>"><?php echo $i; ?></a>
+								</li>
+							<?php endfor; ?>
+
+							<?php if($page < $total_pages): ?>
+								<li class="page-item">
+									<a class="page-link" href="?view=clients&page=<?php echo $page+1; ?>&city=<?php echo isset($_GET['city']) ? $_GET['city'] : ''; ?>&state=<?php echo isset($_GET['state']) ? $_GET['state'] : ''; ?>&search=<?php echo isset($_GET['search']) ? $_GET['search'] : ''; ?>&limit=<?php echo $limit; ?>">Siguiente</a>
+								</li>
+							<?php endif; ?>
+						</ul>
+					</nav>
+				<?php endif;
+			}
+
+			// Mostrar paginación arriba
+			showPagination($page, $total_pages, $limit);
 
 			if(count($users)>0){
 				// si hay usuarios
@@ -161,7 +217,8 @@ foreach($configs as $conf) {
 				echo "<p class='alert alert-danger'>No hay clientes</p>";
 			}
 
-
+			// Mostrar paginación abajo
+			showPagination($page, $total_pages, $limit);
 			?>
 		</div>
 </div>

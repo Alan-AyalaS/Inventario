@@ -1622,14 +1622,23 @@ function showProductDetails(productElement) {
     const productData = productElement.dataset;
     const productName = productData.productName;
     const productCategory = productData.productCategory;
-    const jerseyType = productElement.closest('tr').querySelector('td:nth-child(5) .badge:nth-child(2)')?.textContent.trim().toLowerCase();
     const productId = productData.productId;
+    
+    // Obtener el tipo de jersey de manera segura
+    const categoryCell = productElement.closest('tr').querySelector('td:nth-child(5)');
+    let jerseyType = 'nene';
+    if (categoryCell) {
+        const jerseyBadge = categoryCell.querySelector('.badge:nth-child(2)');
+        if (jerseyBadge) {
+            jerseyType = jerseyBadge.textContent.trim().toLowerCase();
+        }
+    }
     
     // Guardar datos para el formulario de nueva talla
     document.getElementById('newSizeProductId').value = productId;
     document.getElementById('newSizeProductName').value = productName;
     document.getElementById('newSizeCategory').value = productCategory;
-    document.getElementById('newSizeJerseyType').value = jerseyType || '';
+    document.getElementById('newSizeJerseyType').value = jerseyType;
     
     // Actualizar el contenido básico del modal
     document.getElementById('productName').textContent = productName;
@@ -1663,7 +1672,7 @@ function showProductDetails(productElement) {
     if (productCategory === 'Jersey') {
         if (jerseyType === 'adulto') {
             allSizes = new Set(['S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '6XL', '8XL']);
-        } else if (jerseyType === 'niño') {
+        } else if (jerseyType === 'nene' || jerseyType === 'niño') {
             allSizes = new Set(['16', '18', '20', '22', '24', '26', '28']);
         } else if (jerseyType === 'dama') {
             allSizes = new Set(['S', 'M', 'L', 'XL', 'XXL']);
@@ -1672,22 +1681,35 @@ function showProductDetails(productElement) {
     
     // Buscar todas las filas que coincidan con el nombre y categoría
     document.querySelectorAll('tr.product-row').forEach(row => {
-        const rowName = row.querySelector('td:nth-child(3)').textContent.trim();
-        const rowCategory = row.querySelector('td:nth-child(5) .badge:first-child').textContent.trim();
-        const rowJerseyType = row.querySelector('td:nth-child(5) .badge:nth-child(2)')?.textContent.trim().toLowerCase();
-        const rowSize = row.querySelector('td:nth-child(4)').textContent.trim();
-        const rowAvailability = row.querySelector('td:nth-child(9) .badge').textContent.trim();
+        const nameCell = row.querySelector('td:nth-child(3)');
+        const categoryCell = row.querySelector('td:nth-child(5)');
+        const sizeCell = row.querySelector('td:nth-child(4)');
+        const availabilityCell = row.querySelector('td:nth-child(9)');
         
-        // Verificar si es el mismo producto
-        if (rowName === productName && rowCategory === productCategory) {
-            if (productCategory === 'Jersey') {
-                if (rowJerseyType === jerseyType) {
+        if (nameCell && categoryCell && sizeCell && availabilityCell) {
+            const rowName = nameCell.textContent.trim();
+            const rowCategory = categoryCell.querySelector('.badge:first-child')?.textContent.trim() || '';
+            const rowSize = sizeCell.textContent.trim();
+            const rowAvailability = availabilityCell.querySelector('.badge')?.textContent.trim() || '0';
+            
+            // Obtener el tipo de jersey de la fila de manera segura
+            let rowJerseyType = 'nene';
+            const rowJerseyBadge = categoryCell.querySelector('.badge:nth-child(2)');
+            if (rowJerseyBadge) {
+                rowJerseyType = rowJerseyBadge.textContent.trim().toLowerCase();
+            }
+            
+            // Verificar si es el mismo producto
+            if (rowName === productName && rowCategory === productCategory) {
+                if (productCategory === 'Jersey') {
+                    if (rowJerseyType === jerseyType) {
+                        addSizeBadge(rowSize, rowAvailability);
+                        availableSizes.add(rowSize);
+                    }
+                } else {
                     addSizeBadge(rowSize, rowAvailability);
                     availableSizes.add(rowSize);
                 }
-            } else {
-                addSizeBadge(rowSize, rowAvailability);
-                availableSizes.add(rowSize);
             }
         }
     });
@@ -1706,9 +1728,10 @@ function showProductDetails(productElement) {
         }
     });
     
-    // Mostrar u ocultar el botón de agregar talla según si hay tallas disponibles para agregar
+    // Mostrar u ocultar el botón de agregar talla según si hay tallas disponibles para agregar y si es admin
     const addSizeBtn = document.getElementById('addSizeBtn');
-    addSizeBtn.style.display = newSizeSelect.options.length > 1 ? '' : 'none';
+    const isAdmin = document.getElementById('productPriceIn') !== null; // Verificar si es admin
+    addSizeBtn.style.display = (newSizeSelect.options.length > 1 && isAdmin) ? '' : 'none';
     
     // Ocultar el formulario de agregar talla
     toggleAddSizeForm(false);

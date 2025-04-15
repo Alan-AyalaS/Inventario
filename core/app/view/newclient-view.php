@@ -10,6 +10,12 @@
 
 		<form class="form-horizontal" method="post" id="addproduct" action="index.php?view=addclient" role="form">
 
+  <div class="form-group">
+    <label for="inputEmail1" class="col-lg-2 control-label">Telefono*</label>
+    <div class="col-md-6">
+      <input type="text" name="phone1" class="form-control" id="phone1" placeholder="Telefono">
+    </div>
+  </div>
 
   <div class="form-group">
     <label for="inputEmail1" class="col-lg-2 control-label">Nombre*</label>
@@ -53,15 +59,6 @@
       <input type="text" name="email1" class="form-control" id="email1" placeholder="Email">
     </div>
   </div>
-
-  <div class="form-group">
-    <label for="inputEmail1" class="col-lg-2 control-label">Telefono*</label>
-    <div class="col-md-6">
-      <input type="text" name="phone1" class="form-control" id="phone1" placeholder="Telefono">
-    </div>
-  </div>
-
-
 
   <p class="alert alert-info">* Campos obligatorios</p>
 

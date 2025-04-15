@@ -105,7 +105,27 @@ class PersonData {
 		return $found;
 	}
 
-
+	public static function getByPhone($phone){
+		$sql = "select * from ".self::$tablename." where phone1=\"$phone\"";
+		$query = Executor::doit($sql);
+		$found = null;
+		$data = new PersonData();
+		while($r = $query[0]->fetch_array()){
+			$data->id = $r['id'];
+			$data->name = $r['name'];
+			$data->lastname = $r['lastname'];
+			$data->address1 = $r['address1'];
+			$data->city = $r['city'];
+			$data->state = $r['state'];
+			$data->zip_code = $r['zip_code'];
+			$data->phone1 = $r['phone1'];
+			$data->email1 = $r['email1'];
+			$data->created_at = $r['created_at'];
+			$found = $data;
+			break;
+		}
+		return $found;
+	}
 
 	public static function getAll(){
 		$sql = "select * from ".self::$tablename;

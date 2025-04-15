@@ -24,12 +24,13 @@ if(isset($_GET['check_phone'])) {
     <div class="form-group">
     <label for="inputEmail1" class="col-lg-2 control-label">Teléfono*</label>
     <div class="col-md-6">
-      <input type="text" name="phone1" class="form-control" required id="phone1" placeholder="Teléfono">
-      <div id="phoneAlert" class="alert alert-danger" style="display: none; margin-top: 5px;">
+      <input type="text" name="phone" class="form-control" required id="inputPhone" placeholder="Teléfono">
+      <div id="phoneAlert" class="alert alert-danger mt-2" style="display: none;">
         Este teléfono ya está registrado
       </div>
     </div>
   </div>
+    
   <div class="form-group">
     <label for="inputEmail1" class="col-lg-2 control-label">Nombre*</label>
     <div class="col-md-6">
@@ -45,7 +46,7 @@ if(isset($_GET['check_phone'])) {
   <div class="form-group">
     <label for="inputEmail1" class="col-lg-2 control-label">Dirección*</label>
     <div class="col-md-6">
-      <input type="text" name="address1" class="form-control" required id="address1" placeholder="Dirección">
+      <input type="text" name="address1" class="form-control" id="address1" placeholder="Dirección">
     </div>
   </div>
   <div class="form-group">
@@ -63,7 +64,7 @@ if(isset($_GET['check_phone'])) {
   <div class="form-group">
     <label for="inputEmail1" class="col-lg-2 control-label">Código Postal*</label>
     <div class="col-md-6">
-      <input type="text" name="zip_code" class="form-control" required id="zip_code" placeholder="Código Postal">
+      <input type="text" name="zip_code" class="form-control" id="zip_code" placeholder="Código Postal">
     </div>
   </div>
   
@@ -86,16 +87,16 @@ if(isset($_GET['check_phone'])) {
 
 <script>
 $(document).ready(function() {
-    $('#phone1').on('blur', function() {
+    $('#inputPhone').on('blur', function() {
         var phone = $(this).val();
         if(phone.length > 0) {
             $.ajax({
                 url: 'index.php?view=check_phone',
-                type: 'GET',
+                method: 'GET',
                 data: { phone: phone },
                 dataType: 'json',
-                success: function(data) {
-                    if(data.exists) {
+                success: function(response) {
+                    if(response.exists) {
                         $('#phoneAlert').show();
                         $('#submitBtn').prop('disabled', true);
                     } else {
@@ -105,7 +106,6 @@ $(document).ready(function() {
                 },
                 error: function(xhr, status, error) {
                     console.error('Error:', error);
-                    console.log('Response:', xhr.responseText);
                 }
             });
         }

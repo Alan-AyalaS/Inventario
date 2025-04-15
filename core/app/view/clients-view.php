@@ -241,4 +241,14 @@ foreach($configs as $conf) {
   color:rgb(24, 56, 31) !important;
   background-color: white !important;
 }
+.pagination {
+  flex-wrap: wrap;
+  white-space: normal;
+  word-break: break-all;
+  justify-content: center !important;
+}
+.pagination-container {
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
 </style>

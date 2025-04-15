@@ -24,7 +24,7 @@ if(isset($_GET['check_phone'])) {
     <div class="form-group">
     <label for="inputEmail1" class="col-lg-2 control-label">Teléfono*</label>
     <div class="col-md-6">
-      <input type="text" name="phone" class="form-control" required id="inputPhone" placeholder="Teléfono">
+      <input type="text" name="phone1" class="form-control" required id="inputPhone" placeholder="Teléfono">
       <div id="phoneAlert" class="alert alert-danger mt-2" style="display: none;">
         Este teléfono ya está registrado
       </div>
@@ -108,6 +108,10 @@ $(document).ready(function() {
                     console.error('Error:', error);
                 }
             });
+        } else {
+            // Si el campo está vacío, ocultar la alerta y habilitar el botón
+            $('#phoneAlert').hide();
+            $('#submitBtn').prop('disabled', false);
         }
     });
 });
